@@ -1,0 +1,3797 @@
+---
+openapi: 3.0.3
+info:
+  title: Wire API (development)
+  version: 1.0.0
+  description: The API for the Clientwire messaging service.
+  termsOfService: https://clientwire.net/terms
+  contact:
+    email: support@clientwire.net
+    name: Support
+    url: https://www.clientwire.net/
+servers:
+- url: https://api.clientwire.net
+- url: https://api.staging.clientwire.net
+- url: https://api.int.clientwire.net
+- url: https://api.test.clientwire.net
+- url: https://api.dev.clientwire.net
+- url: http://localhost:8080
+tags:
+- name: Signup
+  description: Operations related to signup.
+- name: Signin
+  description: Operations related to signin.
+- name: Conversation Types
+  description: Operations for tenant-level conversation types.
+- name: Conversations
+  description: Operations for conversations.
+- name: Participants
+  description: Operations for participants.
+- name: Messages
+  description: Operations for conversations.
+- name: Users
+  description: Operations related to users.
+- name: Tenants
+  description: Operations related to tenants.
+- name: Tenant Config
+  description: Operations related to tenant configurations.
+- name: API Keys
+  description: Operations related to users.
+- name: OIDC Configs
+  description: Operations related to OIDC configurations.
+- name: SMS Settings
+  description: Operations for managing per-tenant Twilio SMS settings.
+- name: Geocoding
+  description: Operations to geocode locations.
+paths:
+  /api/v1/api_keys:
+    get:
+      summary: List the API keys for this tenant.
+      operationId: listApiKeys
+      tags:
+      - API Keys
+      responses:
+        "200":
+          description: List of API keys returned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiKeyList"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - API_KEY
+        - OWNER
+    post:
+      summary: Create a new API key for this tenant.
+      operationId: createApiKey
+      tags:
+      - API Keys
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateApiKeyRequest"
+        required: true
+      responses:
+        "201":
+          description: API key created successfully.
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - API_KEY
+        - OWNER
+  /api/v1/api_keys/{key_id}:
+    delete:
+      summary: Delete an API key by key_id.
+      operationId: deleteApiKey
+      tags:
+      - API Keys
+      parameters:
+      - name: key_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: API key deleted successfully.
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Not found.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - API_KEY
+        - OWNER
+  /api/v1/client_participant/me:
+    get:
+      summary: Get information about the client participant and its conversation.
+      description: Retrieves the participant details for the calling CLIENT_PARTICIPANT
+        token.
+      operationId: getClientParticipantHimself
+      tags:
+      - Participants
+      responses:
+        "200":
+          description: Participant data returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Participant"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - BearerAuth:
+        - CLIENT_PARTICIPANT
+  /api/v1/conversation_types:
+    get:
+      summary: List all conversation types for the specified tenant.
+      description: Returns all conversation types for the tenant.
+      operationId: getConversationTypes
+      tags:
+      - Conversation Types
+      responses:
+        "200":
+          description: List of conversation types returned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversationTypeListResponse"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - USER
+        - OWNER
+        - API_KEY
+    post:
+      summary: Create a new conversation type for the specified tenant.
+      description: Creates a conversation type for a tenant.
+      operationId: createConversationType
+      tags:
+      - Conversation Types
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConversationTypePostRequest"
+        required: true
+      responses:
+        "201":
+          description: Conversation type created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversationType"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
+  /api/v1/conversation_types/{conversation_type_id}:
+    patch:
+      summary: Update partial fields of an existing conversation type.
+      description: Allows patching only specific fields of a conversation type.
+      operationId: updateConversationType
+      tags:
+      - Conversation Types
+      parameters:
+      - name: conversation_type_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: The patch body for updating conversation type fields.
+        required: true
+        content:
+          application/json:
+            schema:
+              description: "Allowed fields are: id, description, conversation_data_schema,\
+                \ conversation_data_list_item_template."
+              type: object
+              additionalProperties: {}
+              example:
+                description: new description
+      responses:
+        "200":
+          description: Conversation type updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversationType"
+        "404":
+          description: Not found.
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
+    get:
+      summary: Get a single conversation type.
+      description: Retrieves a conversation type by its ID.
+      operationId: getConversationType
+      tags:
+      - Conversation Types
+      parameters:
+      - name: conversation_type_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Conversation type found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversationType"
+        "404":
+          description: Not found.
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - USER
+        - OWNER
+        - API_KEY
+    delete:
+      summary: Delete a conversation type.
+      description: Removes a conversation type by its ID.
+      operationId: deleteConversationType
+      tags:
+      - Conversation Types
+      parameters:
+      - name: conversation_type_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: Conversation type deleted successfully.
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Not found.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
+    put:
+      summary: Create or update a conversation type.
+      description: "If not found, conversation type is created; otherwise it is updated."
+      operationId: createOrUpdateConversationType
+      tags:
+      - Conversation Types
+      parameters:
+      - name: conversation_type_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConversationTypePostRequest"
+        required: true
+      responses:
+        "201":
+          description: Conversation type created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversationType"
+        "200":
+          description: Conversation type updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversationType"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
+  /api/v1/conversations:
+    get:
+      summary: List all conversations for the specified tenant.
+      description: Returns a paginated list of conversations for the tenant.
+      operationId: getConversations
+      tags:
+      - Conversations
+      parameters:
+      - name: archived
+        in: query
+        schema:
+          type: boolean
+          nullable: true
+      - description: Only include messages created after this date-time
+        schema:
+          format: date-time
+        name: created_after
+        in: query
+      - description: Only include messages created before this date-time
+        schema:
+          format: date-time
+        name: created_before
+        in: query
+      - name: include
+        in: query
+        schema:
+          type: string
+          nullable: true
+      - name: limit
+        in: query
+        schema:
+          format: int32
+          default: 10
+          type: integer
+      - name: offset
+        in: query
+        schema:
+          format: int32
+          default: 0
+          type: integer
+      - name: order
+        in: query
+        schema:
+          type: string
+          nullable: true
+      - name: order_by
+        in: query
+        schema:
+          type: string
+          nullable: true
+      - name: search
+        in: query
+        schema:
+          type: string
+          nullable: true
+      - description: Only include messages updated after this date-time
+        schema:
+          format: date-time
+        name: updated_after
+        in: query
+      - description: Only include messages updated before this date-time
+        schema:
+          format: date-time
+        name: updated_before
+        in: query
+      responses:
+        "200":
+          description: List of conversations returned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversationPaginatedResponse"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - USER
+        - OWNER
+        - API_KEY
+    post:
+      summary: Create a new conversation for the specified tenant.
+      description: Creates a conversation and optional participants.
+      operationId: createConversation
+      tags:
+      - Conversations
+      parameters:
+      - name: include
+        in: query
+        schema:
+          type: string
+          nullable: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConversationPostRequest"
+        required: true
+      responses:
+        "201":
+          description: Conversation created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
+  /api/v1/conversations/byIds:
+    post:
+      summary: Get a list of conversations by their ids.
+      description: Retrieves multiple conversations by their public IDs in a POST
+        request body.
+      operationId: getConversationsByIds
+      tags:
+      - Conversations
+      parameters:
+      - name: include
+        in: query
+        schema:
+          type: string
+          nullable: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConversationsByIdsRequest"
+        required: true
+      responses:
+        "200":
+          description: List of conversations returned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversationListResponse"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - USER
+        - OWNER
+        - API_KEY
+  /api/v1/conversations/{conversation_id}:
+    patch:
+      summary: Update partial fields of an existing conversation.
+      description: "Allows patching id, archived, conversation_data, etc."
+      operationId: updateConversation
+      tags:
+      - Conversations
+      parameters:
+      - name: conversation_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: include
+        in: query
+        schema:
+          type: string
+          nullable: true
+      requestBody:
+        description: The patch body for updating conversation fields.
+        required: true
+        content:
+          application/json:
+            schema:
+              description: "The fields to update. Allowed fields are: id, archived\
+                \ and conversation_data."
+              type: object
+              additionalProperties: {}
+              example:
+                conversation_data: new-data
+      responses:
+        "200":
+          description: Conversation updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+        "404":
+          description: Not found.
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
+    get:
+      summary: Get a single conversation.
+      description: Retrieves conversation details by ID.
+      operationId: getConversation
+      tags:
+      - Conversations
+      parameters:
+      - name: conversation_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: include
+        in: query
+        schema:
+          type: string
+          nullable: true
+      responses:
+        "200":
+          description: Conversation found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+        "404":
+          description: Not found.
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - USER
+        - OWNER
+        - API_KEY
+        - CLIENT_PARTICIPANT
+    delete:
+      summary: Delete a conversation.
+      description: Removes a conversation by ID.
+      operationId: deleteConversation
+      tags:
+      - Conversations
+      parameters:
+      - name: conversation_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: Conversation deleted successfully.
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Not found.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
+    put:
+      summary: Create or update a conversation.
+      description: "If it doesn't exist, creates it; otherwise updates it."
+      operationId: createOrUpdateConversation
+      tags:
+      - Conversations
+      parameters:
+      - name: conversation_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: include
+        in: query
+        schema:
+          type: string
+          nullable: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConversationPutRequest"
+      responses:
+        "201":
+          description: Conversation created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+        "200":
+          description: Conversation updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
+  /api/v1/conversations/{conversation_id}/messages:
+    get:
+      summary: Get messages of a conversation.
+      description: Returns a paginated list of messages for the conversation.
+      operationId: getMessages
+      tags:
+      - Messages
+      parameters:
+      - name: conversation_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - description: Only include messages created after this date-time
+        schema:
+          format: date-time
+        name: created_after
+        in: query
+      - description: Only include messages created before this date-time
+        schema:
+          format: date-time
+        name: created_before
+        in: query
+      - description: "If using sequence-based pagination, the last known sequence."
+        name: last_sequence
+        in: query
+        schema:
+          format: int32
+          type: integer
+          nullable: true
+      - description: Max number of messages to return (page size)
+        name: limit
+        in: query
+        schema:
+          format: int32
+          type: integer
+          nullable: true
+      - description: Starting offset for pagination
+        name: offset
+        in: query
+        schema:
+          format: int32
+          type: integer
+          nullable: true
+      - description: Sort direction (asc/desc)
+        name: order
+        in: query
+        schema:
+          type: string
+          nullable: true
+      - description: "Field to sort by, e.g. 'createdAt' or 'updatedAt'"
+        name: order_by
+        in: query
+        schema:
+          type: string
+          nullable: true
+      - description: Only include messages updated after this date-time
+        schema:
+          format: date-time
+        name: updated_after
+        in: query
+      - description: Only include messages updated before this date-time
+        schema:
+          format: date-time
+        name: updated_before
+        in: query
+      responses:
+        "200":
+          description: Messages retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessagePaginatedResponse"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - CLIENT_PARTICIPANT
+        - USER
+        - OWNER
+        - API_KEY
+    post:
+      summary: Add a new message to a conversation.
+      description: Queues a message to be added to the conversation.
+      operationId: createMessage
+      tags:
+      - Messages
+      parameters:
+      - name: conversation_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessagePostRequest"
+      responses:
+        "201":
+          description: Message queued for adding successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - CLIENT_PARTICIPANT
+        - USER
+        - OWNER
+        - API_KEY
+  /api/v1/conversations/{conversation_id}/messages/{message_id}:
+    get:
+      summary: Get a single message in the specified conversation.
+      description: Retrieves details of a specific message by ID.
+      operationId: getMessage
+      tags:
+      - Messages
+      parameters:
+      - name: conversation_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: message_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Message retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Not found.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - CLIENT_PARTICIPANT
+        - USER
+        - OWNER
+        - API_KEY
+  /api/v1/conversations/{conversation_id}/participants:
+    get:
+      summary: List all participants in the specified conversation.
+      description: Returns all participants for a conversation.
+      operationId: getParticipants
+      tags:
+      - Participants
+      parameters:
+      - name: conversation_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: A list of conversation participants.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ParticipantListResponse"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - USER
+        - OWNER
+        - API_KEY
+    post:
+      summary: Create a new participant in the specified conversation.
+      description: Creates a conversation participant.
+      operationId: createParticipant
+      tags:
+      - Participants
+      parameters:
+      - name: conversation_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ParticipantPostRequest"
+        required: true
+      responses:
+        "201":
+          description: Participant created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Participant"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - USER
+        - OWNER
+        - API_KEY
+  /api/v1/conversations/{conversation_id}/participants/new_message_count:
+    get:
+      summary: Get new message count for a participant.
+      description: Returns the unread message count for the participant across all
+        conversations.
+      operationId: getNewMessageCount
+      tags:
+      - Participants
+      parameters:
+      - name: conversation_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: New message counts returned.
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - CLIENT_PARTICIPANT
+        - USER
+        - OWNER
+        - API_KEY
+  /api/v1/conversations/{conversation_id}/participants/notify:
+    post:
+      summary: Notify conversation client participants.
+      description: Sends a notification to participants of the conversation.
+      operationId: notifyClientParticipants
+      tags:
+      - Participants
+      parameters:
+      - name: conversation_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: Participants notified successfully.
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - USER
+        - OWNER
+        - API_KEY
+  /api/v1/conversations/{conversation_id}/participants/{participant_id}:
+    patch:
+      summary: Patch partial fields of a participant.
+      description: "Allows updating only display_name, phone_number, email, etc."
+      operationId: updateParticipant
+      tags:
+      - Participants
+      parameters:
+      - name: conversation_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: participant_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: {}
+        required: true
+      responses:
+        "200":
+          description: Participant updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Participant"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Not found.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - USER
+        - OWNER
+        - API_KEY
+    get:
+      summary: Get a single participant in the specified conversation.
+      description: Retrieves participant details by ID.
+      operationId: getParticipant
+      tags:
+      - Participants
+      parameters:
+      - name: conversation_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: participant_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: The conversation participant.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Participant"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Not found.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - USER
+        - OWNER
+        - API_KEY
+    delete:
+      summary: Delete a participant from the specified conversation.
+      description: Removes a participant by ID.
+      operationId: deleteParticipant
+      tags:
+      - Participants
+      parameters:
+      - name: conversation_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: participant_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: Participant deleted successfully.
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Not found.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - USER
+        - OWNER
+        - API_KEY
+    put:
+      summary: Create or update a participant in the specified conversation.
+      description: "If participant doesn’t exist, it is created, otherwise it is fully\
+        \ updated."
+      operationId: createOrUpdateParticipant
+      tags:
+      - Participants
+      parameters:
+      - name: conversation_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: participant_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ParticipantPutRequest"
+        required: true
+      responses:
+        "201":
+          description: Participant created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Participant"
+        "200":
+          description: Participant updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Participant"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - USER
+        - OWNER
+        - API_KEY
+  /api/v1/conversations/{conversation_id}/participants/{participant_id}/activity:
+    post:
+      summary: Record participant activity.
+      description: "Update participant’s message-seen info, etc."
+      operationId: updateParticipantActivity
+      tags:
+      - Participants
+      parameters:
+      - name: conversation_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: participant_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ParticipantActivityRequest"
+        required: true
+      responses:
+        "200":
+          description: Conversation participant activity updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Participant"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - CLIENT_PARTICIPANT
+        - USER
+        - OWNER
+        - API_KEY
+  /api/v1/geocoder/reverse:
+    get:
+      summary: Reverse geocode a location.
+      description: "Given latitude/longitude, returns the address."
+      operationId: reverseGeocode
+      tags:
+      - Geocoding
+      parameters:
+      - name: latitude
+        in: query
+        schema:
+          format: double
+          type: number
+      - name: longitude
+        in: query
+        schema:
+          format: double
+          type: number
+      responses:
+        "200":
+          description: Reverse geocoding successful.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LocationWithAddress"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - CLIENT_PARTICIPANT
+        - USER
+        - OWNER
+        - API_KEY
+  /api/v1/geocoder/search:
+    get:
+      summary: Search for a location.
+      description: "Given a text query, returns a geocoded address."
+      operationId: searchGeocode
+      tags:
+      - Geocoding
+      parameters:
+      - name: text
+        in: query
+        schema:
+          type: string
+        required: true
+      responses:
+        "200":
+          description: Geocode search successful.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LocationWithAddress"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - CLIENT_PARTICIPANT
+        - USER
+        - OWNER
+        - API_KEY
+  /api/v1/geocoder/search/structured:
+    get:
+      summary: Search for a location (structured).
+      description: "Given partial address fields, returns a geocoded address."
+      operationId: searchStructuredGeocode
+      tags:
+      - Geocoding
+      parameters:
+      - name: country
+        in: query
+        schema:
+          type: string
+          nullable: true
+      - name: postalCode
+        in: query
+        schema:
+          format: int32
+          type: integer
+          nullable: true
+      - name: street
+        in: query
+        schema:
+          type: string
+        required: true
+      responses:
+        "200":
+          description: Structured geocode search successful.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LocationWithAddress"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - CLIENT_PARTICIPANT
+        - USER
+        - OWNER
+        - API_KEY
+  /api/v1/oidc_configs:
+    get:
+      summary: List all OIDC provider configs for the specified tenant.
+      description: Retrieves all OIDC configs for the given tenant.
+      operationId: listOidcProviders
+      tags:
+      - OIDC Configs
+      responses:
+        "200":
+          description: All OIDC configs returned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OidcConfigList"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - API_KEY
+        - OWNER
+    post:
+      summary: Create a new OIDC provider config for the specified tenant.
+      description: Creates an OIDC config if it does not already exist for that provider.
+      operationId: createOidcProvider
+      tags:
+      - OIDC Configs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOidcConfigRequest"
+        required: true
+      responses:
+        "201":
+          description: OIDC config created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OidcConfig"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - API_KEY
+        - OWNER
+  /api/v1/oidc_configs/{provider_name}:
+    patch:
+      summary: Update partial fields of an existing OIDC provider config.
+      description: "Allows updating only certain fields like client_id, authority_url,\
+        \ client_secret, scope."
+      operationId: patchOidcProvider
+      tags:
+      - OIDC Configs
+      parameters:
+      - name: provider_name
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: The patch body for updating OIDC provider config fields.
+        required: true
+        content:
+          application/json:
+            schema:
+              description: "Allowed fields are: client_id, authority_url, client_secret,\
+                \ scope."
+              type: object
+              additionalProperties: {}
+              example:
+                client_secret: new-secret
+      responses:
+        "200":
+          description: OIDC config updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OidcConfig"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Not found.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - API_KEY
+        - OWNER
+    get:
+      summary: Get a single OIDC provider config by provider name.
+      description: Finds an OIDC provider config by its provider name.
+      operationId: getOidcProvider
+      tags:
+      - OIDC Configs
+      parameters:
+      - name: provider_name
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OIDC provider found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OidcConfig"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Not found.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - API_KEY
+        - OWNER
+    delete:
+      summary: Delete an OIDC provider config.
+      description: Removes an OIDC provider config from the tenant’s configuration.
+      operationId: deleteOidcProvider
+      tags:
+      - OIDC Configs
+      parameters:
+      - name: provider_name
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: OIDC provider config deleted successfully.
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Not found.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - API_KEY
+        - OWNER
+  /api/v1/password_reset:
+    post:
+      summary: Request a password reset.
+      description: Request a password reset for the specified user.
+      operationId: resetPassword
+      tags:
+      - Signin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResetPasswordRequest"
+        required: true
+      responses:
+        "204":
+          description: The password reset has been initiated or user not found.
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "415":
+          description: Unsupported Content Type.
+  /api/v1/password_reset/set:
+    post:
+      summary: Set password after reset.
+      description: Provide the token and new password to complete the reset.
+      operationId: setPassword
+      tags:
+      - Signin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetPasswordRequest"
+        required: true
+      responses:
+        "204":
+          description: The password has been updated.
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "415":
+          description: Unsupported Content Type.
+  /api/v1/signin/email:
+    post:
+      summary: Login via email credentials (ROPC).
+      description: "Authenticates a user by email and password, then issues tokens."
+      operationId: ropcEmailLogin
+      tags:
+      - Signin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmailCredentialsRequest"
+        required: true
+      responses:
+        "200":
+          description: Returns user tokens upon successful login.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponseDto"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+  /api/v1/signin/participant_auth_key:
+    post:
+      summary: Login for participant via auth key (ROPC).
+      description: "Authenticates a conversation participant by auth key, then issues\
+        \ tokens."
+      operationId: ropcParticipantAuthKeyLogin
+      tags:
+      - Signin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ParticipantAuthKeyRequest"
+        required: true
+      responses:
+        "200":
+          description: Participant login success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponseDto"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+  /api/v1/signin/passthrough:
+    post:
+      summary: Handle passthrough login with Bearer token from upstream.
+      description: Exchanges an external Bearer token for our token if valid.
+      operationId: passthroughLogin
+      tags:
+      - Signin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PassthroughRequestDto"
+        required: true
+      responses:
+        "200":
+          description: Passthrough login success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponseDto"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+  /api/v1/signin/providers/{provider_name}/callback:
+    post:
+      summary: Handle the OIDC callback from Microsoft (Authorization Code).
+      description: Exchanges the authorization code for tokens.
+      operationId: oidcCallback
+      tags:
+      - Signin
+      parameters:
+      - name: provider_name
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OidcCallbackRequest"
+        required: true
+      responses:
+        "200":
+          description: Token exchange success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponseDto"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "415":
+          description: Unsupported Content Type.
+  /api/v1/signin/refresh:
+    post:
+      summary: Exchange your existing refresh token for a new access token.
+      description: Refresh tokens and issue a new access token.
+      operationId: refreshOidcToken
+      tags:
+      - Signin
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                grant_type:
+                  type: string
+                  nullable: true
+                refresh_token:
+                  type: string
+                  nullable: true
+                client_id:
+                  type: string
+                  nullable: true
+                client_secret:
+                  type: string
+                  nullable: true
+                scope:
+                  type: string
+                  nullable: true
+        required: true
+      responses:
+        "200":
+          description: Token refresh success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponseDto"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+  /api/v1/signup:
+    post:
+      summary: Create a new account and user.
+      description: Tenant and user created successfully. You should now be able to
+        login.
+      operationId: signup
+      tags:
+      - Signup
+      requestBody:
+        description: The data needed to sign up a new tenant and user.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignupRequest"
+      responses:
+        "201":
+          description: Tenant and user created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignupResponse"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+  /api/v1/sms/twilio:
+    put:
+      summary: Create or update Twilio SMS settings for this tenant.
+      description: Upserts the Twilio SMS settings for the specified tenant.
+      operationId: upsertTwilioSmsSettings
+      tags:
+      - SMS Settings
+      requestBody:
+        description: Twilio SMS settings data
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TwilioSettings"
+        required: true
+      responses:
+        "200":
+          description: Settings created or updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TwilioSettings"
+        "400":
+          description: Bad request.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Not found.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
+    get:
+      summary: Get the Twilio SMS settings for this tenant.
+      description: Returns the Twilio SMS settings if available.
+      operationId: getTwilioSmsSettings
+      tags:
+      - SMS Settings
+      responses:
+        "200":
+          description: Returned Twilio SMS settings (if any).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TwilioSettings"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Not found.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
+    delete:
+      summary: Delete the Twilio SMS settings for this tenant.
+      description: Removes the Twilio SMS settings for the tenant if they exist.
+      operationId: deleteTwilioSmsSettings
+      tags:
+      - SMS Settings
+      responses:
+        "204":
+          description: Deleted successfully.
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Not found.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
+  /api/v1/tenant:
+    patch:
+      summary: Update a tenant by ID.
+      description: Updates tenant fields such as name or subdomain.
+      operationId: updateTenant
+      tags:
+      - Tenants
+      requestBody:
+        description: The patch body for updating tenant fields.
+        required: true
+        content:
+          application/json:
+            schema:
+              description: "The patch body for updating tenant fields. Allowed fields\
+                \ are: name, subdomain."
+              type: object
+              additionalProperties: {}
+              example:
+                name: new-name
+      responses:
+        "200":
+          description: Tenant updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tenant"
+        "404":
+          description: Not found.
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - API_KEY
+        - OWNER
+    get:
+      summary: Get a tenant by ID.
+      description: Returns the tenant.
+      operationId: getTenant
+      tags:
+      - Tenants
+      responses:
+        "200":
+          description: Returns the tenant.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tenant"
+        "404":
+          description: Not found.
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - API_KEY
+        - OWNER
+  /api/v1/tenant/config:
+    get:
+      summary: Get the current config for the tenant specified via query parameters.
+      description: Either tenant_subdomain or tenant_id must be provided
+      operationId: getTenantConfig
+      tags:
+      - Tenant Config
+      parameters:
+      - description: Get tenant config for the specified ID.
+        required: false
+        name: tenant_id
+        in: query
+        schema:
+          type: string
+          nullable: true
+      - description: Get tenant config for the specified subdomain.
+        required: false
+        name: tenant_subdomain
+        in: query
+        schema:
+          type: string
+          nullable: true
+      responses:
+        "200":
+          description: Returns the tenant config.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TenantConfig"
+        "404":
+          description: Not found.
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "415":
+          description: Unsupported Content Type.
+  /api/v1/users:
+    get:
+      summary: List all users.
+      description: Returns a list of all users for the tenant.
+      operationId: listAllUsers
+      tags:
+      - Users
+      responses:
+        "200":
+          description: A list of users returned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserListResponse"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - API_KEY
+        - OWNER
+    post:
+      summary: Create a new user.
+      description: Creates a new user with the provided details.
+      operationId: createUser
+      tags:
+      - Users
+      requestBody:
+        description: The details of the user to create.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserRequest"
+      responses:
+        "201":
+          description: User created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - API_KEY
+        - OWNER
+  /api/v1/users/me:
+    get:
+      summary: Get the currently authenticated user.
+      description: Returns the current user for the authenticated request.
+      operationId: getCurrentUser
+      tags:
+      - Users
+      responses:
+        "200":
+          description: The currently authenticated user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - USER
+  /api/v1/users/{user_id}:
+    get:
+      summary: Get a user by ID.
+      description: Returns details of a user by tenant ID and user ID.
+      operationId: getUser
+      tags:
+      - Users
+      parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: The user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Not found.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - API_KEY
+        - OWNER
+    delete:
+      summary: Delete a user.
+      description: Deletes a user by ID for the specified tenant.
+      operationId: deleteUser
+      tags:
+      - Users
+      parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: User deleted successfully.
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Not found.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - API_KEY
+        - OWNER
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "Authenticate via a JWT token, issued by Wire."
+    ApiKeyAuth:
+      type: apiKey
+      name: X-API-KEY
+      in: header
+      description: Authenticate via an API key.
+  schemas:
+    Activity:
+      enum:
+      - MESSAGE_SEEN
+      type: string
+    ApiKeyList:
+      description: Wrapper object for returning a list of API keys.
+      required:
+      - api_keys
+      type: object
+      properties:
+        api_keys:
+          description: List of API keys for this tenant.
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiKeyListItem"
+    ApiKeyListItem:
+      required:
+      - key_id
+      type: object
+      properties:
+        key_id:
+          description: "The ID of the API key (public portion, not secret)."
+          type: string
+        name:
+          description: An optional display name for this key
+          type: string
+          nullable: true
+        expires_at:
+          description: Optional expiration time in ISO-8601 format
+          type: string
+          example: 2025-01-01T00:00:00Z
+          anyOf:
+          - $ref: "#/components/schemas/Instant"
+          - enum:
+            - null
+          nullable: true
+    AssetResponse:
+      type: object
+      properties:
+        download_url:
+          description: URL to download the created asset
+          type: string
+          example: "null"
+          nullable: true
+        upload_url:
+          description: URL to upload a asset
+          type: string
+          example: "null"
+          nullable: true
+        status:
+          description: The status of the asset.
+          type: string
+          example: UPLOAD_COMPLETED
+          anyOf:
+          - $ref: "#/components/schemas/Status"
+          - enum:
+            - null
+          nullable: true
+    Conversation:
+      required:
+      - id
+      - tenant_id
+      - archived
+      - conversation_type_id
+      - participants
+      type: object
+      properties:
+        id:
+          description: Unique identifier for a conversation.
+          maxLength: 50
+          pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
+          type: string
+          example: Abc123
+        tenant_id:
+          description: Unique identifier for the tenant.
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/UUID"
+          example: 1f81eb52-5198-4599-803e-771906343485
+        archived:
+          description: Indicates whether the conversation is archived.
+          type: boolean
+          example: true
+        conversation_type_id:
+          description: Unique identifier for a conversation type.
+          maxLength: 50
+          pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
+          type: string
+          example: breakdowncase
+        created_at:
+          description: Timestamp when the conversation was created.
+          type: string
+          example: 2022-11-03T20:26:10.344522Z
+          anyOf:
+          - $ref: "#/components/schemas/Instant"
+          - enum:
+            - null
+          nullable: true
+        updated_at:
+          description: Timestamp when the conversation was last updated. Initially
+            the same as created_at.
+          type: string
+          example: 2022-11-03T20:26:10.344522Z
+          anyOf:
+          - $ref: "#/components/schemas/Instant"
+          - enum:
+            - null
+          nullable: true
+        conversation_data:
+          description: The data of a conversation corresponding to the conversation_data_schema
+            of the conversation type.
+          maxLength: 1073741824
+          example:
+            status: in_progress
+            details: Car breakdown on highway.
+        conversation_data_updated_at:
+          description: Timestamp when the conversation data was last updated.
+          type: string
+          example: 2022-11-03T21:26:10.344522Z
+          anyOf:
+          - $ref: "#/components/schemas/Instant"
+          - enum:
+            - null
+          nullable: true
+        participants:
+          description: ""
+          type: array
+          items:
+            $ref: "#/components/schemas/Participant"
+          example: "null"
+        new_message_count:
+          format: int32
+          description: Number of unread messages.
+          type: integer
+          example: 2
+          nullable: true
+        last_message_sequence_seen:
+          format: int32
+          description: Number of unread messages.
+          type: integer
+          example: 2
+          nullable: true
+    ConversationListResponse:
+      type: object
+      properties:
+        conversations:
+          description: ""
+          type: array
+          items:
+            $ref: "#/components/schemas/Conversation"
+          example: "null"
+          nullable: true
+    ConversationPaginatedResponse:
+      required:
+      - hasMore
+      - total_elements
+      - limit
+      - conversations
+      type: object
+      properties:
+        hasMore:
+          description: Indicates if there are more pages to fetch.
+          type: boolean
+          example: "null"
+        total_elements:
+          format: int32
+          description: Total number of elements across all pages.
+          type: integer
+          example: "null"
+          nullable: true
+        limit:
+          format: int32
+          description: The maximum number of elements in this page.
+          type: integer
+          example: "null"
+          nullable: true
+        conversations:
+          description: ""
+          type: array
+          items:
+            $ref: "#/components/schemas/Conversation"
+          example: "null"
+        offset:
+          format: int32
+          description: The offset of the first element in this page (for offset-based
+            pagination). Either offset or last_sequence must be set.
+          type: integer
+          example: "null"
+          nullable: true
+        last_sequence:
+          format: int32
+          description: The sequence (or key) of the last element in this page (for
+            key-based pagination). Either offset or last_sequence must be set.
+          type: integer
+          example: "null"
+          nullable: true
+    ConversationPostRequest:
+      required:
+      - id
+      - conversation_type_id
+      type: object
+      properties:
+        id:
+          description: Unique identifier for a conversation.
+          maxLength: 50
+          pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
+          type: string
+          example: Abc123
+        conversation_type_id:
+          description: The id of the conversation type to be assigned to this conversation.
+          maxLength: 50
+          pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
+          type: string
+          example: breakdowncase
+        conversation_data:
+          description: The data of a conversation corresponding to the conversation_data_schema
+            of the conversation type.
+          maxLength: 1073741824
+          example:
+            status: in_progress
+            details: Car breakdown on highway.
+        participants:
+          description: ""
+          type: array
+          items:
+            $ref: "#/components/schemas/ParticipantPostRequest"
+          example: "null"
+          nullable: true
+    ConversationPutRequest:
+      required:
+      - id
+      - conversation_type_id
+      type: object
+      properties:
+        id:
+          description: "Unique identifier for a conversation. If the conversation\
+            \ is created, this field will be ignored. The id from the URL takes precedence."
+          type: string
+          example: Abc123
+        conversation_type_id:
+          description: "Unique identifier for a conversation type. If the conversation\
+            \ already exists, this field will be ignored."
+          maxLength: 50
+          pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
+          type: string
+          example: breakdowncase
+        conversation_data:
+          description: The data of a conversation corresponding to the conversation_data_schema
+            of the conversation type.
+          maxLength: 1073741824
+          example:
+            status: in_progress
+            details: Car breakdown on highway.
+        archived:
+          description: Indicates whether the conversation is archived. This can only
+            be set to false if the conversation already exists.
+          type: boolean
+          example: true
+        participants:
+          description: ""
+          type: array
+          items:
+            $ref: "#/components/schemas/ParticipantPostRequest"
+          example: "null"
+          nullable: true
+    ConversationType:
+      required:
+      - id
+      - tenant_id
+      - created_at
+      - updated_at
+      type: object
+      properties:
+        id:
+          description: Unique identifier for a conversation type.
+          maxLength: 50
+          pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
+          type: string
+          example: breakdowncase
+        tenant_id:
+          description: Unique identifier for the tenant.
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/UUID"
+          example: 1f81eb52-5198-4599-803e-771906343485
+        created_at:
+          description: Timestamp when the conversation type was created.
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/Instant"
+          example: 2022-11-03T20:26:10.344522Z
+        updated_at:
+          description: Timestamp when the conversation type was last updated. Initially
+            the same as created_at.
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/Instant"
+          example: 2022-11-03T20:26:10.344522Z
+        description:
+          description: A description of what this conversation type is used for.
+          type: string
+          example: A conversation type for handling breakdown cases.
+          nullable: true
+        conversation_data_schema:
+          description: A JSON Schema describing the data expected in the conversation.
+          maxLength: 1073741824
+          example:
+            type: object
+            properties:
+              status:
+                type: string
+        conversation_data_list_item_template:
+          description: A handlebars template string used to render the conversation
+            data in a list view. The template can contain placeholders for data in
+            the conversation data schema.
+          maxLength: 1073741824
+          type: string
+          example: "{{status}} - {{created_at}}"
+          nullable: true
+    ConversationTypeListResponse:
+      required:
+      - conversation_types
+      type: object
+      properties:
+        conversation_types:
+          description: A list of conversation types.
+          type: array
+          items:
+            $ref: "#/components/schemas/ConversationType"
+          example:
+          - id: breakdowncase
+            tenant_id: 1f81eb52-5198-4599-803e-771906343485
+            created_at: 2022-11-03T20:26:10.344522Z
+            updated_at: 2022-11-03T20:26:10.344522Z
+            description: A conversation type for handling breakdown cases.
+            conversation_data_schema:
+              type: object
+              properties:
+                status:
+                  type: string
+            conversation_data_list_item_template: "{{status}} - {{created_at}}"
+    ConversationTypePostRequest:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          description: Unique identifier for a conversation type.
+          maxLength: 50
+          pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
+          type: string
+          example: breakdowncase
+        description:
+          description: A description of what this conversation type is used for.
+          type: string
+          example: A conversation type for handling breakdown cases.
+          nullable: true
+        conversation_data_schema:
+          description: A JSON Schema describing the data expected in the conversation.
+          maxLength: 1073741824
+          example:
+            type: object
+            properties:
+              status:
+                type: string
+        conversation_data_list_item_template:
+          description: A handlebars template string used to render the conversation
+            data in a list view. The template can contain placeholders for data in
+            the conversation data schema.
+          maxLength: 1073741824
+          type: string
+          example: "{{status}} - {{created_at}}"
+          nullable: true
+    ConversationTypePutRequest:
+      type: object
+      properties:
+        id:
+          description: Unique identifier for a conversation type.
+          maxLength: 50
+          pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
+          type: string
+          example: breakdowncase
+          nullable: true
+        description:
+          description: A description of what this conversation type is used for.
+          type: string
+          example: A conversation type for handling breakdown cases.
+          nullable: true
+        conversation_data_schema:
+          description: A JSON Schema describing the data expected in the conversation.
+          maxLength: 1073741824
+          example:
+            type: object
+            properties:
+              status:
+                type: string
+        conversation_data_list_item_template:
+          description: A handlebars template string used to render the conversation
+            data in a list view. The template can contain placeholders for data in
+            the conversation data schema.
+          maxLength: 1073741824
+          type: string
+          example: "{{status}} - {{created_at}}"
+          nullable: true
+    ConversationsByIdsRequest:
+      required:
+      - ids
+      type: object
+      properties:
+        ids:
+          description: Array of needed ids
+          type: array
+          items:
+            type: string
+          example:
+          - convo-1
+          - convo-2
+    CreateApiKeyRequest:
+      type: object
+      properties:
+        name:
+          description: An optional display name for this key
+          type: string
+          nullable: true
+        expires_at:
+          description: Optional expiration time in ISO-8601 format
+          type: string
+          example: 2025-01-01T00:00:00Z
+          nullable: true
+    CreateApiKeyResponse:
+      required:
+      - key_id
+      - api_key
+      type: object
+      properties:
+        key_id:
+          description: "The ID of the API key (public portion, not secret)."
+          type: string
+        api_key:
+          description: The API key itself. You cannot retrieve the API key again.
+          type: string
+        name:
+          description: Optional display name.
+          type: string
+          nullable: true
+        expires_at:
+          description: "When this key expires, if any."
+          type: string
+          example: 2022-03-10T16:15:50Z
+          anyOf:
+          - $ref: "#/components/schemas/Instant"
+          - enum:
+            - null
+          nullable: true
+    CreateOidcConfigRequest:
+      description: DTO for creating or updating a Tenant OIDC configuration
+      required:
+      - provider_name
+      - authority_url
+      - client_id
+      - client_secret
+      type: object
+      properties:
+        provider_name:
+          description: "The provider name, e.g. 'microsoft' or 'google'"
+          type: string
+          example: microsoft
+        authority_url:
+          description: "Authority/issuer URL, e.g. 'https://login.microsoftonline.com/<tenant>/v2.0'"
+          type: string
+          example: https://login.microsoftonline.com/1234-abcd/v2.0
+        client_id:
+          description: Client ID for this OIDC application
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        client_secret:
+          description: Client Secret in plaintext. Will be encrypted at rest.
+          type: string
+          example: super-secret
+        scope:
+          description: Scopes to request from the OIDC provider
+          type: string
+          example: openid profile email offline_access
+          nullable: true
+    CreateUserRequest:
+      description: Request body used to create a new user.
+      required:
+      - email
+      - password
+      type: object
+      properties:
+        email:
+          format: email
+          description: User's email address.
+          type: string
+          example: user@example.com
+        password:
+          description: Plain-text password. Will be hashed before storage.
+          type: string
+          example: mySecretPassword
+        firstname:
+          description: The first name of the user to create.
+          type: string
+          example: Philipp
+          nullable: true
+        lastname:
+          description: The last name of the user to create.
+          type: string
+          example: Schmid
+          nullable: true
+        role:
+          description: The role assigned to the user. OWNER or USER
+          default: USER
+          type: string
+          example: OWNER
+          anyOf:
+          - $ref: "#/components/schemas/UserRole"
+          - enum:
+            - null
+          nullable: true
+    EmailCredentialsRequest:
+      required:
+      - tenant_id
+      - email
+      - password
+      type: object
+      properties:
+        tenant_id:
+          description: The tenant ID.
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        email:
+          description: The email of the user.
+          type: string
+          example: owner@autoclubmars.com
+        password:
+          description: The password of the user.
+          type: string
+          example: secret
+    ErrorResponse:
+      required:
+      - code
+      - message
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ErrorWithCode"
+          nullable: true
+    ErrorWithCode:
+      description: Describes a single error encountered during request processing.
+      required:
+      - code
+      - message
+      type: object
+      properties:
+        code:
+          description: An error code specific to the application.
+          type: string
+          example: errors.validation.failed
+        message:
+          description: The error message related to the field or general error.
+          type: string
+          example: Name is required
+        path:
+          description: The path to the field where the error occurred.
+          type: string
+          example: name
+          nullable: true
+        details:
+          description: Additional details about the error.
+          type: object
+          additionalProperties: {}
+          example:
+            info: Additional detail about the error
+          nullable: true
+    Instant:
+      format: date-time
+      type: string
+    Location:
+      required:
+      - latitude
+      - longitude
+      type: object
+      properties:
+        latitude:
+          description: Latitude of the location
+          type: number
+          example: 16.8
+        longitude:
+          description: Longitude of the location
+          type: number
+          example: 14.8
+        accuracy:
+          format: int32
+          description: Location accuracy in meters
+          type: integer
+          example: 5
+          nullable: true
+        positioned_at:
+          description: ""
+          type: string
+          example: 2024-09-01T23:59:59.999Z
+          anyOf:
+          - $ref: "#/components/schemas/Instant"
+          - enum:
+            - null
+          nullable: true
+    LocationWithAddress:
+      type: object
+      properties:
+        formatted_address:
+          description: ""
+          type: string
+          example: "Biberstraße 9, 1010 Wien, Austria"
+          nullable: true
+        location:
+          description: ""
+          type: object
+          example: "null"
+          anyOf:
+          - $ref: "#/components/schemas/Location"
+          - enum:
+            - null
+          nullable: true
+    Message:
+      required:
+      - id
+      - tenant_id
+      - created_at
+      - updated_at
+      - conversation_id
+      - participant_id
+      - sequence
+      - kind
+      type: object
+      properties:
+        id:
+          description: Unique identifier for a conversation.
+          type: string
+          example: 1f81eb52-5198-4599-803e-771906343485
+        tenant_id:
+          format: uuid
+          description: Unique identifier for the tenant.
+          type: string
+          example: 1f81eb52-5198-4599-803e-771906343485
+        created_at:
+          description: Timestamp when the conversation was created.
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/Instant"
+          example: 2022-11-03T20:26:10.344522Z
+        updated_at:
+          description: Timestamp when the conversation was last updated. Initially
+            the same as created_at.
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/Instant"
+          example: 2022-11-03T20:26:10.344522Z
+        conversation_id:
+          description: Unique identifier for a conversation type.
+          maxLength: 50
+          pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
+          type: string
+          example: Abc123
+        participant_id:
+          description: The id of the participant this messages is posted by.
+          maxLength: 50
+          pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
+          type: string
+          example: client123
+        sequence:
+          format: int32
+          description: The sequence of the message in the conversation. This will
+            be null if the message has not been processed yet.
+          type: integer
+          example: 0
+          nullable: true
+        kind:
+          description: The kind of message.
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/MessageKind"
+          example: TEXT
+        text:
+          description: "The text of the message. If kind is TEXT or REQUEST_LOCATION,\
+            \ this field is required."
+          maxLength: 4096
+          minLength: 1
+          type: string
+          example: "Hello, how can I help you?"
+          nullable: true
+        location:
+          description: ""
+          type: object
+          anyOf:
+          - $ref: "#/components/schemas/Location"
+          - enum:
+            - null
+          nullable: true
+        formatted_address:
+          description: The formatted address of the location.
+          type: string
+          example: "Biberstraße 9, 1010 Vienna, Austria"
+          nullable: true
+        asset:
+          description: ""
+          type: object
+          anyOf:
+          - $ref: "#/components/schemas/AssetResponse"
+          - enum:
+            - null
+          nullable: true
+        source_id:
+          description: Source id of the message.
+          type: string
+          example: 0193df26-54b2-7142-ab2b-faba1babd679
+          nullable: true
+    MessageKind:
+      enum:
+      - TEXT
+      - LOCATION
+      - IMAGE
+      - VIDEO
+      - AUDIO
+      - REQUEST_LOCATION
+      type: string
+    MessagePaginatedResponse:
+      required:
+      - has_more
+      - total_elements
+      - limit
+      - messages
+      type: object
+      properties:
+        has_more:
+          description: Indicates if there are more pages to fetch.
+          type: boolean
+          example: "null"
+        total_elements:
+          format: int32
+          description: Total number of elements across all pages.
+          type: integer
+          example: "null"
+          nullable: true
+        limit:
+          format: int32
+          description: The maximum number of elements in this page.
+          type: integer
+          example: "null"
+          nullable: true
+        messages:
+          description: ""
+          type: array
+          items:
+            $ref: "#/components/schemas/Message"
+          example: "null"
+        offset:
+          format: int32
+          description: The offset of the first element in this page (for offset-based
+            pagination). Either offset or last_sequence must be set.
+          type: integer
+          example: "null"
+          nullable: true
+        last_sequence:
+          format: int32
+          description: The sequence (or key) of the last element in this page (for
+            key-based pagination). Either offset or last_sequence must be set.
+          type: integer
+          example: "null"
+          nullable: true
+    MessagePostRequest:
+      required:
+      - participant_id
+      - kind
+      type: object
+      properties:
+        participant_id:
+          description: The id of the participant this messages is posted by.
+          maxLength: 50
+          pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
+          type: string
+          example: client123
+        kind:
+          description: The kind of message.
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/MessageKind"
+          example: TEXT
+        text:
+          description: "The text of the message. If kind is TEXT or REQUEST_LOCATION,\
+            \ this field is required."
+          maxLength: 4096
+          minLength: 1
+          type: string
+          example: "Hello, how can I help you?"
+          nullable: true
+        location:
+          description: ""
+          type: object
+          example: "null"
+          anyOf:
+          - $ref: "#/components/schemas/Location"
+          - enum:
+            - null
+          nullable: true
+        formatted_address:
+          description: The formatted address of the location.
+          type: string
+          example: "Biberstraße 9, 1010 Vienna, Austria"
+          nullable: true
+        source_id:
+          description: "Source id of the message, if not provided a random UUID will\
+            \ be used."
+          maxLength: 100
+          pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
+          type: string
+          example: 0193df26-54b2-7142-ab2b-faba1babd679
+          nullable: true
+    NewMessageCount:
+      required:
+      - conversation_id
+      - participant_id
+      - new_message_count
+      type: object
+      properties:
+        conversation_id:
+          description: Unique identifier for a conversation.
+          maxLength: 50
+          pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
+          type: string
+          example: Abc123
+        participant_id:
+          description: The id of the participant.
+          maxLength: 50
+          pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
+          type: string
+          example: client123
+        new_message_count:
+          format: int32
+          description: The number of new messages.
+          type: integer
+          example: 5
+    OidcCallbackRequest:
+      required:
+      - tenant_id
+      - code
+      - code_verifier
+      type: object
+      properties:
+        tenant_id:
+          description: The tenant ID.
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        code:
+          description: The authorization code received from Microsoft after user login.
+          type: string
+          example: AAQABAAIAAAA7k_T...9bG8_nDHgsk
+        code_verifier:
+          description: The PKCE code verifier if you're using PKCE flow.
+          type: string
+          example: c3AqdGhpcyBpcyBhIHRlc3Qgd2l0aCBzaW1wbGUgdGV4dA==
+    OidcConfig:
+      description: Represents a Tenant OIDC configuration object as returned by the
+        API
+      required:
+      - provider_name
+      - authority_url
+      - client_id
+      type: object
+      properties:
+        provider_name:
+          description: "The provider name, e.g. 'microsoft' or 'google'"
+          type: string
+          example: microsoft
+        authority_url:
+          description: "Authority/issuer URL, e.g. 'https://login.microsoftonline.com/<tenant>/v2.0'"
+          type: string
+          example: https://login.microsoftonline.com/1234-abcd/v2.0
+        client_id:
+          description: Client ID for this OIDC application
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        scope:
+          description: Scopes requested from the OIDC provider
+          type: string
+          example: openid profile email offline_access
+          nullable: true
+    OidcConfigList:
+      description: Wrapper object for returning a list of OIDC configs.
+      required:
+      - oidc_configs
+      type: object
+      properties:
+        oidc_configs:
+          description: List of OIDC provider configurations for this tenant.
+          type: array
+          items:
+            $ref: "#/components/schemas/OidcConfig"
+    Participant:
+      required:
+      - id
+      - tenant_id
+      - conversation_id
+      - role
+      type: object
+      properties:
+        id:
+          description: Unique identifier for a conversation.
+          maxLength: 50
+          pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
+          type: string
+          example: Abc123
+        tenant_id:
+          format: uuid
+          description: Unique identifier for the tenant.
+          type: string
+          example: 1f81eb52-5198-4599-803e-771906343485
+        conversation_id:
+          description: Unique identifier for a conversation.
+          maxLength: 50
+          pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
+          type: string
+          example: Abc123
+        created_at:
+          description: Timestamp when the conversation was created.
+          type: string
+          example: 2022-11-03T20:26:10.344522Z
+          anyOf:
+          - $ref: "#/components/schemas/Instant"
+          - enum:
+            - null
+          nullable: true
+        updated_at:
+          description: Timestamp when the conversation was last updated. Initially
+            the same as created_at.
+          type: string
+          example: 2022-11-03T20:26:10.344522Z
+          anyOf:
+          - $ref: "#/components/schemas/Instant"
+          - enum:
+            - null
+          nullable: true
+        role:
+          description: The role of the participant.
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/ParticipantRole"
+          example: "null"
+        display_name:
+          description: The display name of the participant.
+          maxLength: 50
+          minLength: 1
+          type: string
+          example: John Doe
+          nullable: true
+        phone_number:
+          description: The phone number of a participant if he is a CLIENT. The field
+            is otherwise always null.
+          type: string
+          example: "+4369912345678"
+          nullable: true
+        email:
+          format: email
+          description: The email of a participant if he is a CLIENT. The field is
+            otherwise always null.
+          type: string
+          example: user@example.com
+          nullable: true
+        user_id:
+          format: uuid
+          description: "If has role USER, this is the user id of this participant.\
+            \ The field is otherwise always null."
+          type: string
+          example: EDA089DA-7940-46EB-97B5-3F18F1396844
+          nullable: true
+        last_message_sequence_seen:
+          format: int32
+          description: ""
+          type: integer
+          example: 5
+          nullable: true
+    ParticipantActivityRequest:
+      required:
+      - activity
+      - last_message_sequence_seen
+      type: object
+      properties:
+        activity:
+          description: The activity of the participant.
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/Activity"
+          example: MESSAGE_SEEN
+        last_message_sequence_seen:
+          format: int32
+          description: ""
+          type: integer
+          example: 5
+    ParticipantAuthKeyRequest:
+      description: The auth key of the conversation participant.
+      required:
+      - participant_auth_key
+      type: object
+      properties:
+        participant_auth_key:
+          description: The auth key of the conversation participant.
+          minLength: 1
+          type: string
+          example: A8ks9_Rs2ks
+    ParticipantAuthKeyResponse:
+      description: Return a JWT token for the conversation participant and also to
+        which tenant and conversation the participant belongs to.
+      required:
+      - token
+      - tenant_id
+      - conversation_id
+      - conversation_participant_id
+      - tenant_config
+      - oidc_tokens
+      type: object
+      properties:
+        oidc_tokens:
+          description: The OIDC tokens.
+          type: object
+          allOf:
+          - $ref: "#/components/schemas/TokenResponseDto"
+        tenant_id:
+          description: Unique identifier for the tenant.
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/UUID"
+          example: 1f81eb52-5198-4599-803e-771906343485
+    ParticipantListResponse:
+      required:
+      - participants
+      type: object
+      properties:
+        participants:
+          description: A list of conversation participants.
+          type: array
+          items:
+            $ref: "#/components/schemas/Participant"
+          example:
+          - id: Abc123
+            tenant_id: 1f81eb52-5198-4599-803e-771906343485
+            conversation_id: breakdowncase
+            created_at: 2022-11-03T20:26:10.344522Z
+            updated_at: 2022-11-03T20:26:10.344522Z
+            role: USER
+            display_name: John Doe
+    ParticipantPostRequest:
+      required:
+      - id
+      - role
+      type: object
+      properties:
+        id:
+          description: Unique identifier for a conversation participant.
+          type: string
+          example: Abc123
+        role:
+          description: The role of the participant.
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/ParticipantRole"
+          example: "null"
+        display_name:
+          description: "The display name of the participant. If empty or null, the\
+            \ display name will be generated from the id."
+          maxLength: 50
+          minLength: 1
+          type: string
+          example: John Doe
+          nullable: true
+        phone_number:
+          description: The phone number of a participant if he is a CLIENT. The field
+            is otherwise always null.
+          type: string
+          example: "+4369912345678"
+          nullable: true
+        email:
+          format: email
+          description: The email of a participant if he is a CLIENT. The field is
+            otherwise always null.
+          type: string
+          example: user@example.com
+          nullable: true
+        user_id:
+          format: uuid
+          description: The userId of a participant if he is a USER. The field is otherwise
+            always null.
+          type: string
+          example: C8E62D56-80BE-437E-A967-6861803729B8
+          nullable: true
+    ParticipantPutRequest:
+      required:
+      - conversation_id
+      - role
+      type: object
+      properties:
+        id:
+          description: "Unique identifier for a conversation participant. If the conversation\
+            \ participant is created, this field will be ignored. The id from the\
+            \ URL takes precedence."
+          type: string
+          example: Abc123
+          nullable: true
+        conversation_id:
+          description: "Unique identifier for a conversation participant. If the conversation\
+            \ participant already exists, this field will be ignored."
+          maxLength: 50
+          pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
+          type: string
+          example: Abc123
+        role:
+          description: The role of the participant. This can only be set if the conversation
+            participant does not exist yet.
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/ParticipantRole"
+          example: "null"
+        display_name:
+          description: The display name of the participant. The display name can not
+            be empty or null.
+          maxLength: 50
+          minLength: 1
+          type: string
+          example: John Doe
+          nullable: true
+        phone_number:
+          description: The phone number of a participant if he is a CLIENT. The field
+            is otherwise always null.
+          type: string
+          example: "+4369912345678"
+          nullable: true
+        email:
+          format: email
+          description: The email of a participant if he is a CLIENT. The field is
+            otherwise always null.
+          type: string
+          example: user@example.com
+          nullable: true
+        user_id:
+          format: uuid
+          description: The userId of a participant if he is a USER. The field is otherwise
+            always null.
+          type: string
+          example: C8E62D56-80BE-437E-A967-6861803729B8
+          nullable: true
+    ParticipantRole:
+      enum:
+      - NONE
+      - USER
+      - TENANT
+      - CLIENT
+      type: string
+    PassthroughRequestDto:
+      required:
+      - tenant_id
+      - token
+      type: object
+      properties:
+        tenant_id:
+          description: The tenant ID.
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        token:
+          description: Bearer token.
+          type: string
+    ResetPasswordRequest:
+      required:
+      - tenant_id
+      - email
+      type: object
+      properties:
+        tenant_id:
+          description: The tenant ID.
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        email:
+          description: The email of the user.
+          type: string
+          example: owner@autoclubmars.com
+    SetPasswordRequest:
+      required:
+      - tenant_id
+      - email
+      - password
+      - token
+      type: object
+      properties:
+        tenant_id:
+          description: The tenant ID.
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        email:
+          description: The user’s email address.
+          type: string
+          example: owner@autoclubmars.com
+        password:
+          description: The new password.
+          type: string
+          example: secret
+        token:
+          description: The plaintext token from the password reset link.
+          type: string
+          example: abcdefg
+    SignupRequest:
+      description: The data needed to create a new tenant and an owner user.
+      required:
+      - tenant_name
+      - tenant_subdomain
+      - user_email
+      - user_password
+      type: object
+      properties:
+        tenant_name:
+          description: The name of the tenant to create.
+          maxLength: 20
+          minLength: 3
+          pattern: "^[\\p{L}0-9][\\p{L}0-9 \\p{L}]+[\\p{L}0-9]$"
+          type: string
+          example: Autoclub of Mars
+        tenant_subdomain:
+          description: The subdomain of the tenant to create. Used as the subdomain
+            in the URL.
+          maxLength: 20
+          minLength: 3
+          pattern: "^[a-z0-9][a-z0-9_-]+[a-z0-9]?$"
+          type: string
+          example: autoclubmars
+        user_email:
+          format: email
+          description: The email of the user to create (receives 'OWNER' role). Email
+            confirmation is required.
+          type: string
+          example: philipp@autoclubmars.com
+        user_password:
+          description: "The password for the new user account. (In real scenarios,\
+            \ note security concerns around plain-text passwords.)"
+          type: string
+          example: yourpassword123
+        user_firstname:
+          description: The first name of the user to create.
+          type: string
+          example: Philipp
+          nullable: true
+        user_lastname:
+          description: The last name of the user to create.
+          type: string
+          example: Schmid
+          nullable: true
+    SignupResponse:
+      description: The data returned after a successful signup.
+      required:
+      - tenant_config
+      type: object
+      properties:
+        tenant_config:
+          description: The tenant config for the newly created tenant.
+          type: object
+          allOf:
+          - $ref: "#/components/schemas/TenantConfig"
+    Status:
+      enum:
+      - UPLOAD_PENDING
+      - UPLOAD_COMPLETED
+      - UPLOAD_COMPLETED_MISSING
+      - UPLOAD_FAILED
+      - UNKNOWN
+      type: string
+    Tenant:
+      description: "Represents a tenant with a unique ID, subdomain, and metadata."
+      required:
+      - id
+      - name
+      - subdomain
+      type: object
+      properties:
+        id:
+          description: Unique identifier for the tenant.
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/UUID"
+          example: 1f81eb52-5198-4599-803e-771906343485
+        name:
+          description: The name of the tenant.
+          maxLength: 20
+          minLength: 3
+          pattern: "^[\\p{L}0-9][\\p{L}0-9 \\p{L}]+[\\p{L}0-9]$"
+          type: string
+          example: Autoclub of Mars
+        subdomain:
+          description: The subdomain of the tenant. Used as the subdomain in the URL.
+          maxLength: 20
+          minLength: 3
+          pattern: "^[a-z0-9][a-z0-9_-]+[a-z0-9]?$"
+          type: string
+          example: autoclubmars
+    TenantConfig:
+      description: Configuration object for a specific tenant.
+      required:
+      - id
+      - subdomain
+      - frontendUrl
+      - name
+      - enabled
+      - frontend_url
+      - oidc_configs
+      type: object
+      properties:
+        id:
+          description: Unique identifier for the tenant.
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/UUID"
+          example: 1f81eb52-5198-4599-803e-771906343485
+        subdomain:
+          description: The subdomain of the tenant.
+          maxLength: 20
+          minLength: 3
+          pattern: "^[a-z0-9][a-z0-9_-]+[a-z0-9]?$"
+          type: string
+          example: autoclubmars
+        frontend_url:
+          description: The URL of the frontend application.
+          type: string
+          example: https://autoclubmars.clientwire.net
+        name:
+          description: The name of the tenant.
+          maxLength: 20
+          minLength: 3
+          pattern: "^[\\p{L}0-9][\\p{L}0-9 \\p{L}]+[\\p{L}0-9]$"
+          type: string
+          example: Autoclub of Mars
+        enabled:
+          description: Indicates whether the tenant is enabled.
+          type: boolean
+          example: true
+        oidc_configs:
+          description: List of OIDC provider configurations for this tenant.
+          type: array
+          items:
+            $ref: "#/components/schemas/TenantOidcConfig"
+    TenantOidcConfig:
+      required:
+      - provider_name
+      - authority_url
+      - client_id
+      type: object
+      properties:
+        provider_name:
+          description: "The provider name, e.g. 'microsoft' or 'google'"
+          type: string
+          example: microsoft
+        authority_url:
+          description: "Authority/issuer URL, e.g. 'https://login.microsoftonline.com/<tenant>/v2.0'"
+          type: string
+          example: https://login.microsoftonline.com/1234-abcd/v2.0
+        client_id:
+          description: Client ID for this OIDC application
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+    TokenResponseDto:
+      required:
+      - access_token
+      type: object
+      properties:
+        access_token:
+          description: The access token.
+          type: string
+        id_token:
+          description: The ID token (JWT).
+          type: string
+          nullable: true
+        refresh_token:
+          description: "Refresh token, if available."
+          type: string
+          nullable: true
+        token_type:
+          description: "Token type, typically 'Bearer'."
+          type: string
+          nullable: true
+        expires_in:
+          format: int32
+          description: "Seconds until expiration, e.g. 3600."
+          type: integer
+          nullable: true
+    TwilioSettings:
+      required:
+      - username
+      - account_sid
+      type: object
+      properties:
+        username:
+          description: The username of the Twilio account.
+          type: string
+        auth_token:
+          description: The auth token of the Twilio account.
+          type: string
+          nullable: true
+        account_sid:
+          description: The account SID of the Twilio account.
+          type: string
+        account_auth_token:
+          description: The account auth token of the Twilio account.
+          type: string
+          nullable: true
+        message_service_sid:
+          description: The message service SID of the Twilio account.
+          type: string
+          nullable: true
+        phone_number:
+          description: The phone number of the Twilio account.
+          type: string
+          nullable: true
+    UUID:
+      format: uuid
+      pattern: "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+      type: string
+    User:
+      description: Represents a user with an ID and email address.
+      required:
+      - id
+      - email
+      - role
+      type: object
+      properties:
+        id:
+          description: Unique identifier for the user.
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/UUID"
+          example: 1f81eb52-5198-4599-803e-771906343485
+        email:
+          format: email
+          description: The email address of the user.
+          type: string
+          example: user@example.com
+        role:
+          description: The role assigned to the user. OWNER or USER
+          default: USER
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/UserRole"
+          example: OWNER
+        firstname:
+          description: The first name of the user to create.
+          type: string
+          example: Philipp
+          nullable: true
+        lastname:
+          description: The last name of the user to create.
+          type: string
+          example: Schmid
+          nullable: true
+    UserInfoResponse:
+      required:
+      - email
+      type: object
+      properties:
+        email:
+          type: string
+        sub:
+          type: string
+          nullable: true
+        given_name:
+          type: string
+          nullable: true
+        family_name:
+          type: string
+          nullable: true
+    UserListResponse:
+      required:
+      - users
+      type: object
+      properties:
+        users:
+          description: A list of users.
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+    UserRole:
+      enum:
+      - OWNER
+      - USER
+      type: string
+    WsAuthenticate:
+      required:
+      - token
+      type: object
+      properties:
+        type:
+          type: string
+          nullable: true
+        token:
+          type: string
+    WsConversationsReadStatus:
+      type: object
+      properties:
+        conversation_id:
+          description: The id of the conversation.
+          maxLength: 50
+          pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
+          type: string
+          example: Abc123
+          nullable: true
+        conversation_participant_id:
+          description: The id of the participant.
+          maxLength: 50
+          pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
+          type: string
+          example: Abc123
+          nullable: true
+        unread_messages:
+          format: int32
+          description: The number of unread messages in the conversation.
+          type: integer
+          example: 3
+          nullable: true
+    WsNewConversation:
+      required:
+      - conversationId
+      type: object
+      properties:
+        type:
+          type: string
+          nullable: true
+        conversationId:
+          type: string
+    WsNewMessage:
+      required:
+      - message
+      type: object
+      properties:
+        type:
+          type: string
+          nullable: true
+        message:
+          $ref: "#/components/schemas/Message"
+    WsParticipantReadStatus:
+      required:
+      - participant_id
+      - conversation_id
+      type: object
+      properties:
+        type:
+          type: string
+          nullable: true
+        participant_id:
+          type: string
+        conversation_id:
+          type: string
+        unread_messages:
+          format: int32
+          type: integer
+    WsPing:
+      type: object
+      properties:
+        type:
+          type: string
+          nullable: true
+    WsPong:
+      type: object
+      properties:
+        type:
+          type: string
+          nullable: true
+    WsSubscribe:
+      required:
+      - address
+      type: object
+      properties:
+        type:
+          type: string
+          nullable: true
+        address:
+          type: string
+    WsUnsubscribe:
+      required:
+      - address
+      type: object
+      properties:
+        type:
+          type: string
+          nullable: true
+        address:
+          type: string
