@@ -1,6 +1,6 @@
 {
   "name": "@clientwire/api",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "ClientWire API library for Node and browsers.",
   "keywords": [
     "clientwire",

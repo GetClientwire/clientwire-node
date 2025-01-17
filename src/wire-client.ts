@@ -210,12 +210,11 @@ export class WireClient extends EventTarget {
    * Sign in with participant client auth key
    * On success, store the access token in localStorage and re-initialize usersApi with that token.
    */
-  public async signInWithParticipantAuthKey(tenantId: string, authKey: string) {
+  public async signInWithParticipantAuthKey(authKey: string) {
     this.logout();
 
     const requestParameters = {
       participantAuthKeyRequest: {
-        tenantId: tenantId,
         participantAuthKey: authKey,
       },
     };
