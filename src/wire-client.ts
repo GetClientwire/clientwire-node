@@ -242,6 +242,27 @@ export class WireClient extends EventTarget {
     this.setupAfterLogin();
   }
 
+  public async signInWithPassthroughToken(tenantId: string, token: string) {
+    this.logout();
+
+    const requestParameters = {
+      passthroughRequestDto: {
+        tenantId: tenantId,
+        token: token,
+      },
+    };
+
+    const response = await this.signinApi.passthroughLogin(requestParameters);
+    this.tokenManager.setAccessToken(response.accessToken);
+    if (response.refreshToken) {
+      this.tokenManager.setRefreshToken(response.refreshToken);
+    }
+
+    this.setupAfterLogin();
+
+    return response;
+  }
+
   /**
    * Does not really sign in, just stores the token
    * // TODO: make an actual call to verify the token
