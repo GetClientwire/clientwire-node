@@ -408,11 +408,14 @@ paths:
           format: date-time
         name: created_before
         in: query
-      - name: include
-        in: query
+      - description: |-
+          Include the specified related resources in the response.
+          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
+          If empty, no related resource is returned
         schema:
-          type: string
-          nullable: true
+          example: "PARTICIPANTS,CONVERSATION_TYPE"
+        name: include
+        in: query
       - name: limit
         in: query
         schema:
@@ -425,16 +428,18 @@ paths:
           format: int32
           default: 0
           type: integer
-      - name: order
-        in: query
+      - description: "Direction of the sort. Possible values: ASC, DESC. If not provided\
+          \ will fallback to DESC."
         schema:
-          type: string
-          nullable: true
-      - name: order_by
+          example: created_at
+        name: order
         in: query
+      - description: "Sort result based on this field. Possible values: created_at,\
+          \ updated_at. If not provided it will fallback to created_at"
         schema:
-          type: string
-          nullable: true
+          example: created_at
+        name: order_by
+        in: query
       - name: search
         in: query
         schema:
@@ -479,11 +484,14 @@ paths:
       tags:
       - Conversations
       parameters:
-      - name: include
-        in: query
+      - description: |-
+          Include the specified related resources in the response.
+          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
+          If empty, no related resource is returned
         schema:
-          type: string
-          nullable: true
+          example: "PARTICIPANTS,CONVERSATION_TYPE"
+        name: include
+        in: query
       requestBody:
         content:
           application/json:
@@ -513,7 +521,7 @@ paths:
       - BearerAuth:
         - OWNER
         - API_KEY
-  /api/v1/conversations/byIds:
+  /api/v1/conversations/by_ids:
     post:
       summary: Get a list of conversations by their ids.
       description: Retrieves multiple conversations by their public IDs in a POST
@@ -522,11 +530,14 @@ paths:
       tags:
       - Conversations
       parameters:
-      - name: include
-        in: query
+      - description: |-
+          Include the specified related resources in the response.
+          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
+          If empty, no related resource is returned
         schema:
-          type: string
-          nullable: true
+          example: "PARTICIPANTS,CONVERSATION_TYPE"
+        name: include
+        in: query
       requestBody:
         content:
           application/json:
@@ -570,11 +581,14 @@ paths:
         required: true
         schema:
           type: string
-      - name: include
-        in: query
+      - description: |-
+          Include the specified related resources in the response.
+          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
+          If empty, no related resource is returned
         schema:
-          type: string
-          nullable: true
+          example: "PARTICIPANTS,CONVERSATION_TYPE"
+        name: include
+        in: query
       requestBody:
         description: The patch body for updating conversation fields.
         required: true
@@ -624,11 +638,14 @@ paths:
         required: true
         schema:
           type: string
-      - name: include
-        in: query
+      - description: |-
+          Include the specified related resources in the response.
+          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
+          If empty, no related resource is returned
         schema:
-          type: string
-          nullable: true
+          example: "PARTICIPANTS,CONVERSATION_TYPE"
+        name: include
+        in: query
       responses:
         "200":
           description: Conversation found.
@@ -697,11 +714,14 @@ paths:
         required: true
         schema:
           type: string
-      - name: include
-        in: query
+      - description: |-
+          Include the specified related resources in the response.
+          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
+          If empty, no related resource is returned
         schema:
-          type: string
-          nullable: true
+          example: "PARTICIPANTS,CONVERSATION_TYPE"
+        name: include
+        in: query
       requestBody:
         required: true
         content:
@@ -2298,7 +2318,6 @@ components:
       - id
       - tenant_id
       - archived
-      - conversation_type_id
       - participants
       type: object
       properties:
@@ -2324,6 +2343,7 @@ components:
           pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
           type: string
           example: breakdowncase
+          nullable: true
         created_at:
           description: Timestamp when the conversation was created.
           type: string
@@ -2443,6 +2463,7 @@ components:
           pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
           type: string
           example: Abc123
+          nullable: true
         conversation_type_id:
           description: The id of the conversation type to be assigned to this conversation.
           maxLength: 50

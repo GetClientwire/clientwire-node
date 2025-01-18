@@ -39,13 +39,13 @@ import {
 
 export interface CreateConversationRequest {
     conversationPostRequest: ConversationPostRequest;
-    include?: string | null;
+    include?: any;
 }
 
 export interface CreateOrUpdateConversationRequest {
     conversationId: string;
     conversationPutRequest: ConversationPutRequest;
-    include?: string | null;
+    include?: any;
 }
 
 export interface DeleteConversationRequest {
@@ -54,18 +54,18 @@ export interface DeleteConversationRequest {
 
 export interface GetConversationRequest {
     conversationId: string;
-    include?: string | null;
+    include?: any;
 }
 
 export interface GetConversationsRequest {
     archived?: boolean | null;
     createdAfter?: any;
     createdBefore?: any;
-    include?: string | null;
+    include?: any;
     limit?: number;
     offset?: number;
-    order?: string | null;
-    orderBy?: string | null;
+    order?: any;
+    orderBy?: any;
     search?: string | null;
     updatedAfter?: any;
     updatedBefore?: any;
@@ -73,13 +73,13 @@ export interface GetConversationsRequest {
 
 export interface GetConversationsByIdsRequest {
     conversationsByIdsRequest: ConversationsByIdsRequest;
-    include?: string | null;
+    include?: any;
 }
 
 export interface UpdateConversationRequest {
     conversationId: string;
     requestBody: { [key: string]: any; };
-    include?: string | null;
+    include?: any;
 }
 
 /**
@@ -93,7 +93,7 @@ export interface ConversationsApiInterface {
      * Creates a conversation and optional participants.
      * @summary Create a new conversation for the specified tenant.
      * @param {ConversationPostRequest} conversationPostRequest 
-     * @param {string} [include] 
+     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;. If empty, no related resource is returned
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ConversationsApiInterface
@@ -111,7 +111,7 @@ export interface ConversationsApiInterface {
      * @summary Create or update a conversation.
      * @param {string} conversationId 
      * @param {ConversationPutRequest} conversationPutRequest 
-     * @param {string} [include] 
+     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;. If empty, no related resource is returned
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ConversationsApiInterface
@@ -144,7 +144,7 @@ export interface ConversationsApiInterface {
      * Retrieves conversation details by ID.
      * @summary Get a single conversation.
      * @param {string} conversationId 
-     * @param {string} [include] 
+     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;. If empty, no related resource is returned
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ConversationsApiInterface
@@ -163,11 +163,11 @@ export interface ConversationsApiInterface {
      * @param {boolean} [archived] 
      * @param {any} [createdAfter] Only include messages created after this date-time
      * @param {any} [createdBefore] Only include messages created before this date-time
-     * @param {string} [include] 
+     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;. If empty, no related resource is returned
      * @param {number} [limit] 
      * @param {number} [offset] 
-     * @param {string} [order] 
-     * @param {string} [orderBy] 
+     * @param {any} [order] Direction of the sort. Possible values: ASC, DESC. If not provided will fallback to DESC.
+     * @param {any} [orderBy] Sort result based on this field. Possible values: created_at, updated_at. If not provided it will fallback to created_at
      * @param {string} [search] 
      * @param {any} [updatedAfter] Only include messages updated after this date-time
      * @param {any} [updatedBefore] Only include messages updated before this date-time
@@ -187,7 +187,7 @@ export interface ConversationsApiInterface {
      * Retrieves multiple conversations by their public IDs in a POST request body.
      * @summary Get a list of conversations by their ids.
      * @param {ConversationsByIdsRequest} conversationsByIdsRequest 
-     * @param {string} [include] 
+     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;. If empty, no related resource is returned
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ConversationsApiInterface
@@ -205,7 +205,7 @@ export interface ConversationsApiInterface {
      * @summary Update partial fields of an existing conversation.
      * @param {string} conversationId 
      * @param {{ [key: string]: any; }} requestBody The patch body for updating conversation fields.
-     * @param {string} [include] 
+     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;. If empty, no related resource is returned
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ConversationsApiInterface
@@ -556,7 +556,7 @@ export class ConversationsApi extends runtime.BaseAPI implements ConversationsAp
             }
         }
         const response = await this.request({
-            path: `/api/v1/conversations/byIds`,
+            path: `/api/v1/conversations/by_ids`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,

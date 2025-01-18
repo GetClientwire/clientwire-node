@@ -32,7 +32,7 @@ export interface ConversationPostRequest {
      * @type {string}
      * @memberof ConversationPostRequest
      */
-    id: string;
+    id: string | null;
     /**
      * The id of the conversation type to be assigned to this conversation.
      * @type {string}

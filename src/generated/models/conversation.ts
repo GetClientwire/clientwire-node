@@ -50,7 +50,7 @@ export interface Conversation {
      * @type {string}
      * @memberof Conversation
      */
-    conversationTypeId: string;
+    conversationTypeId?: string | null;
     /**
      * 
      * @type {Date}
@@ -102,7 +102,6 @@ export function instanceOfConversation(value: object): value is Conversation {
     if (!('id' in value) || value['id'] === undefined) return false;
     if (!('tenantId' in value) || value['tenantId'] === undefined) return false;
     if (!('archived' in value) || value['archived'] === undefined) return false;
-    if (!('conversationTypeId' in value) || value['conversationTypeId'] === undefined) return false;
     if (!('participants' in value) || value['participants'] === undefined) return false;
     return true;
 }
@@ -120,7 +119,7 @@ export function ConversationFromJSONTyped(json: any, ignoreDiscriminator: boolea
         'id': json['id'],
         'tenantId': json['tenant_id'],
         'archived': json['archived'],
-        'conversationTypeId': json['conversation_type_id'],
+        'conversationTypeId': json['conversation_type_id'] == null ? undefined : json['conversation_type_id'],
         'createdAt': json['created_at'] == null ? undefined : (new Date(json['created_at'])),
         'updatedAt': json['updated_at'] == null ? undefined : (new Date(json['updated_at'])),
         'conversationData': json['conversation_data'] == null ? undefined : json['conversation_data'],
