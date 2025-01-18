@@ -42,7 +42,7 @@ import {
  */
 export interface Message {
     /**
-     * Unique identifier for a conversation.
+     * Unique identifier for a message.
      * @type {string}
      * @memberof Message
      */

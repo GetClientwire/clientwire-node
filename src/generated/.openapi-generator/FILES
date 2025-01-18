@@ -49,14 +49,16 @@ models/oidc-config.ts
 models/participant-activity-request.ts
 models/participant-auth-key-request.ts
 models/participant-auth-key-response.ts
+models/participant-kind.ts
 models/participant-list-response.ts
 models/participant-post-request.ts
 models/participant-put-request.ts
-models/participant-role.ts
 models/participant.ts
 models/passthrough-request-dto.ts
 models/reset-password-request.ts
 models/set-password-request.ts
+models/signup-machine-request.ts
+models/signup-machine-response.ts
 models/signup-request.ts
 models/signup-response.ts
 models/status.ts

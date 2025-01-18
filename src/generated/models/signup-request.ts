@@ -55,6 +55,12 @@ export interface SignupRequest {
      * @memberof SignupRequest
      */
     userLastname?: string | null;
+    /**
+     * The invite code to use for signing up.
+     * @type {string}
+     * @memberof SignupRequest
+     */
+    signupInviteCode?: string | null;
 }
 
 /**
@@ -84,6 +90,7 @@ export function SignupRequestFromJSONTyped(json: any, ignoreDiscriminator: boole
         'userPassword': json['user_password'],
         'userFirstname': json['user_firstname'] == null ? undefined : json['user_firstname'],
         'userLastname': json['user_lastname'] == null ? undefined : json['user_lastname'],
+        'signupInviteCode': json['signup_invite_code'] == null ? undefined : json['signup_invite_code'],
     };
 }
 
@@ -104,6 +111,7 @@ export function SignupRequestToJSONTyped(value?: SignupRequest | null, ignoreDis
         'user_password': value['userPassword'],
         'user_firstname': value['userFirstname'],
         'user_lastname': value['userLastname'],
+        'signup_invite_code': value['signupInviteCode'],
     };
 }
 

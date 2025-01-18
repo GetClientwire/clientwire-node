@@ -86,7 +86,7 @@ export function ConversationPaginatedResponseFromJSONTyped(json: any, ignoreDisc
     }
     return {
         
-        'hasMore': json['hasMore'],
+        'hasMore': json['has_more'],
         'totalElements': json['total_elements'],
         'limit': json['limit'],
         'conversations': ((json['conversations'] as Array<any>).map(ConversationFromJSON)),
@@ -106,7 +106,7 @@ export function ConversationPaginatedResponseToJSONTyped(value?: ConversationPag
 
     return {
         
-        'hasMore': value['hasMore'],
+        'has_more': value['hasMore'],
         'total_elements': value['totalElements'],
         'limit': value['limit'],
         'conversations': ((value['conversations'] as Array<any>).map(ConversationToJSON)),

@@ -15,10 +15,13 @@
 
 import * as runtime from '../runtime';
 import type {
+  SignupMachineRequest,
   SignupRequest,
   SignupResponse,
 } from '../models/index';
 import {
+    SignupMachineRequestFromJSON,
+    SignupMachineRequestToJSON,
     SignupRequestFromJSON,
     SignupRequestToJSON,
     SignupResponseFromJSON,
@@ -27,6 +30,10 @@ import {
 
 export interface SignupOperationRequest {
     signupRequest: SignupRequest;
+}
+
+export interface SignupAsMachineRequest {
+    signupMachineRequest: SignupMachineRequest;
 }
 
 /**
@@ -51,6 +58,22 @@ export interface SignupApiInterface {
      * Create a new account and user.
      */
     signup(requestParameters: SignupOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<SignupResponse>;
+
+    /**
+     * Signup for automated new tenant creation. You will need an existing \'main\' tenant thathas been provisioned to allow machine setup. Instead of creating a user, we will create anAPI key for you.
+     * @summary Signup for automation/machines.
+     * @param {SignupMachineRequest} signupMachineRequest The data needed to sign up a new tenant with api key.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SignupApiInterface
+     */
+    signupAsMachineRaw(requestParameters: SignupAsMachineRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<SignupResponse>>;
+
+    /**
+     * Signup for automated new tenant creation. You will need an existing \'main\' tenant thathas been provisioned to allow machine setup. Instead of creating a user, we will create anAPI key for you.
+     * Signup for automation/machines.
+     */
+    signupAsMachine(requestParameters: SignupAsMachineRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<SignupResponse>;
 
 }
 
@@ -94,6 +117,48 @@ export class SignupApi extends runtime.BaseAPI implements SignupApiInterface {
      */
     async signup(requestParameters: SignupOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<SignupResponse> {
         const response = await this.signupRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Signup for automated new tenant creation. You will need an existing \'main\' tenant thathas been provisioned to allow machine setup. Instead of creating a user, we will create anAPI key for you.
+     * Signup for automation/machines.
+     */
+    async signupAsMachineRaw(requestParameters: SignupAsMachineRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<SignupResponse>> {
+        if (requestParameters['signupMachineRequest'] == null) {
+            throw new runtime.RequiredError(
+                'signupMachineRequest',
+                'Required parameter "signupMachineRequest" was null or undefined when calling signupAsMachine().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.apiKey) {
+            headerParameters["X-API-KEY"] = await this.configuration.apiKey("X-API-KEY"); // ApiKeyAuth authentication
+        }
+
+        const response = await this.request({
+            path: `/api/v1/signup/machine`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: SignupMachineRequestToJSON(requestParameters['signupMachineRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => SignupResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Signup for automated new tenant creation. You will need an existing \'main\' tenant thathas been provisioned to allow machine setup. Instead of creating a user, we will create anAPI key for you.
+     * Signup for automation/machines.
+     */
+    async signupAsMachine(requestParameters: SignupAsMachineRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<SignupResponse> {
+        const response = await this.signupAsMachineRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

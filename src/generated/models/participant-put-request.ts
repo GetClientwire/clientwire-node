@@ -13,13 +13,13 @@
  */
 
 import { mapValues } from '../runtime';
-import type { ParticipantRole } from './participant-role';
+import type { ParticipantKind } from './participant-kind';
 import {
-    ParticipantRoleFromJSON,
-    ParticipantRoleFromJSONTyped,
-    ParticipantRoleToJSON,
-    ParticipantRoleToJSONTyped,
-} from './participant-role';
+    ParticipantKindFromJSON,
+    ParticipantKindFromJSONTyped,
+    ParticipantKindToJSON,
+    ParticipantKindToJSONTyped,
+} from './participant-kind';
 
 /**
  * 
@@ -40,11 +40,11 @@ export interface ParticipantPutRequest {
      */
     conversationId: string;
     /**
-     * The role of the participant. This can only be set if the conversation participant does not exist yet.
-     * @type {ParticipantRole}
+     * The kind of the participant. This can only be set if the conversation participant does not exist yet.
+     * @type {ParticipantKind}
      * @memberof ParticipantPutRequest
      */
-    role: ParticipantRole;
+    kind: ParticipantKind;
     /**
      * The display name of the participant. The display name can not be empty or null.
      * @type {string}
@@ -78,7 +78,7 @@ export interface ParticipantPutRequest {
  */
 export function instanceOfParticipantPutRequest(value: object): value is ParticipantPutRequest {
     if (!('conversationId' in value) || value['conversationId'] === undefined) return false;
-    if (!('role' in value) || value['role'] === undefined) return false;
+    if (!('kind' in value) || value['kind'] === undefined) return false;
     return true;
 }
 
@@ -94,7 +94,7 @@ export function ParticipantPutRequestFromJSONTyped(json: any, ignoreDiscriminato
         
         'id': json['id'] == null ? undefined : json['id'],
         'conversationId': json['conversation_id'],
-        'role': ParticipantRoleFromJSON(json['role']),
+        'kind': ParticipantKindFromJSON(json['kind']),
         'displayName': json['display_name'] == null ? undefined : json['display_name'],
         'phoneNumber': json['phone_number'] == null ? undefined : json['phone_number'],
         'email': json['email'] == null ? undefined : json['email'],
@@ -115,7 +115,7 @@ export function ParticipantPutRequestToJSONTyped(value?: ParticipantPutRequest |
         
         'id': value['id'],
         'conversation_id': value['conversationId'],
-        'role': ParticipantRoleToJSON(value['role']),
+        'kind': ParticipantKindToJSON(value['kind']),
         'display_name': value['displayName'],
         'phone_number': value['phoneNumber'],
         'email': value['email'],

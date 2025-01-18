@@ -13,13 +13,13 @@
  */
 
 import { mapValues } from '../runtime';
-import type { ParticipantRole } from './participant-role';
+import type { ParticipantKind } from './participant-kind';
 import {
-    ParticipantRoleFromJSON,
-    ParticipantRoleFromJSONTyped,
-    ParticipantRoleToJSON,
-    ParticipantRoleToJSONTyped,
-} from './participant-role';
+    ParticipantKindFromJSON,
+    ParticipantKindFromJSONTyped,
+    ParticipantKindToJSON,
+    ParticipantKindToJSONTyped,
+} from './participant-kind';
 
 /**
  * 
@@ -58,11 +58,11 @@ export interface Participant {
      */
     updatedAt?: Date;
     /**
-     * The role of the participant.
-     * @type {ParticipantRole}
+     * The kind of the participant.
+     * @type {ParticipantKind}
      * @memberof Participant
      */
-    role: ParticipantRole;
+    kind: ParticipantKind;
     /**
      * The display name of the participant.
      * @type {string}
@@ -82,7 +82,7 @@ export interface Participant {
      */
     email?: string | null;
     /**
-     * If has role USER, this is the user id of this participant. The field is otherwise always null.
+     * If has kind USER, this is the user id of this participant. The field is otherwise always null.
      * @type {string}
      * @memberof Participant
      */
@@ -104,7 +104,7 @@ export function instanceOfParticipant(value: object): value is Participant {
     if (!('id' in value) || value['id'] === undefined) return false;
     if (!('tenantId' in value) || value['tenantId'] === undefined) return false;
     if (!('conversationId' in value) || value['conversationId'] === undefined) return false;
-    if (!('role' in value) || value['role'] === undefined) return false;
+    if (!('kind' in value) || value['kind'] === undefined) return false;
     return true;
 }
 
@@ -123,7 +123,7 @@ export function ParticipantFromJSONTyped(json: any, ignoreDiscriminator: boolean
         'conversationId': json['conversation_id'],
         'createdAt': json['created_at'] == null ? undefined : (new Date(json['created_at'])),
         'updatedAt': json['updated_at'] == null ? undefined : (new Date(json['updated_at'])),
-        'role': ParticipantRoleFromJSON(json['role']),
+        'kind': ParticipantKindFromJSON(json['kind']),
         'displayName': json['display_name'] == null ? undefined : json['display_name'],
         'phoneNumber': json['phone_number'] == null ? undefined : json['phone_number'],
         'email': json['email'] == null ? undefined : json['email'],
@@ -148,7 +148,7 @@ export function ParticipantToJSONTyped(value?: Participant | null, ignoreDiscrim
         'conversation_id': value['conversationId'],
         'created_at': value['createdAt'] == null ? undefined : ((value['createdAt']).toISOString()),
         'updated_at': value['updatedAt'] == null ? undefined : ((value['updatedAt']).toISOString()),
-        'role': ParticipantRoleToJSON(value['role']),
+        'kind': ParticipantKindToJSON(value['kind']),
         'display_name': value['displayName'],
         'phone_number': value['phoneNumber'],
         'email': value['email'],

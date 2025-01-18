@@ -37,6 +37,12 @@ export interface Tenant {
      * @memberof Tenant
      */
     subdomain: string;
+    /**
+     * The endpoint that should be used to verify the token if you want to enable the token-exchange flow and passthrough your token to us to verify it.
+     * @type {string}
+     * @memberof Tenant
+     */
+    passthroughUserInfoUrl?: string | null;
 }
 
 /**
@@ -62,6 +68,7 @@ export function TenantFromJSONTyped(json: any, ignoreDiscriminator: boolean): Te
         'id': json['id'],
         'name': json['name'],
         'subdomain': json['subdomain'],
+        'passthroughUserInfoUrl': json['passthrough_user_info_url'] == null ? undefined : json['passthrough_user_info_url'],
     };
 }
 
@@ -79,6 +86,7 @@ export function TenantToJSONTyped(value?: Tenant | null, ignoreDiscriminator: bo
         'id': value['id'],
         'name': value['name'],
         'subdomain': value['subdomain'],
+        'passthrough_user_info_url': value['passthroughUserInfoUrl'],
     };
 }
 

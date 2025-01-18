@@ -10,7 +10,7 @@ info:
     name: Support
     url: https://www.clientwire.net/
 servers:
-- url: https://api.clientwire.net
+- url: https://api.production.clientwire.net
 - url: https://api.staging.clientwire.net
 - url: https://api.int.clientwire.net
 - url: https://api.test.clientwire.net
@@ -1828,6 +1828,40 @@ paths:
           description: Conflict. A resource with the same id/name already exists.
         "415":
           description: Unsupported Content Type.
+  /api/v1/signup/machine:
+    post:
+      summary: Signup for automation/machines.
+      description: "Signup for automated new tenant creation. You will need an existing\
+        \ 'main' tenant thathas been provisioned to allow machine setup. Instead of\
+        \ creating a user, we will create anAPI key for you."
+      operationId: signupAsMachine
+      tags:
+      - Signup
+      requestBody:
+        description: The data needed to sign up a new tenant with api key.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignupMachineRequest"
+      responses:
+        "201":
+          description: Tenant and API key created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignupResponse"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
   /api/v1/sms/twilio:
     put:
       summary: Create or update Twilio SMS settings for this tenant.
@@ -1934,7 +1968,7 @@ paths:
           application/json:
             schema:
               description: "The patch body for updating tenant fields. Allowed fields\
-                \ are: name, subdomain."
+                \ are: name, subdomain, passthrough_user_info_url."
               type: object
               additionalProperties: {}
               example:
@@ -2279,7 +2313,7 @@ components:
           type: string
           allOf:
           - $ref: "#/components/schemas/UUID"
-          example: 1f81eb52-5198-4599-803e-771906343485
+          example: ace00000-ace0000-ace00-ace00-ace000000
         archived:
           description: Indicates whether the conversation is archived.
           type: boolean
@@ -2355,13 +2389,13 @@ components:
           nullable: true
     ConversationPaginatedResponse:
       required:
-      - hasMore
+      - has_more
       - total_elements
       - limit
       - conversations
       type: object
       properties:
-        hasMore:
+        has_more:
           description: Indicates if there are more pages to fetch.
           type: boolean
           example: "null"
@@ -2485,7 +2519,7 @@ components:
           type: string
           allOf:
           - $ref: "#/components/schemas/UUID"
-          example: 1f81eb52-5198-4599-803e-771906343485
+          example: ace00000-ace0000-ace00-ace00-ace000000
         created_at:
           description: Timestamp when the conversation type was created.
           type: string
@@ -2532,7 +2566,7 @@ components:
             $ref: "#/components/schemas/ConversationType"
           example:
           - id: breakdowncase
-            tenant_id: 1f81eb52-5198-4599-803e-771906343485
+            tenant_id: ace00000-ace0000-ace00-ace00-ace000000
             created_at: 2022-11-03T20:26:10.344522Z
             updated_at: 2022-11-03T20:26:10.344522Z
             description: A conversation type for handling breakdown cases.
@@ -2731,7 +2765,7 @@ components:
         tenant_id:
           description: The tenant ID.
           type: string
-          example: 00000000-0000-0000-0000-000000000000
+          example: ace00000-ace0000-ace00-ace00-ace000000
         email:
           description: The email of the user.
           type: string
@@ -2844,14 +2878,14 @@ components:
       type: object
       properties:
         id:
-          description: Unique identifier for a conversation.
+          description: Unique identifier for a message.
           type: string
-          example: 1f81eb52-5198-4599-803e-771906343485
+          example: eee00000-eee0000-eee00-eee00-eee000000
         tenant_id:
           format: uuid
           description: Unique identifier for the tenant.
           type: string
-          example: 1f81eb52-5198-4599-803e-771906343485
+          example: ace00000-ace0000-ace00-ace00-ace000000
         created_at:
           description: Timestamp when the conversation was created.
           type: string
@@ -3059,7 +3093,7 @@ components:
         tenant_id:
           description: The tenant ID.
           type: string
-          example: 00000000-0000-0000-0000-000000000000
+          example: ace00000-ace0000-ace00-ace00-ace000000
         code:
           description: The authorization code received from Microsoft after user login.
           type: string
@@ -3110,7 +3144,7 @@ components:
       - id
       - tenant_id
       - conversation_id
-      - role
+      - kind
       type: object
       properties:
         id:
@@ -3123,7 +3157,7 @@ components:
           format: uuid
           description: Unique identifier for the tenant.
           type: string
-          example: 1f81eb52-5198-4599-803e-771906343485
+          example: ace00000-ace0000-ace00-ace00-ace000000
         conversation_id:
           description: Unique identifier for a conversation.
           maxLength: 50
@@ -3149,11 +3183,11 @@ components:
           - enum:
             - null
           nullable: true
-        role:
-          description: The role of the participant.
+        kind:
+          description: The kind of the participant.
           type: string
           allOf:
-          - $ref: "#/components/schemas/ParticipantRole"
+          - $ref: "#/components/schemas/ParticipantKind"
           example: "null"
         display_name:
           description: The display name of the participant.
@@ -3177,7 +3211,7 @@ components:
           nullable: true
         user_id:
           format: uuid
-          description: "If has role USER, this is the user id of this participant.\
+          description: "If has kind USER, this is the user id of this participant.\
             \ The field is otherwise always null."
           type: string
           example: EDA089DA-7940-46EB-97B5-3F18F1396844
@@ -3238,7 +3272,14 @@ components:
           type: string
           allOf:
           - $ref: "#/components/schemas/UUID"
-          example: 1f81eb52-5198-4599-803e-771906343485
+          example: ace00000-ace0000-ace00-ace00-ace000000
+    ParticipantKind:
+      enum:
+      - NONE
+      - USER
+      - TENANT
+      - CLIENT
+      type: string
     ParticipantListResponse:
       required:
       - participants
@@ -3251,27 +3292,27 @@ components:
             $ref: "#/components/schemas/Participant"
           example:
           - id: Abc123
-            tenant_id: 1f81eb52-5198-4599-803e-771906343485
+            tenant_id: ace00000-ace0000-ace00-ace00-ace000000
             conversation_id: breakdowncase
             created_at: 2022-11-03T20:26:10.344522Z
             updated_at: 2022-11-03T20:26:10.344522Z
-            role: USER
+            kind: USER
             display_name: John Doe
     ParticipantPostRequest:
       required:
       - id
-      - role
+      - kind
       type: object
       properties:
         id:
           description: Unique identifier for a conversation participant.
           type: string
           example: Abc123
-        role:
-          description: The role of the participant.
+        kind:
+          description: The kind of the participant.
           type: string
           allOf:
-          - $ref: "#/components/schemas/ParticipantRole"
+          - $ref: "#/components/schemas/ParticipantKind"
           example: "null"
         display_name:
           description: "The display name of the participant. If empty or null, the\
@@ -3304,7 +3345,7 @@ components:
     ParticipantPutRequest:
       required:
       - conversation_id
-      - role
+      - kind
       type: object
       properties:
         id:
@@ -3321,12 +3362,12 @@ components:
           pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
           type: string
           example: Abc123
-        role:
-          description: The role of the participant. This can only be set if the conversation
+        kind:
+          description: The kind of the participant. This can only be set if the conversation
             participant does not exist yet.
           type: string
           allOf:
-          - $ref: "#/components/schemas/ParticipantRole"
+          - $ref: "#/components/schemas/ParticipantKind"
           example: "null"
         display_name:
           description: The display name of the participant. The display name can not
@@ -3356,13 +3397,6 @@ components:
           type: string
           example: C8E62D56-80BE-437E-A967-6861803729B8
           nullable: true
-    ParticipantRole:
-      enum:
-      - NONE
-      - USER
-      - TENANT
-      - CLIENT
-      type: string
     PassthroughRequestDto:
       required:
       - tenant_id
@@ -3372,7 +3406,7 @@ components:
         tenant_id:
           description: The tenant ID.
           type: string
-          example: 00000000-0000-0000-0000-000000000000
+          example: ace00000-ace0000-ace00-ace00-ace000000
         token:
           description: Bearer token.
           type: string
@@ -3385,7 +3419,7 @@ components:
         tenant_id:
           description: The tenant ID.
           type: string
-          example: 00000000-0000-0000-0000-000000000000
+          example: ace00000-ace0000-ace00-ace00-ace000000
         email:
           description: The email of the user.
           type: string
@@ -3401,7 +3435,7 @@ components:
         tenant_id:
           description: The tenant ID.
           type: string
-          example: 00000000-0000-0000-0000-000000000000
+          example: ace00000-ace0000-ace00-ace00-ace000000
         email:
           description: The user’s email address.
           type: string
@@ -3414,6 +3448,44 @@ components:
           description: The plaintext token from the password reset link.
           type: string
           example: abcdefg
+    SignupMachineRequest:
+      description: The data needed to create a new tenant and an owner user.
+      required:
+      - tenant_name
+      - tenant_subdomain
+      - user_email
+      type: object
+      properties:
+        tenant_name:
+          description: The name of the tenant to create.
+          maxLength: 20
+          minLength: 3
+          pattern: "^[\\p{L}0-9][\\p{L}0-9 \\p{L}]+[\\p{L}0-9]$"
+          type: string
+          example: Autoclub of Mars
+        tenant_subdomain:
+          description: The subdomain of the tenant to create. Used as the subdomain
+            in the URL.
+          maxLength: 20
+          minLength: 3
+          pattern: "^[a-z0-9][a-z0-9_-]+[a-z0-9]?$"
+          type: string
+          example: autoclubmars
+    SignupMachineResponse:
+      description: The data returned after a successful signup.
+      required:
+      - tenant_config
+      - api_key
+      type: object
+      properties:
+        tenant_config:
+          description: The tenant config for the newly created tenant.
+          type: object
+          allOf:
+          - $ref: "#/components/schemas/TenantConfig"
+        api_key:
+          description: The api key for the newly created tenant.
+          type: string
     SignupRequest:
       description: The data needed to create a new tenant and an owner user.
       required:
@@ -3459,6 +3531,11 @@ components:
           type: string
           example: Schmid
           nullable: true
+        signup_invite_code:
+          description: The invite code to use for signing up.
+          type: string
+          example: Ji9sllks
+          nullable: true
     SignupResponse:
       description: The data returned after a successful signup.
       required:
@@ -3491,7 +3568,7 @@ components:
           type: string
           allOf:
           - $ref: "#/components/schemas/UUID"
-          example: 1f81eb52-5198-4599-803e-771906343485
+          example: ace00000-ace0000-ace00-ace00-ace000000
         name:
           description: The name of the tenant.
           maxLength: 20
@@ -3506,6 +3583,14 @@ components:
           pattern: "^[a-z0-9][a-z0-9_-]+[a-z0-9]?$"
           type: string
           example: autoclubmars
+        passthrough_user_info_url:
+          format: url
+          description: The endpoint that should be used to verify the token if you
+            want to enable the token-exchange flow and passthrough your token to us
+            to verify it.
+          type: string
+          example: https://auth.autoclubmars.com/oauth2/userinfo
+          nullable: true
     TenantConfig:
       description: Configuration object for a specific tenant.
       required:
@@ -3523,7 +3608,7 @@ components:
           type: string
           allOf:
           - $ref: "#/components/schemas/UUID"
-          example: 1f81eb52-5198-4599-803e-771906343485
+          example: ace00000-ace0000-ace00-ace00-ace000000
         subdomain:
           description: The subdomain of the tenant.
           maxLength: 20
@@ -3640,7 +3725,7 @@ components:
           type: string
           allOf:
           - $ref: "#/components/schemas/UUID"
-          example: 1f81eb52-5198-4599-803e-771906343485
+          example: ace00000-ace0000-ace00-ace00-ace000000
         email:
           format: email
           description: The email address of the user.

@@ -13,13 +13,13 @@
  */
 
 import { mapValues } from '../runtime';
-import type { ParticipantRole } from './participant-role';
+import type { ParticipantKind } from './participant-kind';
 import {
-    ParticipantRoleFromJSON,
-    ParticipantRoleFromJSONTyped,
-    ParticipantRoleToJSON,
-    ParticipantRoleToJSONTyped,
-} from './participant-role';
+    ParticipantKindFromJSON,
+    ParticipantKindFromJSONTyped,
+    ParticipantKindToJSON,
+    ParticipantKindToJSONTyped,
+} from './participant-kind';
 
 /**
  * 
@@ -34,11 +34,11 @@ export interface ParticipantPostRequest {
      */
     id: string;
     /**
-     * The role of the participant.
-     * @type {ParticipantRole}
+     * The kind of the participant.
+     * @type {ParticipantKind}
      * @memberof ParticipantPostRequest
      */
-    role: ParticipantRole;
+    kind: ParticipantKind;
     /**
      * The display name of the participant. If empty or null, the display name will be generated from the id.
      * @type {string}
@@ -72,7 +72,7 @@ export interface ParticipantPostRequest {
  */
 export function instanceOfParticipantPostRequest(value: object): value is ParticipantPostRequest {
     if (!('id' in value) || value['id'] === undefined) return false;
-    if (!('role' in value) || value['role'] === undefined) return false;
+    if (!('kind' in value) || value['kind'] === undefined) return false;
     return true;
 }
 
@@ -87,7 +87,7 @@ export function ParticipantPostRequestFromJSONTyped(json: any, ignoreDiscriminat
     return {
         
         'id': json['id'],
-        'role': ParticipantRoleFromJSON(json['role']),
+        'kind': ParticipantKindFromJSON(json['kind']),
         'displayName': json['display_name'] == null ? undefined : json['display_name'],
         'phoneNumber': json['phone_number'] == null ? undefined : json['phone_number'],
         'email': json['email'] == null ? undefined : json['email'],
@@ -107,7 +107,7 @@ export function ParticipantPostRequestToJSONTyped(value?: ParticipantPostRequest
     return {
         
         'id': value['id'],
-        'role': ParticipantRoleToJSON(value['role']),
+        'kind': ParticipantKindToJSON(value['kind']),
         'display_name': value['displayName'],
         'phone_number': value['phoneNumber'],
         'email': value['email'],

@@ -13,7 +13,7 @@
  */
 
 
-export const BASE_PATH = "https://api.clientwire.net".replace(/\/+$/, "");
+export const BASE_PATH = "https://api.production.clientwire.net".replace(/\/+$/, "");
 
 export interface ConfigurationParameters {
     basePath?: string; // override base path
