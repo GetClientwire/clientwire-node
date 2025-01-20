@@ -8,6 +8,10 @@ import {
   WsSubscribe,
   WsUnsubscribe,
   WsMessageUpdated,
+  WsNewMessageFromJSON,
+  WsNewConversationFromJSON,
+  WsMessageUpdatedFromJSON,
+  WsParticipantReadStatusFromJSON,
 } from './generated/models';
 import { TokenManager } from './token-manager';
 
@@ -161,21 +165,21 @@ export class WireWebsocketConnection {
 
         case 'NEW_CONVERSATION': {
           // console.log('Received new NEW_CONVERSATION:', data);
-          let message = data as WsNewConversation;
+          let message = WsNewConversationFromJSON(data);
           this.client.dispatchEvent(new CustomEvent('conversations:new', { detail: message }));
           break;
         }
         case 'NEW_MESSAGE': {
           // console.log('Received new NEW_MESSAGE:', data);
           let eventName = `conversations:${data.message.conversation_id}`;
-          let message = data as WsNewMessage;
+          let message = WsNewMessageFromJSON(data);
           this.client.dispatchEvent(new CustomEvent(eventName, { detail: message }));
           break;
         }
         case 'MESSAGE_UPDATED': {
           // console.log('Received new MESSAGE_UPDATED:', data);
           let eventName = `conversations:${data.message.conversation_id}`;
-          let message = data as WsMessageUpdated;
+          let message = WsMessageUpdatedFromJSON(data);
           this.client.dispatchEvent(new CustomEvent(eventName, { detail: message }));
           break;
         }
@@ -183,7 +187,7 @@ export class WireWebsocketConnection {
         case 'PARTICIPANT_READ_STATUS': {
           // console.log('Received new PARTICIPANT_READ_STATUS:', data);
           let eventName = `conversation:${data.message.conversation_id}:participant:${data.message.participant_id}`;
-          let message = data as WsParticipantReadStatus;
+          let message = WsParticipantReadStatusFromJSON(data);
           this.client.dispatchEvent(new CustomEvent(eventName, { detail: message }));
           break;
         }

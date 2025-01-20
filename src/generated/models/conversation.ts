@@ -20,6 +20,13 @@ import {
     ParticipantToJSON,
     ParticipantToJSONTyped,
 } from './participant';
+import type { ConversationType } from './conversation-type';
+import {
+    ConversationTypeFromJSON,
+    ConversationTypeFromJSONTyped,
+    ConversationTypeToJSON,
+    ConversationTypeToJSONTyped,
+} from './conversation-type';
 
 /**
  * 
@@ -53,6 +60,12 @@ export interface Conversation {
     conversationTypeId?: string | null;
     /**
      * 
+     * @type {ConversationType}
+     * @memberof Conversation
+     */
+    conversationType?: ConversationType | null;
+    /**
+     * 
      * @type {Date}
      * @memberof Conversation
      */
@@ -80,7 +93,7 @@ export interface Conversation {
      * @type {Array<Participant>}
      * @memberof Conversation
      */
-    participants: Array<Participant>;
+    participants?: Array<Participant> | null;
     /**
      * Number of unread messages.
      * @type {number}
@@ -102,7 +115,6 @@ export function instanceOfConversation(value: object): value is Conversation {
     if (!('id' in value) || value['id'] === undefined) return false;
     if (!('tenantId' in value) || value['tenantId'] === undefined) return false;
     if (!('archived' in value) || value['archived'] === undefined) return false;
-    if (!('participants' in value) || value['participants'] === undefined) return false;
     return true;
 }
 
@@ -120,11 +132,12 @@ export function ConversationFromJSONTyped(json: any, ignoreDiscriminator: boolea
         'tenantId': json['tenant_id'],
         'archived': json['archived'],
         'conversationTypeId': json['conversation_type_id'] == null ? undefined : json['conversation_type_id'],
+        'conversationType': json['conversation_type'] == null ? undefined : ConversationTypeFromJSON(json['conversation_type']),
         'createdAt': json['created_at'] == null ? undefined : (new Date(json['created_at'])),
         'updatedAt': json['updated_at'] == null ? undefined : (new Date(json['updated_at'])),
         'conversationData': json['conversation_data'] == null ? undefined : json['conversation_data'],
         'conversationDataUpdatedAt': json['conversation_data_updated_at'] == null ? undefined : (new Date(json['conversation_data_updated_at'])),
-        'participants': ((json['participants'] as Array<any>).map(ParticipantFromJSON)),
+        'participants': json['participants'] == null ? undefined : ((json['participants'] as Array<any>).map(ParticipantFromJSON)),
         'newMessageCount': json['new_message_count'] == null ? undefined : json['new_message_count'],
         'lastMessageSequenceSeen': json['last_message_sequence_seen'] == null ? undefined : json['last_message_sequence_seen'],
     };
@@ -145,11 +158,12 @@ export function ConversationToJSONTyped(value?: Conversation | null, ignoreDiscr
         'tenant_id': value['tenantId'],
         'archived': value['archived'],
         'conversation_type_id': value['conversationTypeId'],
+        'conversation_type': ConversationTypeToJSON(value['conversationType']),
         'created_at': value['createdAt'] == null ? undefined : ((value['createdAt']).toISOString()),
         'updated_at': value['updatedAt'] == null ? undefined : ((value['updatedAt']).toISOString()),
         'conversation_data': value['conversationData'],
         'conversation_data_updated_at': value['conversationDataUpdatedAt'] == null ? undefined : ((value['conversationDataUpdatedAt']).toISOString()),
-        'participants': ((value['participants'] as Array<any>).map(ParticipantToJSON)),
+        'participants': value['participants'] == null ? undefined : ((value['participants'] as Array<any>).map(ParticipantToJSON)),
         'new_message_count': value['newMessageCount'],
         'last_message_sequence_seen': value['lastMessageSequenceSeen'],
     };

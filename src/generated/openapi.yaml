@@ -43,7 +43,6 @@ tags:
   description: Operations for managing per-tenant Twilio SMS settings.
 - name: Geocoding
   description: Operations to geocode locations.
-- name: Authentication
 paths:
   /api/v1/api-keys:
     get:
@@ -134,19 +133,16 @@ paths:
   /api/v1/auth/{tenant_id}/oauth2/token:
     post:
       summary: OAuth2 Token Endpoint
-      description: "\n            OAuth2-style token endpoint. \n            Supports\
-        \ multiple grant_type values:\n             - authorization_code  (PKCE optional)\
-        \ // NOT YET IMPLEMENTED\n             - password            (ROPC)\n    \
-        \         - refresh_token\n             - urn:ietf:params:oauth:grant-type:token-exchange\
-        \ (Token Exchange)\n             \n            For the Token Exchange grant_type,\
-        \ the subject_token_type can be:\n             - urn:clientwire:token-type:client-participant-auth-key\n\
-        \             - urn:ietf:params:oauth:token-type:access_token\n          \
-        \   \n            urn:clientwire:token-type:client-participant-auth-key is\
-        \ a special token type for exchanging a client's participant auth key for\
-        \ an access token.\n            urn:ietf:params:oauth:token-type:access_token\
-        \ is for our token-exchange service to exchange your access token with a Clientwire\
-        \ access token by verifying it at your provided userinfo endpoint.\n     \
-        \       \n        "
+      description: "OAuth2-style token endpoint. \nSupports multiple grant_type values:\n\
+        \ - authorization_code  (PKCE optional) // NOT YET IMPLEMENTED\n - password\
+        \            (ROPC)\n - refresh_token\n - urn:ietf:params:oauth:grant-type:token-exchange\
+        \ (Token Exchange)\n \nFor the Token Exchange grant_type, the subject_token_type\
+        \ can be:\n - urn:clientwire:token-type:client-participant-auth-key\n - urn:ietf:params:oauth:token-type:access_token\n\
+        \ \nurn:clientwire:token-type:client-participant-auth-key is a special token\
+        \ type for exchanging a client's participant auth key for an access token.\n\
+        urn:ietf:params:oauth:token-type:access_token is for our token-exchange service\
+        \ to exchange your access token with a Clientwire access token by verifying\
+        \ it at your provided userinfo endpoint.\n"
       operationId: oauth2TokenEndpoint
       tags:
       - Signin
@@ -2310,7 +2306,6 @@ components:
       - id
       - tenant_id
       - archived
-      - participants
       type: object
       properties:
         id:
@@ -2335,6 +2330,14 @@ components:
           pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
           type: string
           example: breakdowncase
+          nullable: true
+        conversation_type:
+          description: The whole conversation_type type object.
+          type: object
+          anyOf:
+          - $ref: "#/components/schemas/ConversationType"
+          - enum:
+            - null
           nullable: true
         created_at:
           description: Timestamp when the conversation was created.
@@ -2377,6 +2380,7 @@ components:
           items:
             $ref: "#/components/schemas/Participant"
           example: "null"
+          nullable: true
         new_message_count:
           format: int32
           description: Number of unread messages.
