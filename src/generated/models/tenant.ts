@@ -38,11 +38,17 @@ export interface Tenant {
      */
     subdomain: string;
     /**
-     * The endpoint that should be used to verify the token if you want to enable the token-exchange flow and passthrough your token to us to verify it.
+     * The endpoint that should be used to verify the token if you want to enable token-exchange flow and. It must be a oauth2 userinfo endpoint.
      * @type {string}
      * @memberof Tenant
      */
-    passthroughUserInfoUrl?: string | null;
+    tokenExchangeUserinfoUrl?: string | null;
+    /**
+     * If a user logs in with an email address that matches one of these domains, a new user will be created automatically.
+     * @type {Array<string>}
+     * @memberof Tenant
+     */
+    userAutoProvisioningDomains?: Array<string> | null;
 }
 
 /**
@@ -68,7 +74,8 @@ export function TenantFromJSONTyped(json: any, ignoreDiscriminator: boolean): Te
         'id': json['id'],
         'name': json['name'],
         'subdomain': json['subdomain'],
-        'passthroughUserInfoUrl': json['passthrough_user_info_url'] == null ? undefined : json['passthrough_user_info_url'],
+        'tokenExchangeUserinfoUrl': json['token_exchange_userinfo_url'] == null ? undefined : json['token_exchange_userinfo_url'],
+        'userAutoProvisioningDomains': json['user_auto_provisioning_domains'] == null ? undefined : json['user_auto_provisioning_domains'],
     };
 }
 
@@ -86,7 +93,8 @@ export function TenantToJSONTyped(value?: Tenant | null, ignoreDiscriminator: bo
         'id': value['id'],
         'name': value['name'],
         'subdomain': value['subdomain'],
-        'passthrough_user_info_url': value['passthroughUserInfoUrl'],
+        'token_exchange_userinfo_url': value['tokenExchangeUserinfoUrl'],
+        'user_auto_provisioning_domains': value['userAutoProvisioningDomains'],
     };
 }
 

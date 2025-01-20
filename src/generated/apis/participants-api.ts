@@ -453,7 +453,7 @@ export class ParticipantsApi extends runtime.BaseAPI implements ParticipantsApiI
             }
         }
         const response = await this.request({
-            path: `/api/v1/client_participant/me`,
+            path: `/api/v1/client-participant/me`,
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
@@ -500,7 +500,7 @@ export class ParticipantsApi extends runtime.BaseAPI implements ParticipantsApiI
             }
         }
         const response = await this.request({
-            path: `/api/v1/conversations/{conversation_id}/participants/new_message_count`.replace(`{${"conversation_id"}}`, encodeURIComponent(String(requestParameters['conversationId']))),
+            path: `/api/v1/conversations/{conversation_id}/participants/new-message-count`.replace(`{${"conversation_id"}}`, encodeURIComponent(String(requestParameters['conversationId']))),
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,

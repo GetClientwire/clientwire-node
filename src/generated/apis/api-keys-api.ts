@@ -121,7 +121,7 @@ export class APIKeysApi extends runtime.BaseAPI implements APIKeysApiInterface {
             }
         }
         const response = await this.request({
-            path: `/api/v1/api_keys`,
+            path: `/api/v1/api-keys`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
@@ -166,7 +166,7 @@ export class APIKeysApi extends runtime.BaseAPI implements APIKeysApiInterface {
             }
         }
         const response = await this.request({
-            path: `/api/v1/api_keys/{key_id}`.replace(`{${"key_id"}}`, encodeURIComponent(String(requestParameters['keyId']))),
+            path: `/api/v1/api-keys/{key_id}`.replace(`{${"key_id"}}`, encodeURIComponent(String(requestParameters['keyId']))),
             method: 'DELETE',
             headers: headerParameters,
             query: queryParameters,
@@ -203,7 +203,7 @@ export class APIKeysApi extends runtime.BaseAPI implements APIKeysApiInterface {
             }
         }
         const response = await this.request({
-            path: `/api/v1/api_keys`,
+            path: `/api/v1/api-keys`,
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,

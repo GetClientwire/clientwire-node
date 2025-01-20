@@ -17,14 +17,14 @@ import {
 import { TenantConfig } from './generated/models';
 import { WireWebsocketConnection } from './wire-websocket-connection';
 import {
-  WireClientEventMap,
+  ClientWireEventMap,
   SUBSCRIPTION_ERROR_EVENT,
   AUTHENTICATION_ERROR_EVENT,
 } from './wire-events';
 import { TokenManager } from './token-manager';
 import { createFetchWithRefresh } from './fetch-with-refresh';
 
-export class WireClient extends EventTarget {
+export class ClientWireApiClient extends EventTarget {
   private _basePath: string;
   private apiConfig: Configuration;
 
@@ -53,14 +53,13 @@ export class WireClient extends EventTarget {
    * Keep track of how many listeners exist for each event name.
    * If >0, we are "subscribed" to that channel (if it is a WS channel).
    */
-  private listenerCounts = new Map<keyof WireClientEventMap | string, number>();
+  private listenerCounts = new Map<keyof ClientWireEventMap | string, number>();
 
   constructor(basePath: string = 'https://api.production.clientwire.net') {
     super();
-    console.log(basePath);
 
     this._basePath = basePath;
-    this.tokenManager = new TokenManager(basePath);
+    this.tokenManager = new TokenManager();
 
     this.apiConfig = new Configuration({
       basePath: this._basePath,
@@ -70,10 +69,18 @@ export class WireClient extends EventTarget {
       fetchApi: createFetchWithRefresh(
         this.tokenManager,
         () => {
-          this.handleTokensRefreshed();
+          console.log('[ClientWireApiClient] Tokens refreshed');
+          if (!this.isConnected()) {
+            this.websocketConnection?.connect();
+          }
         },
         () => {
-          this.handleTokensCouldNotRefresh();
+          console.log('[ClientWireApiClient] Tokens could not be refreshed');
+          this.dispatchEvent(
+            new CustomEvent(AUTHENTICATION_ERROR_EVENT, {
+              detail: { reason: 'Could not refresh tokens' },
+            })
+          );
         }
       ),
     });
@@ -93,21 +100,329 @@ export class WireClient extends EventTarget {
     this.apiKeysApi = new APIKeysApi(this.apiConfig);
     this.oidcConfigsApi = new OIDCConfigsApi(this.apiConfig);
     this.smsSettingsApi = new SMSSettingsApi(this.apiConfig);
-    console.log('New WireClient instance created: ', this.instanceId);
+    console.log('[ClientWireApiClient] New instance created: ', this.instanceId);
   }
 
+  public get basePath(): string {
+    return this._basePath;
+  }
+
+  //#region Tenant Config
+
+  public async getTenantConfigForSubdomain(subdomain: string) {
+    return this.tenantConfigApi.getTenantConfig({ tenantSubdomain: subdomain });
+  }
+
+  public async getTenantConfigForTenantId(id: string) {
+    return this.tenantConfigApi.getTenantConfig({ tenantId: id });
+  }
+
+  //#endregion
+
+  //#region Authentication
+
+  public logout(): void {
+    this.websocketConnection?.disconnect();
+    this.websocketConnection = undefined;
+    this.tokenManager.clearTokens();
+    this.tokenManager.clearRefreshCallback();
+  }
+
+  public async signInWithEmailAndPassword(tenantId: string, email: string, password: string) {
+    this.logout();
+
+    const requestParameters = {
+      grantType: 'password',
+      tenantId: tenantId,
+      username: email,
+      password: password,
+    };
+
+    const response = await this.signinApi.oauth2TokenEndpoint(requestParameters);
+    this.tokenManager.setTokens(tenantId, response.accessToken, response.refreshToken);
+
+    // Set up a refresh callback, IF we have a refresh token
+    if (response.refreshToken) {
+      this.tokenManager.setRefreshCallback(async () => {
+        try {
+          const currentRefreshToken = this.tokenManager.getRefreshToken();
+
+          const refreshRequestParameters = {
+            tenantId: tenantId,
+            grantType: 'refresh_token',
+            refresh_token: currentRefreshToken,
+          };
+          const refreshResponse =
+            await this.signinApi.oauth2TokenEndpoint(refreshRequestParameters);
+          this.tokenManager.setTokens(
+            tenantId,
+            refreshResponse.accessToken,
+            refreshResponse.refreshToken
+          );
+
+          return true;
+        } catch (e) {
+          console.error('[ClientWireApiClient#signInWithEmailAndPassword] Refresh failed:', e);
+          return false;
+        }
+      });
+    } else {
+      // If response.refreshToken is empty, we *cannot* refresh.
+      // So set a fallback callback that indicates refresh is impossible.
+      this.tokenManager.setRefreshCallback(async () => false);
+    }
+
+    this.setupWebsocket();
+    return response;
+  }
+
+  public async signInWithTokenExchangeParticipantAuthKey(
+    tenantId: string,
+    authKey: string | (() => string | Promise<string>) | Promise<string>
+  ) {
+    this.logout();
+
+    // 1. Resolve the incoming 'authKey' to a string for the initial sign-in
+    let resolvedToken: string;
+    if (authKey instanceof Promise) {
+      resolvedToken = await authKey;
+    } else if (typeof authKey === 'function') {
+      const possiblePromise = authKey();
+      resolvedToken = possiblePromise instanceof Promise ? await possiblePromise : possiblePromise;
+    } else {
+      resolvedToken = authKey;
+    }
+
+    // 2. Make the token-exchange request
+    const requestParameters = {
+      grantType: 'urn:ietf:params:oauth:grant-type:token-exchange',
+      tenantId: tenantId,
+      subjectToken: resolvedToken,
+      subjectTokenType: 'urn:clientwire:token-type:client-participant-auth-key',
+    };
+    const response = await this.signinApi.oauth2TokenEndpoint(requestParameters);
+
+    // 3. Store the newly retrieved tokens
+    this.tokenManager.setTokens(tenantId, response.accessToken, response.refreshToken);
+
+    // 4. Set up a refresh callback, IF we have a function to generate new tokens
+    if (typeof authKey === 'function') {
+      // If 'authKey' was a function, we expect we can call it again to get a *new* participant auth key
+      this.tokenManager.setRefreshCallback(async () => {
+        try {
+          // Re-invoke the function to get the latest participant auth key
+          const possiblePromise = authKey();
+          const nextAuthKey =
+            possiblePromise instanceof Promise ? await possiblePromise : possiblePromise;
+
+          // Then do the token exchange again
+          const refreshParams = {
+            grantType: 'urn:ietf:params:oauth:grant-type:token-exchange',
+            tenantId: tenantId,
+            subjectToken: nextAuthKey,
+            subjectTokenType: 'urn:clientwire:token-type:client-participant-auth-key',
+          };
+          const refreshResponse = await this.signinApi.oauth2TokenEndpoint(refreshParams);
+
+          // Store them
+          this.tokenManager.setTokens(
+            tenantId,
+            refreshResponse.accessToken,
+            refreshResponse.refreshToken
+          );
+          return true;
+        } catch (e) {
+          console.error(
+            '[ClientWireApiClient#signInWithTokenExchangeParticipantAuthKey] Refresh failed:',
+            e
+          );
+          return false;
+        }
+      });
+    } else {
+      // If authKey is just a string or a single Promise, we *cannot* truly refresh
+      // (we have no way to get a new subject token).
+      // So set a fallback callback that indicates refresh is impossible.
+      this.tokenManager.setRefreshCallback(async () => false);
+    }
+
+    // 5. Finally, set up the WebSocket connection.
+    this.setupWebsocket();
+
+    return response;
+  }
+
+  public async signInWithTokenExchangeAccessToken(
+    tenantId: string,
+    token: string | (() => string | Promise<string>) | Promise<string>
+  ) {
+    this.logout();
+
+    // 1. Resolve the incoming 'token' to a string for the initial sign-in
+    let resolvedToken: string;
+    if (token instanceof Promise) {
+      resolvedToken = await token;
+    } else if (typeof token === 'function') {
+      const possiblePromise = token();
+      resolvedToken = possiblePromise instanceof Promise ? await possiblePromise : possiblePromise;
+    } else {
+      resolvedToken = token;
+    }
+
+    // 2. Make the token-exchange request
+    const requestParameters = {
+      grantType: 'urn:ietf:params:oauth:grant-type:token-exchange',
+      tenantId: tenantId,
+      subjectToken: resolvedToken,
+      subjectTokenType: 'urn:ietf:params:oauth:token-type:access_token',
+    };
+    const response = await this.signinApi.oauth2TokenEndpoint(requestParameters);
+
+    // 3. Store the tokens — in this flow, we only want to store an access token (no refresh token).
+    this.tokenManager.setTokens(tenantId, response.accessToken, null);
+
+    // 4. If `token` is a function, set a refresh callback that re-invokes the function for a new token
+    if (typeof token === 'function') {
+      this.tokenManager.setRefreshCallback(async () => {
+        try {
+          // Re-invoke the function to get the latest participant auth key
+          const possiblePromise = token();
+          const nextToken =
+            possiblePromise instanceof Promise ? await possiblePromise : possiblePromise;
+
+          const refreshParams = {
+            grantType: 'urn:ietf:params:oauth:grant-type:token-exchange',
+            tenantId: tenantId,
+            subjectToken: nextToken,
+            subjectTokenType: 'urn:ietf:params:oauth:token-type:access_token',
+          };
+          const refreshResponse = await this.signinApi.oauth2TokenEndpoint(refreshParams);
+
+          // Store new tokens again (here, ignoring any refresh token returned)
+          this.tokenManager.setTokens(tenantId, refreshResponse.accessToken, null);
+          return true;
+        } catch (err) {
+          console.error(
+            '[ClientWireApiClient#signInWithTokenExchangeAccessToken] Refresh with token function failed:',
+            err
+          );
+          return false;
+        }
+      });
+    } else {
+      // If user just passed a string, we have no way to get a *new* token in the future,
+      // so we provide a "no-op" refresh callback that returns false.
+      this.tokenManager.setRefreshCallback(async () => false);
+    }
+
+    // 5. Setup WebSocket connection
+    this.setupWebsocket();
+
+    return response;
+  }
+
+  public async signInWithStoredCredentials() {
+    let currentTenantId = this.tokenManager.getTenantId();
+    let currentAccessToken = this.tokenManager.getAccessToken();
+    let currentRefreshToken = this.tokenManager.getRefreshToken();
+    this.logout();
+
+    if (currentAccessToken && currentTenantId) {
+      this.tokenManager.setTokens(currentTenantId, currentAccessToken, currentRefreshToken);
+      this.setupWebsocket();
+    } else {
+      return;
+    }
+
+    // Set up a refresh callback, IF we have a refresh token
+    if (currentRefreshToken) {
+      this.tokenManager.setRefreshCallback(async () => {
+        try {
+          const currentTenantId = this.tokenManager.getTenantId();
+          const currentRefreshToken = this.tokenManager.getRefreshToken();
+
+          if (!currentTenantId || !currentRefreshToken) {
+            console.error(
+              '[ClientWireApiClient#signInWithStoredCredentials] No tenantId or refreshToken found.'
+            );
+            return false;
+          }
+
+          const refreshRequestParameters = {
+            tenantId: currentTenantId,
+            grantType: 'refresh_token',
+            refreshToken: currentRefreshToken,
+          };
+          const refreshResponse =
+            await this.signinApi.oauth2TokenEndpoint(refreshRequestParameters);
+          this.tokenManager.setTokens(
+            currentTenantId,
+            refreshResponse.accessToken,
+            refreshResponse.refreshToken
+          );
+
+          return true;
+        } catch (e) {
+          console.error('[signInWithStoredCredentials] Refresh failed:', e);
+          return false;
+        }
+      });
+    } else {
+      // If response.refreshToken is empty, we *cannot* refresh.
+      // So set a fallback callback that indicates refresh is impossible.
+      this.tokenManager.setRefreshCallback(async () => false);
+    }
+  }
+
+  public static get hasCredentials(): boolean {
+    return TokenManager.hasAccessToken();
+  }
+  public get hasCredentials(): boolean {
+    return this.tokenManager.hasAccessToken();
+  }
+  //#endregion
+
+  //#region Websocket & Websocket Subscription Management
+  private subscribe(address: string): void {
+    if (this.websocketConnection) {
+      this.websocketConnection.subscribe(address);
+    } else {
+      throw new Error(`No websocket connection. Cannot subscribe to ${address}.`);
+    }
+  }
+
+  private unsubscribe(address: string): void {
+    if (this.websocketConnection) {
+      this.websocketConnection.unsubscribe(address);
+    }
+  }
+
+  public isConnected(): boolean {
+    if (this.websocketConnection) {
+      return this.websocketConnection.isConnected;
+    }
+    return false;
+  }
+
+  private setupWebsocket() {
+    this.websocketConnection = new WireWebsocketConnection(this, this._basePath, this.tokenManager);
+    this.websocketConnection.connect();
+  }
+  //#endregion
+
+  //#region EventTarget / Event Handling
   /**
    * We define a single "on" method for typed events.
    * If the event is "conversations:new" or "conversations:<id>", we auto-subscribe to WS.
    * Returns an "off()" function to unsubscribe.
    */
-  public on<K extends keyof WireClientEventMap>(
+  public on<K extends keyof ClientWireEventMap>(
     eventName: K,
-    callback: (payload: WireClientEventMap[K]) => void
+    callback: (payload: ClientWireEventMap[K]) => void
   ): () => void {
     // Wrap the callback for EventTarget
     const listener = (evt: Event) => {
-      const customEvt = evt as CustomEvent<WireClientEventMap[K]>;
+      const customEvt = evt as CustomEvent<ClientWireEventMap[K]>;
       callback(customEvt.detail);
     };
 
@@ -129,7 +444,7 @@ export class WireClient extends EventTarget {
         // 1) remove this newly added listener
         // 2) decrement the listener count back
         // 3) possibly dispatch "authentication:error" or "subscription:error"
-        console.error('Subscription to', eventName, 'failed:', err);
+        console.error('[ClientWireApiClient] Subscription to', eventName, 'failed:', err);
 
         this.removeEventListener(eventName, listener);
         this.listenerCounts.set(eventName, currentCount);
@@ -156,194 +471,9 @@ export class WireClient extends EventTarget {
     };
   }
 
-  /**
-   * Check if an event is a conversation-based WS event.
-   * - 'conversations:new'
-   * - 'conversations:<someId>'
-   */
-  private isWebsocketEvent(eventName: keyof WireClientEventMap | string): boolean {
+  private isWebsocketEvent(eventName: keyof ClientWireEventMap | string): boolean {
     if (typeof eventName !== 'string') return false;
     return eventName.startsWith('conversations:');
   }
-
-  /**
-   * Fetch tenant config by subdomain.
-   */
-  public async getTenantConfigForSubdomain(subdomain: string) {
-    return this.tenantConfigApi.getTenantConfig({ tenantSubdomain: subdomain });
-  }
-
-  /**
-   * Fetch tenant config by tenant ID.
-   */
-  public async getTenantConfigForTenantId(id: string) {
-    return this.tenantConfigApi.getTenantConfig({ tenantId: id });
-  }
-
-  /**
-   * Sign in with email+password.
-   * On success, store the access token in localStorage and re-initialize usersApi with that token.
-   */
-  public async signInWithEmailAndPassword(tenantId: string, email: string, password: string) {
-    this.logout();
-
-    const requestParameters = {
-      emailCredentialsRequest: {
-        tenantId: tenantId,
-        email,
-        password,
-      },
-    };
-
-    const response = await this.signinApi.ropcEmailLogin(requestParameters);
-    this.tokenManager.setAccessToken(response.accessToken);
-    if (response.refreshToken) {
-      this.tokenManager.setRefreshToken(response.refreshToken);
-    }
-
-    this.setupAfterLogin();
-
-    return response;
-  }
-
-  /**
-   * Sign in with participant client auth key
-   * On success, store the access token in localStorage and re-initialize usersApi with that token.
-   */
-  public async signInWithParticipantAuthKey(authKey: string) {
-    this.logout();
-
-    const requestParameters = {
-      participantAuthKeyRequest: {
-        participantAuthKey: authKey,
-      },
-    };
-
-    const response = await this.signinApi.ropcParticipantAuthKeyLogin(requestParameters);
-    this.tokenManager.setAccessToken(response.accessToken);
-    if (response.refreshToken) {
-      this.tokenManager.setRefreshToken(response.refreshToken);
-    }
-
-    this.setupAfterLogin();
-
-    return response;
-  }
-
-  public async signInWithStoredCredentials() {
-    let currentAccessToken = this.tokenManager.getAccessToken();
-    let currentRefreshToken = this.tokenManager.getRefreshToken();
-    this.logout();
-
-    this.tokenManager.setAccessToken(currentAccessToken);
-    this.tokenManager.setRefreshToken(currentRefreshToken);
-
-    this.setupAfterLogin();
-  }
-
-  public async signInWithPassthroughToken(tenantId: string, token: string) {
-    this.logout();
-
-    const requestParameters = {
-      passthroughRequestDto: {
-        tenantId: tenantId,
-        token: token,
-      },
-    };
-
-    const response = await this.signinApi.passthroughLogin(requestParameters);
-    this.tokenManager.setAccessToken(response.accessToken);
-    if (response.refreshToken) {
-      this.tokenManager.setRefreshToken(response.refreshToken);
-    }
-
-    this.setupAfterLogin();
-
-    return response;
-  }
-
-  /**
-   * Does not really sign in, just stores the token
-   * // TODO: make an actual call to verify the token
-   */
-  public async signInWithToken(accessToken: string, refreshToken?: string) {
-    this.logout();
-
-    this.tokenManager.setAccessToken(accessToken);
-    this.tokenManager.setRefreshToken(refreshToken);
-
-    this.setupAfterLogin();
-
-    return this;
-  }
-
-  // ----------------------------------------------------------------
-  // Subscription logic used by .on() method
-  // ----------------------------------------------------------------
-  private subscribe(address: string): void {
-    if (this.websocketConnection) {
-      this.websocketConnection.subscribe(address);
-    } else {
-      throw new Error(`No websocket connection. Cannot subscribe to ${address}.`);
-    }
-  }
-
-  private unsubscribe(address: string): void {
-    if (this.websocketConnection) {
-      this.websocketConnection.unsubscribe(address);
-    }
-  }
-
-  public isConnected(): boolean {
-    if (this.websocketConnection) {
-      return this.websocketConnection.isConnected;
-    }
-    return false;
-  }
-
-  private setupAfterLogin() {
-    this.setupWebsocket();
-  }
-
-  private setupWebsocket() {
-    this.websocketConnection = new WireWebsocketConnection(this, this._basePath, this.tokenManager);
-    this.websocketConnection.connect();
-  }
-
-  private handleTokensRefreshed() {
-    console.log('Tokens refreshed');
-
-    if (!this.isConnected()) {
-      this.websocketConnection?.connect();
-    }
-  }
-
-  private handleTokensCouldNotRefresh() {
-    console.log('Tokens could not be refreshed');
-    this.dispatchEvent(
-      new CustomEvent(AUTHENTICATION_ERROR_EVENT, {
-        detail: { reason: 'Could not refresh tokens' },
-      })
-    );
-  }
-
-  /**
-   * Check if there's a current access token in localStorage.
-   */
-  public static get hasCredentials(): boolean {
-    return TokenManager.hasAccessToken();
-  }
-  public get hasCredentials(): boolean {
-    return this.tokenManager.hasAccessToken();
-  }
-
-  public logout(): void {
-    this.websocketConnection?.disconnect();
-    this.websocketConnection = undefined;
-    this.tokenManager.logout();
-  }
-
-  public get basePath(): string {
-    return this._basePath;
-  }
+  //#endregion
 }

@@ -15,23 +15,14 @@
 
 import * as runtime from '../runtime';
 import type {
-  EmailCredentialsRequest,
-  OidcCallbackRequest,
-  ParticipantAuthKeyRequest,
-  PassthroughRequestDto,
+  AuthenticationOptions,
   ResetPasswordRequest,
   SetPasswordRequest,
   TokenResponseDto,
 } from '../models/index';
 import {
-    EmailCredentialsRequestFromJSON,
-    EmailCredentialsRequestToJSON,
-    OidcCallbackRequestFromJSON,
-    OidcCallbackRequestToJSON,
-    ParticipantAuthKeyRequestFromJSON,
-    ParticipantAuthKeyRequestToJSON,
-    PassthroughRequestDtoFromJSON,
-    PassthroughRequestDtoToJSON,
+    AuthenticationOptionsFromJSON,
+    AuthenticationOptionsToJSON,
     ResetPasswordRequestFromJSON,
     ResetPasswordRequestToJSON,
     SetPasswordRequestFromJSON,
@@ -40,37 +31,36 @@ import {
     TokenResponseDtoToJSON,
 } from '../models/index';
 
-export interface OidcCallbackOperationRequest {
-    providerName: string;
-    oidcCallbackRequest: OidcCallbackRequest;
-}
-
-export interface PassthroughLoginRequest {
-    passthroughRequestDto: PassthroughRequestDto;
-}
-
-export interface RefreshOidcTokenRequest {
+export interface Oauth2TokenEndpointRequest {
+    tenantId: string | null;
     grantType?: string | null;
-    refreshToken?: string | null;
     clientId?: string | null;
     clientSecret?: string | null;
     scope?: string | null;
+    username?: string | null;
+    password?: string | null;
+    subjectToken?: string | null;
+    subjectTokenType?: string | null;
+    code?: string | null;
+    redirectUri?: string | null;
+    codeVerifier?: string | null;
+    providerName?: string | null;
+    refreshToken?: string | null;
 }
 
 export interface ResetPasswordOperationRequest {
+    tenantId: string;
     resetPasswordRequest: ResetPasswordRequest;
 }
 
-export interface RopcEmailLoginRequest {
-    emailCredentialsRequest: EmailCredentialsRequest;
-}
-
-export interface RopcParticipantAuthKeyLoginRequest {
-    participantAuthKeyRequest: ParticipantAuthKeyRequest;
-}
-
 export interface SetPasswordOperationRequest {
+    tenantId: string;
     setPasswordRequest: SetPasswordRequest;
+}
+
+export interface SigninOptionsRequest {
+    tenantId: string;
+    email: string;
 }
 
 /**
@@ -81,61 +71,38 @@ export interface SetPasswordOperationRequest {
  */
 export interface SigninApiInterface {
     /**
-     * Exchanges the authorization code for tokens.
-     * @summary Handle the OIDC callback from Microsoft (Authorization Code).
-     * @param {string} providerName 
-     * @param {OidcCallbackRequest} oidcCallbackRequest 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof SigninApiInterface
-     */
-    oidcCallbackRaw(requestParameters: OidcCallbackOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TokenResponseDto>>;
-
-    /**
-     * Exchanges the authorization code for tokens.
-     * Handle the OIDC callback from Microsoft (Authorization Code).
-     */
-    oidcCallback(requestParameters: OidcCallbackOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TokenResponseDto>;
-
-    /**
-     * Exchanges an external Bearer token for our token if valid.
-     * @summary Handle passthrough login with Bearer token from upstream.
-     * @param {PassthroughRequestDto} passthroughRequestDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof SigninApiInterface
-     */
-    passthroughLoginRaw(requestParameters: PassthroughLoginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TokenResponseDto>>;
-
-    /**
-     * Exchanges an external Bearer token for our token if valid.
-     * Handle passthrough login with Bearer token from upstream.
-     */
-    passthroughLogin(requestParameters: PassthroughLoginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TokenResponseDto>;
-
-    /**
-     * Refresh tokens and issue a new access token.
-     * @summary Exchange your existing refresh token for a new access token.
+     *              OAuth2-style token endpoint.              Supports multiple grant_type values:              - authorization_code  (PKCE optional) // NOT YET IMPLEMENTED              - password            (ROPC)              - refresh_token              - urn:ietf:params:oauth:grant-type:token-exchange (Token Exchange)                           For the Token Exchange grant_type, the subject_token_type can be:              - urn:clientwire:token-type:client-participant-auth-key              - urn:ietf:params:oauth:token-type:access_token                           urn:clientwire:token-type:client-participant-auth-key is a special token type for exchanging a client\'s participant auth key for an access token.             urn:ietf:params:oauth:token-type:access_token is for our token-exchange service to exchange your access token with a Clientwire access token by verifying it at your provided userinfo endpoint.                      
+     * @summary OAuth2 Token Endpoint
+     * @param {string} tenantId 
      * @param {string} [grantType] 
-     * @param {string} [refreshToken] 
      * @param {string} [clientId] 
      * @param {string} [clientSecret] 
      * @param {string} [scope] 
+     * @param {string} [username] 
+     * @param {string} [password] 
+     * @param {string} [subjectToken] 
+     * @param {string} [subjectTokenType] 
+     * @param {string} [code] 
+     * @param {string} [redirectUri] 
+     * @param {string} [codeVerifier] 
+     * @param {string} [providerName] 
+     * @param {string} [refreshToken] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof SigninApiInterface
      */
-    refreshOidcTokenRaw(requestParameters: RefreshOidcTokenRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TokenResponseDto>>;
+    oauth2TokenEndpointRaw(requestParameters: Oauth2TokenEndpointRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TokenResponseDto>>;
 
     /**
-     * Refresh tokens and issue a new access token.
-     * Exchange your existing refresh token for a new access token.
+     *              OAuth2-style token endpoint.              Supports multiple grant_type values:              - authorization_code  (PKCE optional) // NOT YET IMPLEMENTED              - password            (ROPC)              - refresh_token              - urn:ietf:params:oauth:grant-type:token-exchange (Token Exchange)                           For the Token Exchange grant_type, the subject_token_type can be:              - urn:clientwire:token-type:client-participant-auth-key              - urn:ietf:params:oauth:token-type:access_token                           urn:clientwire:token-type:client-participant-auth-key is a special token type for exchanging a client\'s participant auth key for an access token.             urn:ietf:params:oauth:token-type:access_token is for our token-exchange service to exchange your access token with a Clientwire access token by verifying it at your provided userinfo endpoint.                      
+     * OAuth2 Token Endpoint
      */
-    refreshOidcToken(requestParameters: RefreshOidcTokenRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TokenResponseDto>;
+    oauth2TokenEndpoint(requestParameters: Oauth2TokenEndpointRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TokenResponseDto>;
 
     /**
      * Request a password reset for the specified user.
      * @summary Request a password reset.
+     * @param {string} tenantId 
      * @param {ResetPasswordRequest} resetPasswordRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -150,40 +117,9 @@ export interface SigninApiInterface {
     resetPassword(requestParameters: ResetPasswordOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
 
     /**
-     * Authenticates a user by email and password, then issues tokens.
-     * @summary Login via email credentials (ROPC).
-     * @param {EmailCredentialsRequest} emailCredentialsRequest 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof SigninApiInterface
-     */
-    ropcEmailLoginRaw(requestParameters: RopcEmailLoginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TokenResponseDto>>;
-
-    /**
-     * Authenticates a user by email and password, then issues tokens.
-     * Login via email credentials (ROPC).
-     */
-    ropcEmailLogin(requestParameters: RopcEmailLoginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TokenResponseDto>;
-
-    /**
-     * Authenticates a conversation participant by auth key, then issues tokens.
-     * @summary Login for participant via auth key (ROPC).
-     * @param {ParticipantAuthKeyRequest} participantAuthKeyRequest 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof SigninApiInterface
-     */
-    ropcParticipantAuthKeyLoginRaw(requestParameters: RopcParticipantAuthKeyLoginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TokenResponseDto>>;
-
-    /**
-     * Authenticates a conversation participant by auth key, then issues tokens.
-     * Login for participant via auth key (ROPC).
-     */
-    ropcParticipantAuthKeyLogin(requestParameters: RopcParticipantAuthKeyLoginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TokenResponseDto>;
-
-    /**
      * Provide the token and new password to complete the reset.
      * @summary Set password after reset.
+     * @param {string} tenantId 
      * @param {SetPasswordRequest} setPasswordRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -197,6 +133,23 @@ export interface SigninApiInterface {
      */
     setPassword(requestParameters: SetPasswordOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
 
+    /**
+     * Based on the tenant_id and the email, we lookup what options for signin are available.
+     * @summary Returns a list of signin options of the user.
+     * @param {string} tenantId 
+     * @param {string} email 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SigninApiInterface
+     */
+    signinOptionsRaw(requestParameters: SigninOptionsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<AuthenticationOptions>>;
+
+    /**
+     * Based on the tenant_id and the email, we lookup what options for signin are available.
+     * Returns a list of signin options of the user.
+     */
+    signinOptions(requestParameters: SigninOptionsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<AuthenticationOptions>;
+
 }
 
 /**
@@ -205,93 +158,17 @@ export interface SigninApiInterface {
 export class SigninApi extends runtime.BaseAPI implements SigninApiInterface {
 
     /**
-     * Exchanges the authorization code for tokens.
-     * Handle the OIDC callback from Microsoft (Authorization Code).
+     *              OAuth2-style token endpoint.              Supports multiple grant_type values:              - authorization_code  (PKCE optional) // NOT YET IMPLEMENTED              - password            (ROPC)              - refresh_token              - urn:ietf:params:oauth:grant-type:token-exchange (Token Exchange)                           For the Token Exchange grant_type, the subject_token_type can be:              - urn:clientwire:token-type:client-participant-auth-key              - urn:ietf:params:oauth:token-type:access_token                           urn:clientwire:token-type:client-participant-auth-key is a special token type for exchanging a client\'s participant auth key for an access token.             urn:ietf:params:oauth:token-type:access_token is for our token-exchange service to exchange your access token with a Clientwire access token by verifying it at your provided userinfo endpoint.                      
+     * OAuth2 Token Endpoint
      */
-    async oidcCallbackRaw(requestParameters: OidcCallbackOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TokenResponseDto>> {
-        if (requestParameters['providerName'] == null) {
+    async oauth2TokenEndpointRaw(requestParameters: Oauth2TokenEndpointRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TokenResponseDto>> {
+        if (requestParameters['tenantId'] == null) {
             throw new runtime.RequiredError(
-                'providerName',
-                'Required parameter "providerName" was null or undefined when calling oidcCallback().'
+                'tenantId',
+                'Required parameter "tenantId" was null or undefined when calling oauth2TokenEndpoint().'
             );
         }
 
-        if (requestParameters['oidcCallbackRequest'] == null) {
-            throw new runtime.RequiredError(
-                'oidcCallbackRequest',
-                'Required parameter "oidcCallbackRequest" was null or undefined when calling oidcCallback().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'application/json';
-
-        const response = await this.request({
-            path: `/api/v1/signin/providers/{provider_name}/callback`.replace(`{${"provider_name"}}`, encodeURIComponent(String(requestParameters['providerName']))),
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-            body: OidcCallbackRequestToJSON(requestParameters['oidcCallbackRequest']),
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => TokenResponseDtoFromJSON(jsonValue));
-    }
-
-    /**
-     * Exchanges the authorization code for tokens.
-     * Handle the OIDC callback from Microsoft (Authorization Code).
-     */
-    async oidcCallback(requestParameters: OidcCallbackOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TokenResponseDto> {
-        const response = await this.oidcCallbackRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * Exchanges an external Bearer token for our token if valid.
-     * Handle passthrough login with Bearer token from upstream.
-     */
-    async passthroughLoginRaw(requestParameters: PassthroughLoginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TokenResponseDto>> {
-        if (requestParameters['passthroughRequestDto'] == null) {
-            throw new runtime.RequiredError(
-                'passthroughRequestDto',
-                'Required parameter "passthroughRequestDto" was null or undefined when calling passthroughLogin().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'application/json';
-
-        const response = await this.request({
-            path: `/api/v1/signin/passthrough`,
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-            body: PassthroughRequestDtoToJSON(requestParameters['passthroughRequestDto']),
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => TokenResponseDtoFromJSON(jsonValue));
-    }
-
-    /**
-     * Exchanges an external Bearer token for our token if valid.
-     * Handle passthrough login with Bearer token from upstream.
-     */
-    async passthroughLogin(requestParameters: PassthroughLoginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TokenResponseDto> {
-        const response = await this.passthroughLoginRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * Refresh tokens and issue a new access token.
-     * Exchange your existing refresh token for a new access token.
-     */
-    async refreshOidcTokenRaw(requestParameters: RefreshOidcTokenRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TokenResponseDto>> {
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -314,10 +191,6 @@ export class SigninApi extends runtime.BaseAPI implements SigninApiInterface {
             formParams.append('grant_type', requestParameters['grantType'] as any);
         }
 
-        if (requestParameters['refreshToken'] != null) {
-            formParams.append('refresh_token', requestParameters['refreshToken'] as any);
-        }
-
         if (requestParameters['clientId'] != null) {
             formParams.append('client_id', requestParameters['clientId'] as any);
         }
@@ -330,8 +203,44 @@ export class SigninApi extends runtime.BaseAPI implements SigninApiInterface {
             formParams.append('scope', requestParameters['scope'] as any);
         }
 
+        if (requestParameters['username'] != null) {
+            formParams.append('username', requestParameters['username'] as any);
+        }
+
+        if (requestParameters['password'] != null) {
+            formParams.append('password', requestParameters['password'] as any);
+        }
+
+        if (requestParameters['subjectToken'] != null) {
+            formParams.append('subject_token', requestParameters['subjectToken'] as any);
+        }
+
+        if (requestParameters['subjectTokenType'] != null) {
+            formParams.append('subject_token_type', requestParameters['subjectTokenType'] as any);
+        }
+
+        if (requestParameters['code'] != null) {
+            formParams.append('code', requestParameters['code'] as any);
+        }
+
+        if (requestParameters['redirectUri'] != null) {
+            formParams.append('redirect_uri', requestParameters['redirectUri'] as any);
+        }
+
+        if (requestParameters['codeVerifier'] != null) {
+            formParams.append('code_verifier', requestParameters['codeVerifier'] as any);
+        }
+
+        if (requestParameters['providerName'] != null) {
+            formParams.append('provider_name', requestParameters['providerName'] as any);
+        }
+
+        if (requestParameters['refreshToken'] != null) {
+            formParams.append('refresh_token', requestParameters['refreshToken'] as any);
+        }
+
         const response = await this.request({
-            path: `/api/v1/signin/refresh`,
+            path: `/api/v1/auth/{tenant_id}/oauth2/token`.replace(`{${"tenant_id"}}`, encodeURIComponent(String(requestParameters['tenantId']))),
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
@@ -342,11 +251,11 @@ export class SigninApi extends runtime.BaseAPI implements SigninApiInterface {
     }
 
     /**
-     * Refresh tokens and issue a new access token.
-     * Exchange your existing refresh token for a new access token.
+     *              OAuth2-style token endpoint.              Supports multiple grant_type values:              - authorization_code  (PKCE optional) // NOT YET IMPLEMENTED              - password            (ROPC)              - refresh_token              - urn:ietf:params:oauth:grant-type:token-exchange (Token Exchange)                           For the Token Exchange grant_type, the subject_token_type can be:              - urn:clientwire:token-type:client-participant-auth-key              - urn:ietf:params:oauth:token-type:access_token                           urn:clientwire:token-type:client-participant-auth-key is a special token type for exchanging a client\'s participant auth key for an access token.             urn:ietf:params:oauth:token-type:access_token is for our token-exchange service to exchange your access token with a Clientwire access token by verifying it at your provided userinfo endpoint.                      
+     * OAuth2 Token Endpoint
      */
-    async refreshOidcToken(requestParameters: RefreshOidcTokenRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TokenResponseDto> {
-        const response = await this.refreshOidcTokenRaw(requestParameters, initOverrides);
+    async oauth2TokenEndpoint(requestParameters: Oauth2TokenEndpointRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TokenResponseDto> {
+        const response = await this.oauth2TokenEndpointRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -355,6 +264,13 @@ export class SigninApi extends runtime.BaseAPI implements SigninApiInterface {
      * Request a password reset.
      */
     async resetPasswordRaw(requestParameters: ResetPasswordOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['tenantId'] == null) {
+            throw new runtime.RequiredError(
+                'tenantId',
+                'Required parameter "tenantId" was null or undefined when calling resetPassword().'
+            );
+        }
+
         if (requestParameters['resetPasswordRequest'] == null) {
             throw new runtime.RequiredError(
                 'resetPasswordRequest',
@@ -369,7 +285,7 @@ export class SigninApi extends runtime.BaseAPI implements SigninApiInterface {
         headerParameters['Content-Type'] = 'application/json';
 
         const response = await this.request({
-            path: `/api/v1/password_reset`,
+            path: `/api/v1/auth/{tenant_id}/password-reset`.replace(`{${"tenant_id"}}`, encodeURIComponent(String(requestParameters['tenantId']))),
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
@@ -388,86 +304,17 @@ export class SigninApi extends runtime.BaseAPI implements SigninApiInterface {
     }
 
     /**
-     * Authenticates a user by email and password, then issues tokens.
-     * Login via email credentials (ROPC).
-     */
-    async ropcEmailLoginRaw(requestParameters: RopcEmailLoginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TokenResponseDto>> {
-        if (requestParameters['emailCredentialsRequest'] == null) {
-            throw new runtime.RequiredError(
-                'emailCredentialsRequest',
-                'Required parameter "emailCredentialsRequest" was null or undefined when calling ropcEmailLogin().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'application/json';
-
-        const response = await this.request({
-            path: `/api/v1/signin/email`,
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-            body: EmailCredentialsRequestToJSON(requestParameters['emailCredentialsRequest']),
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => TokenResponseDtoFromJSON(jsonValue));
-    }
-
-    /**
-     * Authenticates a user by email and password, then issues tokens.
-     * Login via email credentials (ROPC).
-     */
-    async ropcEmailLogin(requestParameters: RopcEmailLoginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TokenResponseDto> {
-        const response = await this.ropcEmailLoginRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * Authenticates a conversation participant by auth key, then issues tokens.
-     * Login for participant via auth key (ROPC).
-     */
-    async ropcParticipantAuthKeyLoginRaw(requestParameters: RopcParticipantAuthKeyLoginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TokenResponseDto>> {
-        if (requestParameters['participantAuthKeyRequest'] == null) {
-            throw new runtime.RequiredError(
-                'participantAuthKeyRequest',
-                'Required parameter "participantAuthKeyRequest" was null or undefined when calling ropcParticipantAuthKeyLogin().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'application/json';
-
-        const response = await this.request({
-            path: `/api/v1/signin/participant_auth_key`,
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-            body: ParticipantAuthKeyRequestToJSON(requestParameters['participantAuthKeyRequest']),
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => TokenResponseDtoFromJSON(jsonValue));
-    }
-
-    /**
-     * Authenticates a conversation participant by auth key, then issues tokens.
-     * Login for participant via auth key (ROPC).
-     */
-    async ropcParticipantAuthKeyLogin(requestParameters: RopcParticipantAuthKeyLoginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TokenResponseDto> {
-        const response = await this.ropcParticipantAuthKeyLoginRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
-
-    /**
      * Provide the token and new password to complete the reset.
      * Set password after reset.
      */
     async setPasswordRaw(requestParameters: SetPasswordOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['tenantId'] == null) {
+            throw new runtime.RequiredError(
+                'tenantId',
+                'Required parameter "tenantId" was null or undefined when calling setPassword().'
+            );
+        }
+
         if (requestParameters['setPasswordRequest'] == null) {
             throw new runtime.RequiredError(
                 'setPasswordRequest',
@@ -482,7 +329,7 @@ export class SigninApi extends runtime.BaseAPI implements SigninApiInterface {
         headerParameters['Content-Type'] = 'application/json';
 
         const response = await this.request({
-            path: `/api/v1/password_reset/set`,
+            path: `/api/v1/auth/{tenant_id}/password-reset/set`.replace(`{${"tenant_id"}}`, encodeURIComponent(String(requestParameters['tenantId']))),
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
@@ -498,6 +345,52 @@ export class SigninApi extends runtime.BaseAPI implements SigninApiInterface {
      */
     async setPassword(requestParameters: SetPasswordOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
         await this.setPasswordRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Based on the tenant_id and the email, we lookup what options for signin are available.
+     * Returns a list of signin options of the user.
+     */
+    async signinOptionsRaw(requestParameters: SigninOptionsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<AuthenticationOptions>> {
+        if (requestParameters['tenantId'] == null) {
+            throw new runtime.RequiredError(
+                'tenantId',
+                'Required parameter "tenantId" was null or undefined when calling signinOptions().'
+            );
+        }
+
+        if (requestParameters['email'] == null) {
+            throw new runtime.RequiredError(
+                'email',
+                'Required parameter "email" was null or undefined when calling signinOptions().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['email'] != null) {
+            queryParameters['email'] = requestParameters['email'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/api/v1/auth/{tenant_id}/options`.replace(`{${"tenant_id"}}`, encodeURIComponent(String(requestParameters['tenantId']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => AuthenticationOptionsFromJSON(jsonValue));
+    }
+
+    /**
+     * Based on the tenant_id and the email, we lookup what options for signin are available.
+     * Returns a list of signin options of the user.
+     */
+    async signinOptions(requestParameters: SigninOptionsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<AuthenticationOptions> {
+        const response = await this.signinOptionsRaw(requestParameters, initOverrides);
+        return await response.value();
     }
 
 }

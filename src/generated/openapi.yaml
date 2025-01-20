@@ -43,8 +43,9 @@ tags:
   description: Operations for managing per-tenant Twilio SMS settings.
 - name: Geocoding
   description: Operations to geocode locations.
+- name: Authentication
 paths:
-  /api/v1/api_keys:
+  /api/v1/api-keys:
     get:
       summary: List the API keys for this tenant.
       operationId: listApiKeys
@@ -99,7 +100,7 @@ paths:
       - BearerAuth:
         - API_KEY
         - OWNER
-  /api/v1/api_keys/{key_id}:
+  /api/v1/api-keys/{key_id}:
     delete:
       summary: Delete an API key by key_id.
       operationId: deleteApiKey
@@ -130,7 +131,186 @@ paths:
       - BearerAuth:
         - API_KEY
         - OWNER
-  /api/v1/client_participant/me:
+  /api/v1/auth/{tenant_id}/oauth2/token:
+    post:
+      summary: OAuth2 Token Endpoint
+      description: "\n            OAuth2-style token endpoint. \n            Supports\
+        \ multiple grant_type values:\n             - authorization_code  (PKCE optional)\
+        \ // NOT YET IMPLEMENTED\n             - password            (ROPC)\n    \
+        \         - refresh_token\n             - urn:ietf:params:oauth:grant-type:token-exchange\
+        \ (Token Exchange)\n             \n            For the Token Exchange grant_type,\
+        \ the subject_token_type can be:\n             - urn:clientwire:token-type:client-participant-auth-key\n\
+        \             - urn:ietf:params:oauth:token-type:access_token\n          \
+        \   \n            urn:clientwire:token-type:client-participant-auth-key is\
+        \ a special token type for exchanging a client's participant auth key for\
+        \ an access token.\n            urn:ietf:params:oauth:token-type:access_token\
+        \ is for our token-exchange service to exchange your access token with a Clientwire\
+        \ access token by verifying it at your provided userinfo endpoint.\n     \
+        \       \n        "
+      operationId: oauth2TokenEndpoint
+      tags:
+      - Signin
+      parameters:
+      - name: tenant_id
+        in: path
+        required: true
+        schema:
+          type: string
+          nullable: true
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                grant_type:
+                  type: string
+                  nullable: true
+                client_id:
+                  type: string
+                  nullable: true
+                client_secret:
+                  type: string
+                  nullable: true
+                scope:
+                  type: string
+                  nullable: true
+                username:
+                  type: string
+                  nullable: true
+                password:
+                  type: string
+                  nullable: true
+                subject_token:
+                  type: string
+                  nullable: true
+                subject_token_type:
+                  type: string
+                  nullable: true
+                code:
+                  type: string
+                  nullable: true
+                redirect_uri:
+                  type: string
+                  nullable: true
+                code_verifier:
+                  type: string
+                  nullable: true
+                provider_name:
+                  type: string
+                  nullable: true
+                refresh_token:
+                  type: string
+                  nullable: true
+        required: true
+      responses:
+        "200":
+          description: Successful token issuance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponseDto"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+  /api/v1/auth/{tenant_id}/options:
+    get:
+      summary: Returns a list of signin options of the user.
+      description: "Based on the tenant_id and the email, we lookup what options for\
+        \ signin are available."
+      operationId: signinOptions
+      tags:
+      - Signin
+      parameters:
+      - name: tenant_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: email
+        in: query
+        schema:
+          type: string
+        required: true
+      responses:
+        "200":
+          description: Returns signin options.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthenticationOptions"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+  /api/v1/auth/{tenant_id}/password-reset:
+    post:
+      summary: Request a password reset.
+      description: Request a password reset for the specified user.
+      operationId: resetPassword
+      tags:
+      - Signin
+      parameters:
+      - name: tenant_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResetPasswordRequest"
+        required: true
+      responses:
+        "204":
+          description: The password reset has been initiated or user not found.
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "415":
+          description: Unsupported Content Type.
+  /api/v1/auth/{tenant_id}/password-reset/set:
+    post:
+      summary: Set password after reset.
+      description: Provide the token and new password to complete the reset.
+      operationId: setPassword
+      tags:
+      - Signin
+      parameters:
+      - name: tenant_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetPasswordRequest"
+        required: true
+      responses:
+        "204":
+          description: The password has been updated.
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "415":
+          description: Unsupported Content Type.
+  /api/v1/client-participant/me:
     get:
       summary: Get information about the client participant and its conversation.
       description: Retrieves the participant details for the calling CLIENT_PARTICIPANT
@@ -157,7 +337,7 @@ paths:
       security:
       - BearerAuth:
         - CLIENT_PARTICIPANT
-  /api/v1/conversation_types:
+  /api/v1/conversation-types:
     get:
       summary: List all conversation types for the specified tenant.
       description: Returns all conversation types for the tenant.
@@ -221,7 +401,7 @@ paths:
       - BearerAuth:
         - OWNER
         - API_KEY
-  /api/v1/conversation_types/{conversation_type_id}:
+  /api/v1/conversation-types/{conversation_type_id}:
     patch:
       summary: Update partial fields of an existing conversation type.
       description: Allows patching only specific fields of a conversation type.
@@ -1007,7 +1187,7 @@ paths:
         - USER
         - OWNER
         - API_KEY
-  /api/v1/conversations/{conversation_id}/participants/new_message_count:
+  /api/v1/conversations/{conversation_id}/participants/new-message-count:
     get:
       summary: Get new message count for a participant.
       description: Returns the unread message count for the participant across all
@@ -1429,7 +1609,7 @@ paths:
         - USER
         - OWNER
         - API_KEY
-  /api/v1/oidc_configs:
+  /api/v1/oidc-configs:
     get:
       summary: List all OIDC provider configs for the specified tenant.
       description: Retrieves all OIDC configs for the given tenant.
@@ -1492,7 +1672,7 @@ paths:
       - BearerAuth:
         - API_KEY
         - OWNER
-  /api/v1/oidc_configs/{provider_name}:
+  /api/v1/oidc-configs/{provider_name}:
     patch:
       summary: Update partial fields of an existing OIDC provider config.
       description: "Allows updating only certain fields like client_id, authority_url,\
@@ -1609,214 +1789,6 @@ paths:
       - BearerAuth:
         - API_KEY
         - OWNER
-  /api/v1/password_reset:
-    post:
-      summary: Request a password reset.
-      description: Request a password reset for the specified user.
-      operationId: resetPassword
-      tags:
-      - Signin
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ResetPasswordRequest"
-        required: true
-      responses:
-        "204":
-          description: The password reset has been initiated or user not found.
-        "400":
-          description: Bad request. Usually means that the input data was invalid
-            or misformed.
-        "415":
-          description: Unsupported Content Type.
-  /api/v1/password_reset/set:
-    post:
-      summary: Set password after reset.
-      description: Provide the token and new password to complete the reset.
-      operationId: setPassword
-      tags:
-      - Signin
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SetPasswordRequest"
-        required: true
-      responses:
-        "204":
-          description: The password has been updated.
-        "400":
-          description: Bad request. Usually means that the input data was invalid
-            or misformed.
-        "401":
-          description: Missing or invalid credentials.
-        "415":
-          description: Unsupported Content Type.
-  /api/v1/signin/email:
-    post:
-      summary: Login via email credentials (ROPC).
-      description: "Authenticates a user by email and password, then issues tokens."
-      operationId: ropcEmailLogin
-      tags:
-      - Signin
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/EmailCredentialsRequest"
-        required: true
-      responses:
-        "200":
-          description: Returns user tokens upon successful login.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TokenResponseDto"
-        "400":
-          description: Bad request. Usually means that the input data was invalid
-            or misformed.
-        "401":
-          description: Missing or invalid credentials.
-        "403":
-          description: Forbidden.
-        "415":
-          description: Unsupported Content Type.
-  /api/v1/signin/participant_auth_key:
-    post:
-      summary: Login for participant via auth key (ROPC).
-      description: "Authenticates a conversation participant by auth key, then issues\
-        \ tokens."
-      operationId: ropcParticipantAuthKeyLogin
-      tags:
-      - Signin
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ParticipantAuthKeyRequest"
-        required: true
-      responses:
-        "200":
-          description: Participant login success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TokenResponseDto"
-        "400":
-          description: Bad request. Usually means that the input data was invalid
-            or misformed.
-        "401":
-          description: Missing or invalid credentials.
-        "403":
-          description: Forbidden.
-        "415":
-          description: Unsupported Content Type.
-  /api/v1/signin/passthrough:
-    post:
-      summary: Handle passthrough login with Bearer token from upstream.
-      description: Exchanges an external Bearer token for our token if valid.
-      operationId: passthroughLogin
-      tags:
-      - Signin
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/PassthroughRequestDto"
-        required: true
-      responses:
-        "200":
-          description: Passthrough login success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TokenResponseDto"
-        "400":
-          description: Bad request. Usually means that the input data was invalid
-            or misformed.
-        "401":
-          description: Missing or invalid credentials.
-        "403":
-          description: Forbidden.
-        "415":
-          description: Unsupported Content Type.
-  /api/v1/signin/providers/{provider_name}/callback:
-    post:
-      summary: Handle the OIDC callback from Microsoft (Authorization Code).
-      description: Exchanges the authorization code for tokens.
-      operationId: oidcCallback
-      tags:
-      - Signin
-      parameters:
-      - name: provider_name
-        in: path
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/OidcCallbackRequest"
-        required: true
-      responses:
-        "200":
-          description: Token exchange success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TokenResponseDto"
-        "400":
-          description: Bad request. Usually means that the input data was invalid
-            or misformed.
-        "415":
-          description: Unsupported Content Type.
-  /api/v1/signin/refresh:
-    post:
-      summary: Exchange your existing refresh token for a new access token.
-      description: Refresh tokens and issue a new access token.
-      operationId: refreshOidcToken
-      tags:
-      - Signin
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              type: object
-              properties:
-                grant_type:
-                  type: string
-                  nullable: true
-                refresh_token:
-                  type: string
-                  nullable: true
-                client_id:
-                  type: string
-                  nullable: true
-                client_secret:
-                  type: string
-                  nullable: true
-                scope:
-                  type: string
-                  nullable: true
-        required: true
-      responses:
-        "200":
-          description: Token refresh success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TokenResponseDto"
-        "400":
-          description: Bad request. Usually means that the input data was invalid
-            or misformed.
-        "401":
-          description: Missing or invalid credentials.
-        "403":
-          description: Forbidden.
-        "415":
-          description: Unsupported Content Type.
   /api/v1/signup:
     post:
       summary: Create a new account and user.
@@ -1988,7 +1960,7 @@ paths:
           application/json:
             schema:
               description: "The patch body for updating tenant fields. Allowed fields\
-                \ are: name, subdomain, passthrough_user_info_url."
+                \ are: name, subdomain, token_exchange_userinfo_url and user_auto_provisioning_domains."
               type: object
               additionalProperties: {}
               example:
@@ -2313,6 +2285,26 @@ components:
           - enum:
             - null
           nullable: true
+    AuthenticationOptions:
+      required:
+      - oidc_providers
+      type: object
+      properties:
+        email:
+          format: boolean
+          description: If email login is available.
+          type: boolean
+          example: true
+        webauthn:
+          format: boolean
+          description: If WebAuthN/PassKey login is available.
+          type: boolean
+          example: false
+        oidc_providers:
+          description: Which OIDC providers are available for login.
+          type: array
+          items:
+            $ref: "#/components/schemas/LoginOptionsOidcProvider"
     Conversation:
       required:
       - id
@@ -2332,7 +2324,7 @@ components:
           type: string
           allOf:
           - $ref: "#/components/schemas/UUID"
-          example: ace00000-ace0000-ace00-ace00-ace000000
+          example: ace00000-ace0-ace0-ace0-ace000000000
         archived:
           description: Indicates whether the conversation is archived.
           type: boolean
@@ -2540,7 +2532,7 @@ components:
           type: string
           allOf:
           - $ref: "#/components/schemas/UUID"
-          example: ace00000-ace0000-ace00-ace00-ace000000
+          example: ace00000-ace0-ace0-ace0-ace000000000
         created_at:
           description: Timestamp when the conversation type was created.
           type: string
@@ -2587,7 +2579,7 @@ components:
             $ref: "#/components/schemas/ConversationType"
           example:
           - id: breakdowncase
-            tenant_id: ace00000-ace0000-ace00-ace00-ace000000
+            tenant_id: ace00000-ace0-ace0-ace0-ace000000000
             created_at: 2022-11-03T20:26:10.344522Z
             updated_at: 2022-11-03T20:26:10.344522Z
             description: A conversation type for handling breakdown cases.
@@ -2776,25 +2768,6 @@ components:
           - enum:
             - null
           nullable: true
-    EmailCredentialsRequest:
-      required:
-      - tenant_id
-      - email
-      - password
-      type: object
-      properties:
-        tenant_id:
-          description: The tenant ID.
-          type: string
-          example: ace00000-ace0000-ace00-ace00-ace000000
-        email:
-          description: The email of the user.
-          type: string
-          example: owner@autoclubmars.com
-        password:
-          description: The password of the user.
-          type: string
-          example: secret
     ErrorResponse:
       required:
       - code
@@ -2886,6 +2859,25 @@ components:
           - enum:
             - null
           nullable: true
+    LoginOptionsOidcProvider:
+      required:
+      - provider_name
+      - authority_url
+      - client_id
+      type: object
+      properties:
+        provider_name:
+          description: "The provider name, e.g. 'microsoft' or 'google'"
+          type: string
+          example: microsoft
+        authority_url:
+          description: "Authority/issuer URL, e.g. 'https://login.microsoftonline.com/<tenant>/v2.0'"
+          type: string
+          example: https://login.microsoftonline.com/1234-abcd/v2.0
+        client_id:
+          description: Client ID for this OIDC application
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
     Message:
       required:
       - id
@@ -2906,7 +2898,7 @@ components:
           format: uuid
           description: Unique identifier for the tenant.
           type: string
-          example: ace00000-ace0000-ace00-ace00-ace000000
+          example: ace00000-ace0-ace0-ace0-ace000000000
         created_at:
           description: Timestamp when the conversation was created.
           type: string
@@ -3104,25 +3096,6 @@ components:
           description: The number of new messages.
           type: integer
           example: 5
-    OidcCallbackRequest:
-      required:
-      - tenant_id
-      - code
-      - code_verifier
-      type: object
-      properties:
-        tenant_id:
-          description: The tenant ID.
-          type: string
-          example: ace00000-ace0000-ace00-ace00-ace000000
-        code:
-          description: The authorization code received from Microsoft after user login.
-          type: string
-          example: AAQABAAIAAAA7k_T...9bG8_nDHgsk
-        code_verifier:
-          description: The PKCE code verifier if you're using PKCE flow.
-          type: string
-          example: c3AqdGhpcyBpcyBhIHRlc3Qgd2l0aCBzaW1wbGUgdGV4dA==
     OidcConfig:
       description: Represents a Tenant OIDC configuration object as returned by the
         API
@@ -3178,7 +3151,7 @@ components:
           format: uuid
           description: Unique identifier for the tenant.
           type: string
-          example: ace00000-ace0000-ace00-ace00-ace000000
+          example: ace00000-ace0-ace0-ace0-ace000000000
         conversation_id:
           description: Unique identifier for a conversation.
           maxLength: 50
@@ -3260,40 +3233,6 @@ components:
           description: ""
           type: integer
           example: 5
-    ParticipantAuthKeyRequest:
-      description: The auth key of the conversation participant.
-      required:
-      - participant_auth_key
-      type: object
-      properties:
-        participant_auth_key:
-          description: The auth key of the conversation participant.
-          minLength: 1
-          type: string
-          example: A8ks9_Rs2ks
-    ParticipantAuthKeyResponse:
-      description: Return a JWT token for the conversation participant and also to
-        which tenant and conversation the participant belongs to.
-      required:
-      - token
-      - tenant_id
-      - conversation_id
-      - conversation_participant_id
-      - tenant_config
-      - oidc_tokens
-      type: object
-      properties:
-        oidc_tokens:
-          description: The OIDC tokens.
-          type: object
-          allOf:
-          - $ref: "#/components/schemas/TokenResponseDto"
-        tenant_id:
-          description: Unique identifier for the tenant.
-          type: string
-          allOf:
-          - $ref: "#/components/schemas/UUID"
-          example: ace00000-ace0000-ace00-ace00-ace000000
     ParticipantKind:
       enum:
       - NONE
@@ -3313,7 +3252,7 @@ components:
             $ref: "#/components/schemas/Participant"
           example:
           - id: Abc123
-            tenant_id: ace00000-ace0000-ace00-ace00-ace000000
+            tenant_id: ace00000-ace0-ace0-ace0-ace000000000
             conversation_id: breakdowncase
             created_at: 2022-11-03T20:26:10.344522Z
             updated_at: 2022-11-03T20:26:10.344522Z
@@ -3418,45 +3357,22 @@ components:
           type: string
           example: C8E62D56-80BE-437E-A967-6861803729B8
           nullable: true
-    PassthroughRequestDto:
-      required:
-      - tenant_id
-      - token
-      type: object
-      properties:
-        tenant_id:
-          description: The tenant ID.
-          type: string
-          example: ace00000-ace0000-ace00-ace00-ace000000
-        token:
-          description: Bearer token.
-          type: string
     ResetPasswordRequest:
       required:
-      - tenant_id
       - email
       type: object
       properties:
-        tenant_id:
-          description: The tenant ID.
-          type: string
-          example: ace00000-ace0000-ace00-ace00-ace000000
         email:
           description: The email of the user.
           type: string
           example: owner@autoclubmars.com
     SetPasswordRequest:
       required:
-      - tenant_id
       - email
       - password
       - token
       type: object
       properties:
-        tenant_id:
-          description: The tenant ID.
-          type: string
-          example: ace00000-ace0000-ace00-ace00-ace000000
         email:
           description: The user’s email address.
           type: string
@@ -3495,15 +3411,15 @@ components:
     SignupMachineResponse:
       description: The data returned after a successful signup.
       required:
-      - tenant_config
+      - tenant_id
       - api_key
       type: object
       properties:
-        tenant_config:
-          description: The tenant config for the newly created tenant.
-          type: object
+        tenant_id:
+          description: The tenant idt.
+          type: string
           allOf:
-          - $ref: "#/components/schemas/TenantConfig"
+          - $ref: "#/components/schemas/UUID"
         api_key:
           description: The api key for the newly created tenant.
           type: string
@@ -3560,14 +3476,14 @@ components:
     SignupResponse:
       description: The data returned after a successful signup.
       required:
-      - tenant_config
+      - tenant_id
       type: object
       properties:
-        tenant_config:
-          description: The tenant config for the newly created tenant.
-          type: object
+        tenant_id:
+          description: The tenant idt.
+          type: string
           allOf:
-          - $ref: "#/components/schemas/TenantConfig"
+          - $ref: "#/components/schemas/UUID"
     Status:
       enum:
       - UPLOAD_PENDING
@@ -3589,7 +3505,7 @@ components:
           type: string
           allOf:
           - $ref: "#/components/schemas/UUID"
-          example: ace00000-ace0000-ace00-ace00-ace000000
+          example: ace00000-ace0-ace0-ace0-ace000000000
         name:
           description: The name of the tenant.
           maxLength: 20
@@ -3604,13 +3520,22 @@ components:
           pattern: "^[a-z0-9][a-z0-9_-]+[a-z0-9]?$"
           type: string
           example: autoclubmars
-        passthrough_user_info_url:
+        token_exchange_userinfo_url:
           format: url
           description: The endpoint that should be used to verify the token if you
-            want to enable the token-exchange flow and passthrough your token to us
-            to verify it.
+            want to enable token-exchange flow and. It must be a oauth2 userinfo endpoint.
           type: string
           example: https://auth.autoclubmars.com/oauth2/userinfo
+          nullable: true
+        user_auto_provisioning_domains:
+          format: array
+          description: "If a user logs in with an email address that matches one of\
+            \ these domains, a new user will be created automatically."
+          type: array
+          items:
+            type: string
+          example:
+          - autoclubmars.com
           nullable: true
     TenantConfig:
       description: Configuration object for a specific tenant.
@@ -3621,7 +3546,6 @@ components:
       - name
       - enabled
       - frontend_url
-      - oidc_configs
       type: object
       properties:
         id:
@@ -3629,7 +3553,7 @@ components:
           type: string
           allOf:
           - $ref: "#/components/schemas/UUID"
-          example: ace00000-ace0000-ace00-ace00-ace000000
+          example: ace00000-ace0-ace0-ace0-ace000000000
         subdomain:
           description: The subdomain of the tenant.
           maxLength: 20
@@ -3652,30 +3576,6 @@ components:
           description: Indicates whether the tenant is enabled.
           type: boolean
           example: true
-        oidc_configs:
-          description: List of OIDC provider configurations for this tenant.
-          type: array
-          items:
-            $ref: "#/components/schemas/TenantOidcConfig"
-    TenantOidcConfig:
-      required:
-      - provider_name
-      - authority_url
-      - client_id
-      type: object
-      properties:
-        provider_name:
-          description: "The provider name, e.g. 'microsoft' or 'google'"
-          type: string
-          example: microsoft
-        authority_url:
-          description: "Authority/issuer URL, e.g. 'https://login.microsoftonline.com/<tenant>/v2.0'"
-          type: string
-          example: https://login.microsoftonline.com/1234-abcd/v2.0
-        client_id:
-          description: Client ID for this OIDC application
-          type: string
-          example: 00000000-0000-0000-0000-000000000000
     TokenResponseDto:
       required:
       - access_token
@@ -3746,7 +3646,7 @@ components:
           type: string
           allOf:
           - $ref: "#/components/schemas/UUID"
-          example: ace00000-ace0000-ace00-ace00-ace000000
+          example: ace00000-ace0-ace0-ace0-ace000000000
         email:
           format: email
           description: The email address of the user.
@@ -3768,22 +3668,6 @@ components:
           description: The last name of the user to create.
           type: string
           example: Schmid
-          nullable: true
-    UserInfoResponse:
-      required:
-      - email
-      type: object
-      properties:
-        email:
-          type: string
-        sub:
-          type: string
-          nullable: true
-        given_name:
-          type: string
-          nullable: true
-        family_name:
-          type: string
           nullable: true
     UserListResponse:
       required:

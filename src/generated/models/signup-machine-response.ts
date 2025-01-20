@@ -13,14 +13,6 @@
  */
 
 import { mapValues } from '../runtime';
-import type { TenantConfig } from './tenant-config';
-import {
-    TenantConfigFromJSON,
-    TenantConfigFromJSONTyped,
-    TenantConfigToJSON,
-    TenantConfigToJSONTyped,
-} from './tenant-config';
-
 /**
  * The data returned after a successful signup.
  * @export
@@ -28,11 +20,11 @@ import {
  */
 export interface SignupMachineResponse {
     /**
-     * The tenant config for the newly created tenant.
-     * @type {TenantConfig}
+     * The tenant idt.
+     * @type {string}
      * @memberof SignupMachineResponse
      */
-    tenantConfig: TenantConfig;
+    tenantId: string;
     /**
      * The api key for the newly created tenant.
      * @type {string}
@@ -45,7 +37,7 @@ export interface SignupMachineResponse {
  * Check if a given object implements the SignupMachineResponse interface.
  */
 export function instanceOfSignupMachineResponse(value: object): value is SignupMachineResponse {
-    if (!('tenantConfig' in value) || value['tenantConfig'] === undefined) return false;
+    if (!('tenantId' in value) || value['tenantId'] === undefined) return false;
     if (!('apiKey' in value) || value['apiKey'] === undefined) return false;
     return true;
 }
@@ -60,7 +52,7 @@ export function SignupMachineResponseFromJSONTyped(json: any, ignoreDiscriminato
     }
     return {
         
-        'tenantConfig': TenantConfigFromJSON(json['tenant_config']),
+        'tenantId': json['tenant_id'],
         'apiKey': json['api_key'],
     };
 }
@@ -76,7 +68,7 @@ export function SignupMachineResponseToJSONTyped(value?: SignupMachineResponse |
 
     return {
         
-        'tenant_config': TenantConfigToJSON(value['tenantConfig']),
+        'tenant_id': value['tenantId'],
         'api_key': value['apiKey'],
     };
 }

@@ -13,14 +13,6 @@
  */
 
 import { mapValues } from '../runtime';
-import type { TenantConfig } from './tenant-config';
-import {
-    TenantConfigFromJSON,
-    TenantConfigFromJSONTyped,
-    TenantConfigToJSON,
-    TenantConfigToJSONTyped,
-} from './tenant-config';
-
 /**
  * The data returned after a successful signup.
  * @export
@@ -28,18 +20,18 @@ import {
  */
 export interface SignupResponse {
     /**
-     * The tenant config for the newly created tenant.
-     * @type {TenantConfig}
+     * The tenant idt.
+     * @type {string}
      * @memberof SignupResponse
      */
-    tenantConfig: TenantConfig;
+    tenantId: string;
 }
 
 /**
  * Check if a given object implements the SignupResponse interface.
  */
 export function instanceOfSignupResponse(value: object): value is SignupResponse {
-    if (!('tenantConfig' in value) || value['tenantConfig'] === undefined) return false;
+    if (!('tenantId' in value) || value['tenantId'] === undefined) return false;
     return true;
 }
 
@@ -53,7 +45,7 @@ export function SignupResponseFromJSONTyped(json: any, ignoreDiscriminator: bool
     }
     return {
         
-        'tenantConfig': TenantConfigFromJSON(json['tenant_config']),
+        'tenantId': json['tenant_id'],
     };
 }
 
@@ -68,7 +60,7 @@ export function SignupResponseToJSONTyped(value?: SignupResponse | null, ignoreD
 
     return {
         
-        'tenant_config': TenantConfigToJSON(value['tenantConfig']),
+        'tenant_id': value['tenantId'],
     };
 }
 

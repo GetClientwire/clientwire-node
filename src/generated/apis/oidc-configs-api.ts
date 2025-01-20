@@ -170,7 +170,7 @@ export class OIDCConfigsApi extends runtime.BaseAPI implements OIDCConfigsApiInt
             }
         }
         const response = await this.request({
-            path: `/api/v1/oidc_configs`,
+            path: `/api/v1/oidc-configs`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
@@ -218,7 +218,7 @@ export class OIDCConfigsApi extends runtime.BaseAPI implements OIDCConfigsApiInt
             }
         }
         const response = await this.request({
-            path: `/api/v1/oidc_configs/{provider_name}`.replace(`{${"provider_name"}}`, encodeURIComponent(String(requestParameters['providerName']))),
+            path: `/api/v1/oidc-configs/{provider_name}`.replace(`{${"provider_name"}}`, encodeURIComponent(String(requestParameters['providerName']))),
             method: 'DELETE',
             headers: headerParameters,
             query: queryParameters,
@@ -264,7 +264,7 @@ export class OIDCConfigsApi extends runtime.BaseAPI implements OIDCConfigsApiInt
             }
         }
         const response = await this.request({
-            path: `/api/v1/oidc_configs/{provider_name}`.replace(`{${"provider_name"}}`, encodeURIComponent(String(requestParameters['providerName']))),
+            path: `/api/v1/oidc-configs/{provider_name}`.replace(`{${"provider_name"}}`, encodeURIComponent(String(requestParameters['providerName']))),
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
@@ -304,7 +304,7 @@ export class OIDCConfigsApi extends runtime.BaseAPI implements OIDCConfigsApiInt
             }
         }
         const response = await this.request({
-            path: `/api/v1/oidc_configs`,
+            path: `/api/v1/oidc-configs`,
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
@@ -360,7 +360,7 @@ export class OIDCConfigsApi extends runtime.BaseAPI implements OIDCConfigsApiInt
             }
         }
         const response = await this.request({
-            path: `/api/v1/oidc_configs/{provider_name}`.replace(`{${"provider_name"}}`, encodeURIComponent(String(requestParameters['providerName']))),
+            path: `/api/v1/oidc-configs/{provider_name}`.replace(`{${"provider_name"}}`, encodeURIComponent(String(requestParameters['providerName']))),
             method: 'PATCH',
             headers: headerParameters,
             query: queryParameters,

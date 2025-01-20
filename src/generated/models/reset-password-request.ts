@@ -20,12 +20,6 @@ import { mapValues } from '../runtime';
  */
 export interface ResetPasswordRequest {
     /**
-     * The tenant ID.
-     * @type {string}
-     * @memberof ResetPasswordRequest
-     */
-    tenantId: string;
-    /**
      * The email of the user.
      * @type {string}
      * @memberof ResetPasswordRequest
@@ -37,7 +31,6 @@ export interface ResetPasswordRequest {
  * Check if a given object implements the ResetPasswordRequest interface.
  */
 export function instanceOfResetPasswordRequest(value: object): value is ResetPasswordRequest {
-    if (!('tenantId' in value) || value['tenantId'] === undefined) return false;
     if (!('email' in value) || value['email'] === undefined) return false;
     return true;
 }
@@ -52,7 +45,6 @@ export function ResetPasswordRequestFromJSONTyped(json: any, ignoreDiscriminator
     }
     return {
         
-        'tenantId': json['tenant_id'],
         'email': json['email'],
     };
 }
@@ -68,7 +60,6 @@ export function ResetPasswordRequestToJSONTyped(value?: ResetPasswordRequest | n
 
     return {
         
-        'tenant_id': value['tenantId'],
         'email': value['email'],
     };
 }

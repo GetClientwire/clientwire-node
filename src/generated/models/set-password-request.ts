@@ -20,12 +20,6 @@ import { mapValues } from '../runtime';
  */
 export interface SetPasswordRequest {
     /**
-     * The tenant ID.
-     * @type {string}
-     * @memberof SetPasswordRequest
-     */
-    tenantId: string;
-    /**
      * The user’s email address.
      * @type {string}
      * @memberof SetPasswordRequest
@@ -49,7 +43,6 @@ export interface SetPasswordRequest {
  * Check if a given object implements the SetPasswordRequest interface.
  */
 export function instanceOfSetPasswordRequest(value: object): value is SetPasswordRequest {
-    if (!('tenantId' in value) || value['tenantId'] === undefined) return false;
     if (!('email' in value) || value['email'] === undefined) return false;
     if (!('password' in value) || value['password'] === undefined) return false;
     if (!('token' in value) || value['token'] === undefined) return false;
@@ -66,7 +59,6 @@ export function SetPasswordRequestFromJSONTyped(json: any, ignoreDiscriminator: 
     }
     return {
         
-        'tenantId': json['tenant_id'],
         'email': json['email'],
         'password': json['password'],
         'token': json['token'],
@@ -84,7 +76,6 @@ export function SetPasswordRequestToJSONTyped(value?: SetPasswordRequest | null,
 
     return {
         
-        'tenant_id': value['tenantId'],
         'email': value['email'],
         'password': value['password'],
         'token': value['token'],

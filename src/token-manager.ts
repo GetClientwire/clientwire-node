@@ -1,33 +1,43 @@
 export class TokenManager {
+  private static TENANT_ID = 'wire.tenant_id';
   private static ACCESS_TOKEN_KEY = 'wire.access_token';
   private static REFRESH_TOKEN_KEY = 'wire.refresh_token';
 
+  private refreshCallback?: () => Promise<boolean>;
   private refreshInProgress?: Promise<boolean>;
-  private basePath: string;
 
-  constructor(basePath: string) {
-    this.basePath = basePath;
+  public setRefreshCallback(callback: () => Promise<boolean>) {
+    console.info('[TokenManager] refresh callback set.');
+    this.refreshCallback = callback;
+  }
+
+  public clearRefreshCallback() {
+    this.refreshCallback = undefined;
+  }
+
+  public clearTokens() {
+    localStorage.removeItem(TokenManager.ACCESS_TOKEN_KEY);
+    localStorage.removeItem(TokenManager.REFRESH_TOKEN_KEY);
   }
 
   public getAccessToken(): string | undefined {
     return localStorage.getItem(TokenManager.ACCESS_TOKEN_KEY) || undefined;
   }
 
-  public setAccessToken(token: string | undefined) {
-    if (token) {
-      localStorage.setItem(TokenManager.ACCESS_TOKEN_KEY, token);
-    } else {
-      localStorage.removeItem(TokenManager.ACCESS_TOKEN_KEY);
-    }
-  }
-
   public getRefreshToken(): string | undefined {
     return localStorage.getItem(TokenManager.REFRESH_TOKEN_KEY) || undefined;
   }
 
-  public setRefreshToken(token: string | undefined) {
-    if (token) {
-      localStorage.setItem(TokenManager.REFRESH_TOKEN_KEY, token);
+  public getTenantId(): string | undefined {
+    return localStorage.getItem(TokenManager.TENANT_ID) || undefined;
+  }
+
+  public setTokens(tenantId: string, accessToken: string, refreshToken: string | undefined | null) {
+    localStorage.setItem(TokenManager.TENANT_ID, tenantId);
+    localStorage.setItem(TokenManager.ACCESS_TOKEN_KEY, accessToken);
+
+    if (refreshToken) {
+      localStorage.setItem(TokenManager.REFRESH_TOKEN_KEY, refreshToken);
     } else {
       localStorage.removeItem(TokenManager.REFRESH_TOKEN_KEY);
     }
@@ -47,68 +57,33 @@ export class TokenManager {
   }
 
   private async doActualRefresh(): Promise<boolean> {
-    const refreshToken = this.getRefreshToken();
-    if (!refreshToken) {
-      console.error('[TokenManager] No refresh token available.');
+    if (!this.refreshCallback) {
+      console.error('[TokenManager] No refresh callback set.');
       return false;
     }
 
     try {
-      // Call your refresh endpoint. Example: /oauth2/token
-      const resp = await fetch(`${this.basePath}/api/v1/signin/refresh`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          grant_type: 'refresh_token',
-          refresh_token: refreshToken,
-        }),
-      });
+      const refreshCallbackResult = await this.refreshCallback();
 
-      if (!resp.ok) {
-        console.error('[TokenManager] refresh call failed. status=', resp.status);
+      if (refreshCallbackResult) {
+        console.log(
+          '[TokenManager] refreshCallback reports success; new tokens should now be set.'
+        );
+        return true;
+      } else {
+        console.error('[TokenManager] refreshCallback reports failure.');
         return false;
       }
-
-      const data = await resp.json();
-      // e.g. { access_token, refresh_token, token_type, expires_in }
-
-      if (!data.access_token) {
-        console.error('[TokenManager] refresh: no access_token returned');
-        return false;
-      }
-
-      // Store new tokens
-      this.setAccessToken(data.access_token);
-      if (data.refresh_token) {
-        this.setRefreshToken(data.refresh_token);
-      }
-
-      console.log('[TokenManager] Token refreshed successfully');
-      return true;
     } catch (err) {
-      console.error('[TokenManager] Error refreshing token:', err);
+      console.error('[TokenManager] Error executing refreshCallback:', err);
       return false;
     }
   }
 
-  /**
-   * If needed, handle a "logout" scenario to remove tokens.
-   */
-  public logout() {
-    this.setAccessToken(undefined);
-    this.setRefreshToken(undefined);
-  }
-
-  /**
-   * Quick check if we have an access token
-   */
   public hasAccessToken(): boolean {
     return !!this.getAccessToken();
   }
 
-  /**
-   * Quick static check if we have an access token
-   */
   public static hasAccessToken(): boolean {
     return !!(localStorage.getItem(TokenManager.ACCESS_TOKEN_KEY) || undefined);
   }

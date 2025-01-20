@@ -192,7 +192,7 @@ export class ConversationTypesApi extends runtime.BaseAPI implements Conversatio
             }
         }
         const response = await this.request({
-            path: `/api/v1/conversation_types`,
+            path: `/api/v1/conversation-types`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
@@ -249,7 +249,7 @@ export class ConversationTypesApi extends runtime.BaseAPI implements Conversatio
             }
         }
         const response = await this.request({
-            path: `/api/v1/conversation_types/{conversation_type_id}`.replace(`{${"conversation_type_id"}}`, encodeURIComponent(String(requestParameters['conversationTypeId']))),
+            path: `/api/v1/conversation-types/{conversation_type_id}`.replace(`{${"conversation_type_id"}}`, encodeURIComponent(String(requestParameters['conversationTypeId']))),
             method: 'PUT',
             headers: headerParameters,
             query: queryParameters,
@@ -297,7 +297,7 @@ export class ConversationTypesApi extends runtime.BaseAPI implements Conversatio
             }
         }
         const response = await this.request({
-            path: `/api/v1/conversation_types/{conversation_type_id}`.replace(`{${"conversation_type_id"}}`, encodeURIComponent(String(requestParameters['conversationTypeId']))),
+            path: `/api/v1/conversation-types/{conversation_type_id}`.replace(`{${"conversation_type_id"}}`, encodeURIComponent(String(requestParameters['conversationTypeId']))),
             method: 'DELETE',
             headers: headerParameters,
             query: queryParameters,
@@ -343,7 +343,7 @@ export class ConversationTypesApi extends runtime.BaseAPI implements Conversatio
             }
         }
         const response = await this.request({
-            path: `/api/v1/conversation_types/{conversation_type_id}`.replace(`{${"conversation_type_id"}}`, encodeURIComponent(String(requestParameters['conversationTypeId']))),
+            path: `/api/v1/conversation-types/{conversation_type_id}`.replace(`{${"conversation_type_id"}}`, encodeURIComponent(String(requestParameters['conversationTypeId']))),
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
@@ -383,7 +383,7 @@ export class ConversationTypesApi extends runtime.BaseAPI implements Conversatio
             }
         }
         const response = await this.request({
-            path: `/api/v1/conversation_types`,
+            path: `/api/v1/conversation-types`,
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
@@ -439,7 +439,7 @@ export class ConversationTypesApi extends runtime.BaseAPI implements Conversatio
             }
         }
         const response = await this.request({
-            path: `/api/v1/conversation_types/{conversation_type_id}`.replace(`{${"conversation_type_id"}}`, encodeURIComponent(String(requestParameters['conversationTypeId']))),
+            path: `/api/v1/conversation-types/{conversation_type_id}`.replace(`{${"conversation_type_id"}}`, encodeURIComponent(String(requestParameters['conversationTypeId']))),
             method: 'PATCH',
             headers: headerParameters,
             query: queryParameters,

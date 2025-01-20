@@ -94,7 +94,7 @@ export class WireWebsocketConnection {
   }
 
   private wsUrl(): string {
-    return `${this.basePath}/api/v1/ws`;
+    return `${this.basePath}/api/v1/ws/conversations`;
   }
 
   private wsOnOpen(event: Event): void {

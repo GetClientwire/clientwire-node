@@ -13,14 +13,6 @@
  */
 
 import { mapValues } from '../runtime';
-import type { TenantOidcConfig } from './tenant-oidc-config';
-import {
-    TenantOidcConfigFromJSON,
-    TenantOidcConfigFromJSONTyped,
-    TenantOidcConfigToJSON,
-    TenantOidcConfigToJSONTyped,
-} from './tenant-oidc-config';
-
 /**
  * Configuration object for a specific tenant.
  * @export
@@ -57,12 +49,6 @@ export interface TenantConfig {
      * @memberof TenantConfig
      */
     enabled: boolean;
-    /**
-     * List of OIDC provider configurations for this tenant.
-     * @type {Array<TenantOidcConfig>}
-     * @memberof TenantConfig
-     */
-    oidcConfigs: Array<TenantOidcConfig>;
 }
 
 /**
@@ -74,7 +60,6 @@ export function instanceOfTenantConfig(value: object): value is TenantConfig {
     if (!('frontendUrl' in value) || value['frontendUrl'] === undefined) return false;
     if (!('name' in value) || value['name'] === undefined) return false;
     if (!('enabled' in value) || value['enabled'] === undefined) return false;
-    if (!('oidcConfigs' in value) || value['oidcConfigs'] === undefined) return false;
     return true;
 }
 
@@ -93,7 +78,6 @@ export function TenantConfigFromJSONTyped(json: any, ignoreDiscriminator: boolea
         'frontendUrl': json['frontend_url'],
         'name': json['name'],
         'enabled': json['enabled'],
-        'oidcConfigs': ((json['oidc_configs'] as Array<any>).map(TenantOidcConfigFromJSON)),
     };
 }
 
@@ -113,7 +97,6 @@ export function TenantConfigToJSONTyped(value?: TenantConfig | null, ignoreDiscr
         'frontend_url': value['frontendUrl'],
         'name': value['name'],
         'enabled': value['enabled'],
-        'oidc_configs': ((value['oidcConfigs'] as Array<any>).map(TenantOidcConfigToJSON)),
     };
 }
 

@@ -6,7 +6,7 @@ export const AUTHENTICATION_ERROR_EVENT = 'authentication:error';
 export const SUBSCRIPTION_ERROR_EVENT = 'subscription:error';
 export const NEW_CONVERSATION_EVENT = 'conversations:new';
 
-type WireClientEventMap = {
+type ClientWireEventMap = {
   [CONNECTED_EVENT]: void;
   [DISCONNECTED_EVENT]: void;
   [AUTHENTICATION_ERROR_EVENT]: { reason?: string };
@@ -27,4 +27,4 @@ type WireClientEventMap = {
   [key in `conversations:${string}:participants:${string}:read_status`]: WsParticipantReadStatus;
 };
 
-export { WireClientEventMap };
+export { ClientWireEventMap };
