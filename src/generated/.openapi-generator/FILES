@@ -68,6 +68,7 @@ models/user-role.ts
 models/user.ts
 models/ws-authenticate.ts
 models/ws-conversations-read-status.ts
+models/ws-message-updated.ts
 models/ws-new-conversation.ts
 models/ws-new-message.ts
 models/ws-participant-read-status.ts

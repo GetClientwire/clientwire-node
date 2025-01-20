@@ -7,6 +7,7 @@ import {
   WsAuthenticate,
   WsSubscribe,
   WsUnsubscribe,
+  WsMessageUpdated,
 } from './generated/models';
 import { TokenManager } from './token-manager';
 
@@ -168,6 +169,13 @@ export class WireWebsocketConnection {
           // console.log('Received new NEW_MESSAGE:', data);
           let eventName = `conversations:${data.message.conversation_id}`;
           let message = data as WsNewMessage;
+          this.client.dispatchEvent(new CustomEvent(eventName, { detail: message }));
+          break;
+        }
+        case 'MESSAGE_UPDATED': {
+          // console.log('Received new MESSAGE_UPDATED:', data);
+          let eventName = `conversations:${data.message.conversation_id}`;
+          let message = data as WsMessageUpdated;
           this.client.dispatchEvent(new CustomEvent(eventName, { detail: message }));
           break;
         }

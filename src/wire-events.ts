@@ -1,4 +1,4 @@
-import { WsNewConversation, WsNewMessage, WsParticipantReadStatus } from './generated/models';
+import { WsMessageUpdated, WsNewConversation, WsNewMessage, WsParticipantReadStatus } from './generated/models';
 
 export const CONNECTED_EVENT = 'connected';
 export const DISCONNECTED_EVENT = 'disconnected';
@@ -13,11 +13,10 @@ type ClientWireEventMap = {
   [NEW_CONVERSATION_EVENT]: WsNewConversation;
 } & {
   /**
-   * For conversation-specific updates. We store WsNewMessage as an example,
-   * but you might have a different shape for "updates" vs. "new conversation".
+   * For conversation-specific updates.
    * This uses a template-literal type to capture any string after "conversations:".
    */
-  [key in `conversations:${string}`]: WsNewMessage;
+  [key in `conversations:${string}`]: WsNewMessage | WsMessageUpdated;
 } & {
   /**
    * For conversation-specific updates. We store WsParticipantReadStatus as an example,

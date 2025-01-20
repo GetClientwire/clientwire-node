@@ -53,6 +53,7 @@ export * from './user-list-response';
 export * from './user-role';
 export * from './ws-authenticate';
 export * from './ws-conversations-read-status';
+export * from './ws-message-updated';
 export * from './ws-new-conversation';
 export * from './ws-new-message';
 export * from './ws-participant-read-status';

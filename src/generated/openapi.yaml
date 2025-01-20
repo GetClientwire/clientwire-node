@@ -3717,15 +3717,25 @@ components:
           type: integer
           example: 3
           nullable: true
-    WsNewConversation:
+    WsMessageUpdated:
       required:
-      - conversationId
+      - message
       type: object
       properties:
         type:
           type: string
           nullable: true
-        conversationId:
+        message:
+          $ref: "#/components/schemas/Message"
+    WsNewConversation:
+      required:
+      - conversationPublicId
+      type: object
+      properties:
+        type:
+          type: string
+          nullable: true
+        conversationPublicId:
           type: string
     WsNewMessage:
       required:
