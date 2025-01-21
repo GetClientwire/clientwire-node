@@ -15,7 +15,6 @@ export class WireWebsocketConnection {
   private basePath: string;
   private tokenManager: TokenManager;
 
-  // WebSocket or null if not yet connected
   private socket: WebSocket | null = null;
 
   private connected = false;
@@ -28,7 +27,19 @@ export class WireWebsocketConnection {
   private pingTimer: number | null = null;
   private pongTimeoutTimer: number | null = null;
 
-  private activeSubscriptions: Set<string> = new Set(); // Track subscriptions
+  private activeSubscriptions: Set<string> = new Set();
+
+  /**
+   * 1) We track a queue of messages we want to send, but which
+   *    cannot be sent yet (either the socket is not open, or
+   *    we haven't sent "AUTHENTICATE" yet).
+   */
+  private messageQueue: object[] = [];
+
+  /**
+   * 2) A flag to ensure our first message is always AUTHENTICATE.
+   */
+  private authSent = false;
 
   constructor(eventEmitter: EventTarget, basePath: string, tokenManager: TokenManager) {
     this.tokenManager = tokenManager;
@@ -42,8 +53,21 @@ export class WireWebsocketConnection {
 
   public connect(): void {
     this.shouldReconnect = true;
+
+    // Reset authSent every time we start a fresh connection
+    this.authSent = false;
+
     if (!window.WebSocket) {
       logger.error('[ClientWireApi.Websocket] Browser does not support WebSocket.');
+      return;
+    }
+
+    // Guard to prevent multiple parallel connections
+    if (
+      this.socket &&
+      (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING)
+    ) {
+      logger.debug('[ClientWireApi.Websocket] Already open or connecting.');
       return;
     }
 
@@ -58,38 +82,74 @@ export class WireWebsocketConnection {
   public disconnect(): void {
     this.shouldReconnect = false;
     this.stopPing();
-    if (this.socket && !this.socket.CLOSED && !this.socket.CLOSING) {
+    if (
+      this.socket &&
+      this.socket.readyState !== WebSocket.CLOSED &&
+      this.socket.readyState !== WebSocket.CLOSING
+    ) {
       try {
         this.socket.close();
       } catch (error) {
         logger.warn('[ClientWireApi.Websocket] Failed to close WebSocket:', error);
       }
     }
+    this.socket = null;
   }
 
-  public subscribe(address: string): void {
-    this.activeSubscriptions.add(address); // Track the subscription
-    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-      let message = { type: 'SUBSCRIBE', address: address } as WsSubscribe;
-      this.socket.send(JSON.stringify(message));
+  /**
+   * Use the message queue to ensure messages only go out if socket is open
+   * AND we have sent the AUTHENTICATE message first.
+   */
+  private sendMessage(msg: object) {
+    if (!this.socket) {
+      // No socket yet, queue
+      this.messageQueue.push(msg);
+      return;
     }
+    // If socket is open AND we've sent "AUTHENTICATE"
+    if (this.socket.readyState === WebSocket.OPEN && this.authSent) {
+      this.socket.send(JSON.stringify(msg));
+    } else {
+      // Otherwise, queue for later
+      this.messageQueue.push(msg);
+    }
+  }
+
+  /**
+   * Flush all queued messages in FIFO order, but only if
+   * the socket is OPEN and the AUTHENTICATE message was sent.
+   */
+  private flushQueue() {
+    if (!this.socket || this.socket.readyState !== WebSocket.OPEN || !this.authSent) {
+      return; // not ready yet
+    }
+    while (this.messageQueue.length > 0) {
+      const msg = this.messageQueue.shift();
+      this.socket.send(JSON.stringify(msg));
+    }
+  }
+
+  /**
+   * Subscribe and unsubscribe now just queue the messages if needed.
+   * This ensures we never send SUBSCRIBE before AUTHENTICATE.
+   */
+  public subscribe(address: string): void {
+    this.activeSubscriptions.add(address);
+    const message: WsSubscribe = { type: 'SUBSCRIBE', address };
+    this.sendMessage(message);
   }
 
   public unsubscribe(address: string): void {
-    this.activeSubscriptions.delete(address); // Remove from the tracked subscriptions
-    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-      let message = { type: 'UNSUBSCRIBE', address: address } as WsUnsubscribe;
-      this.socket.send(JSON.stringify(message));
-    }
+    this.activeSubscriptions.delete(address);
+    const message: WsUnsubscribe = { type: 'UNSUBSCRIBE', address };
+    this.sendMessage(message);
   }
 
   public unsubscribeAll(): void {
     this.activeSubscriptions.forEach((address) => {
       this.activeSubscriptions.delete(address);
-      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-        let message = { type: 'UNSUBSCRIBE', address: address } as WsUnsubscribe;
-        this.socket.send(JSON.stringify(message));
-      }
+      const message: WsUnsubscribe = { type: 'UNSUBSCRIBE', address };
+      this.sendMessage(message);
     });
   }
 
@@ -100,29 +160,50 @@ export class WireWebsocketConnection {
   private wsOnOpen(event: Event): void {
     logger.debug('[ClientWireApi.Websocket] WebSocket connected');
 
-    // Only emit "connected" if we were previously disconnected
-    if (!this.connected) {
-      this.connected = true;
-
-      // Send token for server-side auth
-      this.socket!.send(
-        JSON.stringify({
-          type: 'AUTHENTICATE',
-          token: this.tokenManager.getAccessToken(),
-        })
-      );
-
-      this.client.dispatchEvent(new CustomEvent('connected'));
-    }
-
     // Clear any existing reconnect timer
     if (this.reconnectTimer !== null) {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;
     }
 
+    // Mark the connection as "connected" if it wasn't before
+    if (!this.connected) {
+      this.connected = true;
+      this.client.dispatchEvent(new CustomEvent('connected'));
+    }
+
+    // 3) The first message MUST be AUTHENTICATE
+    // If the socket is indeed OPEN, send it immediately.
+    if (this.socket?.readyState === WebSocket.OPEN) {
+      const authPayload = {
+        type: 'AUTHENTICATE',
+        token: this.tokenManager.getAccessToken(),
+      };
+      this.socket.send(JSON.stringify(authPayload));
+      this.authSent = true;
+    } else {
+      // Fallback: if for some reason it's not open yet, wait a tick
+      setTimeout(() => {
+        if (this.socket?.readyState === WebSocket.OPEN) {
+          const authPayload = {
+            type: 'AUTHENTICATE',
+            token: this.tokenManager.getAccessToken(),
+          };
+          this.socket.send(JSON.stringify(authPayload));
+          this.authSent = true;
+          // Then flush below
+          this.flushQueue();
+        }
+      }, 0);
+    }
+
+    // Now that we have (or will have) authenticated,
+    // we can safely flush queued messages.
+    // (If we did a synchronous send, "authSent" is already true here.)
+    this.flushQueue();
+
     this.startPing();
-    this.resubscribe(); // Resubscribe to all tracked subscriptions
+    this.resubscribe(); // Re-queue the SUBSCRIBE messages for any known addresses
   }
 
   private wsOnClose(event: CloseEvent): void {
@@ -134,12 +215,18 @@ export class WireWebsocketConnection {
       this.client.dispatchEvent(new CustomEvent('disconnected'));
     }
 
+    // Once closed, reset authSent so next connect re-authenticates
+    this.authSent = false;
+
     this.stopPing();
 
-    if ((event as CloseEvent).code === 1008) {
+    // If the server closed us with 1008 => we suspect an auth problem
+    if (event.code === 1008) {
       logger.info('[ClientWireApi.Websocket] WebSocket closed due to policy violation (code 1008)');
       this.handleAuthExpired();
     }
+
+    this.socket = null;
 
     if (this.shouldReconnect) {
       this.wsScheduleReconnect();
@@ -148,7 +235,8 @@ export class WireWebsocketConnection {
 
   private resubscribe(): void {
     this.activeSubscriptions.forEach((address) => {
-      this.subscribe(address);
+      const msg: WsSubscribe = { type: 'SUBSCRIBE', address };
+      this.sendMessage(msg);
     });
   }
 
@@ -158,44 +246,41 @@ export class WireWebsocketConnection {
 
       switch (data.type) {
         case 'PING': {
-          let message = { type: 'PONG' } as WsPong;
-          this.socket?.send(JSON.stringify(message));
+          const message: WsPong = { type: 'PONG' };
+          this.sendMessage(message);
           break;
         }
         case 'PONG': {
           this.clearPongTimeout();
           break;
         }
-
         case 'NEW_CONVERSATION': {
-          logger.debug('[ClientWireApi.Websocket] Received new NEW_CONVERSATION:', data);
-          let message = WsNewConversationFromJSON(data);
+          logger.debug('[ClientWireApi.Websocket] Received NEW_CONVERSATION:', data);
+          const message = WsNewConversationFromJSON(data);
           this.client.dispatchEvent(new CustomEvent('conversations:new', { detail: message }));
           break;
         }
         case 'NEW_MESSAGE': {
-          logger.debug('[ClientWireApi.Websocket] Received new NEW_MESSAGE:', data);
-          let eventName = `conversations:${data.message.conversation_id}`;
-          let message = WsNewMessageFromJSON(data);
+          logger.debug('[ClientWireApi.Websocket] Received NEW_MESSAGE:', data);
+          const eventName = `conversations:${data.message.conversation_id}`;
+          const message = WsNewMessageFromJSON(data);
           this.client.dispatchEvent(new CustomEvent(eventName, { detail: message }));
           break;
         }
         case 'MESSAGE_UPDATED': {
-          logger.debug('[ClientWireApi.Websocket] Received new MESSAGE_UPDATED:', data);
-          let eventName = `conversations:${data.message.conversation_id}`;
-          let message = WsMessageUpdatedFromJSON(data);
+          logger.debug('[ClientWireApi.Websocket] Received MESSAGE_UPDATED:', data);
+          const eventName = `conversations:${data.message.conversation_id}`;
+          const message = WsMessageUpdatedFromJSON(data);
           this.client.dispatchEvent(new CustomEvent(eventName, { detail: message }));
           break;
         }
-
         case 'PARTICIPANT_READ_STATUS': {
-          logger.debug('[ClientWireApi.Websocket] Received new PARTICIPANT_READ_STATUS:', data);
-          let eventName = `conversation:${data.message.conversation_id}:participant:${data.message.participant_id}`;
-          let message = WsParticipantReadStatusFromJSON(data);
+          logger.debug('[ClientWireApi.Websocket] Received PARTICIPANT_READ_STATUS:', data);
+          const eventName = `conversation:${data.message.conversation_id}:participant:${data.message.participant_id}`;
+          const message = WsParticipantReadStatusFromJSON(data);
           this.client.dispatchEvent(new CustomEvent(eventName, { detail: message }));
           break;
         }
-
         default:
           logger.debug('[ClientWireApi.Websocket] Unknown message type:', data);
       }
@@ -233,13 +318,13 @@ export class WireWebsocketConnection {
   }
 
   private async handleAuthExpired() {
-    this.socket?.close();
     logger.debug('[ClientWireApi.Websocket] Auth expired => attempting refresh...');
     const ok = await this.tokenManager.refreshTokens();
     if (!ok) {
-      logger.debug('[ClientWireApi.Websocket] Refresh failed => disconnect + forced logout?');
+      this.shouldReconnect = false;
+      logger.debug('[ClientWireApi.Websocket] Refresh failed, stopping reconnect attempts');
     } else {
-      logger.debug('[ClientWireApi.Websocket] Refresh succeeded => re-auth websocket?');
+      logger.debug('[ClientWireApi.Websocket] Refresh succeeded');
     }
   }
 
@@ -250,7 +335,7 @@ export class WireWebsocketConnection {
 
   private sendPing(): void {
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-      this.socket.send(JSON.stringify({ type: 'PING' }));
+      this.sendMessage({ type: 'PING' });
       this.startPongTimeout();
     }
   }

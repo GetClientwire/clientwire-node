@@ -9,7 +9,7 @@ export class TokenManager {
   private refreshInProgress?: Promise<boolean>;
 
   public setRefreshCallback(callback: () => Promise<boolean>) {
-    logger.debug('[ClientWireApi.TokenManager] refresh callback set.');
+    logger.debug('[ClientWireApi.TokenManager] refresh callback set');
     this.refreshCallback = callback;
   }
 
@@ -60,7 +60,7 @@ export class TokenManager {
 
   private async doActualRefresh(): Promise<boolean> {
     if (!this.refreshCallback) {
-      logger.debug('[ClientWireApi.TokenManager] No refresh callback set.');
+      logger.debug('[ClientWireApi.TokenManager] No refresh callback set');
       return false;
     }
 
@@ -69,11 +69,11 @@ export class TokenManager {
 
       if (refreshCallbackResult) {
         logger.debug(
-          '[ClientWireApi.TokenManager] refreshCallback reports success; new tokens should now be set.'
+          '[ClientWireApi.TokenManager] refreshCallback reports success; new tokens should now be set'
         );
         return true;
       } else {
-        logger.warn('[ClientWireApi.TokenManager] refreshCallback reports failure.');
+        logger.warn('[ClientWireApi.TokenManager] refreshCallback reports failure');
         return false;
       }
     } catch (err) {
