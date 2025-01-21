@@ -1,4 +1,3 @@
-export * from './wire-websocket-connection';
 export * from './wire-events';
 export * from './wire-client';
 

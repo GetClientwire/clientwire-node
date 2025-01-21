@@ -23,6 +23,8 @@ import {
 } from './wire-events';
 import { TokenManager } from './token-manager';
 import { createFetchWithRefresh } from './fetch-with-refresh';
+import * as logger from './logger';
+import { LogLevel } from './logger';
 
 export class ClientWireApiClient extends EventTarget {
   private _basePath: string;
@@ -55,8 +57,13 @@ export class ClientWireApiClient extends EventTarget {
    */
   private listenerCounts = new Map<keyof ClientWireEventMap | string, number>();
 
-  constructor(basePath: string = 'https://api.production.clientwire.net') {
+  constructor(
+    basePath: string = 'https://api.production.clientwire.net',
+    logLevel: LogLevel = 'warn'
+  ) {
     super();
+
+    logger.setLogLevel(logLevel);
 
     this._basePath = basePath;
     this.tokenManager = new TokenManager();
@@ -69,13 +76,13 @@ export class ClientWireApiClient extends EventTarget {
       fetchApi: createFetchWithRefresh(
         this.tokenManager,
         () => {
-          console.log('[ClientWireApiClient] Tokens refreshed');
+          logger.debug('[ClientWireApi] Tokens refreshed');
           if (!this.isConnected()) {
             this.websocketConnection?.connect();
           }
         },
         () => {
-          console.log('[ClientWireApiClient] Tokens could not be refreshed');
+          logger.warn('[ClientWireApi] Tokens could not be refreshed');
           this.dispatchEvent(
             new CustomEvent(AUTHENTICATION_ERROR_EVENT, {
               detail: { reason: 'Could not refresh tokens' },
@@ -100,7 +107,7 @@ export class ClientWireApiClient extends EventTarget {
     this.apiKeysApi = new APIKeysApi(this.apiConfig);
     this.oidcConfigsApi = new OIDCConfigsApi(this.apiConfig);
     this.smsSettingsApi = new SMSSettingsApi(this.apiConfig);
-    console.log('[ClientWireApiClient] New instance created: ', this.instanceId);
+    logger.debug('[ClientWireApi] New instance created: ', this.instanceId);
   }
 
   public get basePath(): string {
@@ -162,7 +169,7 @@ export class ClientWireApiClient extends EventTarget {
 
           return true;
         } catch (e) {
-          console.error('[ClientWireApiClient#signInWithEmailAndPassword] Refresh failed:', e);
+          logger.error('[ClientWireApi#signInWithEmailAndPassword] Refresh failed:', e);
           return false;
         }
       });
@@ -232,8 +239,8 @@ export class ClientWireApiClient extends EventTarget {
           );
           return true;
         } catch (e) {
-          console.error(
-            '[ClientWireApiClient#signInWithTokenExchangeParticipantAuthKey] Refresh failed:',
+          logger.error(
+            '[ClientWireApi#signInWithTokenExchangeParticipantAuthKey] Refresh failed:',
             e
           );
           return false;
@@ -302,8 +309,8 @@ export class ClientWireApiClient extends EventTarget {
           this.tokenManager.setTokens(tenantId, refreshResponse.accessToken, null);
           return true;
         } catch (err) {
-          console.error(
-            '[ClientWireApiClient#signInWithTokenExchangeAccessToken] Refresh with token function failed:',
+          logger.error(
+            '[ClientWireApi#signInWithTokenExchangeAccessToken] Refresh with token function failed:',
             err
           );
           return false;
@@ -342,8 +349,8 @@ export class ClientWireApiClient extends EventTarget {
           const currentRefreshToken = this.tokenManager.getRefreshToken();
 
           if (!currentTenantId || !currentRefreshToken) {
-            console.error(
-              '[ClientWireApiClient#signInWithStoredCredentials] No tenantId or refreshToken found.'
+            logger.error(
+              '[ClientWireApi#signInWithStoredCredentials] No tenantId or refreshToken found.'
             );
             return false;
           }
@@ -363,7 +370,7 @@ export class ClientWireApiClient extends EventTarget {
 
           return true;
         } catch (e) {
-          console.error('[signInWithStoredCredentials] Refresh failed:', e);
+          logger.error('[ClientWireApi#signInWithStoredCredentials] Refresh failed:', e);
           return false;
         }
       });
@@ -440,11 +447,7 @@ export class ClientWireApiClient extends EventTarget {
       try {
         this.subscribe(eventName);
       } catch (err) {
-        // If subscription fails, you might want to:
-        // 1) remove this newly added listener
-        // 2) decrement the listener count back
-        // 3) possibly dispatch "authentication:error" or "subscription:error"
-        console.error('[ClientWireApiClient] Subscription to', eventName, 'failed:', err);
+        logger.error('[ClientWireApi] Subscription to', eventName, 'failed:', err);
 
         this.removeEventListener(eventName, listener);
         this.listenerCounts.set(eventName, currentCount);

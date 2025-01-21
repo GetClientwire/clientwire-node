@@ -1,3 +1,5 @@
+import * as logger from './logger';
+
 export class TokenManager {
   private static TENANT_ID = 'wire.tenant_id';
   private static ACCESS_TOKEN_KEY = 'wire.access_token';
@@ -7,7 +9,7 @@ export class TokenManager {
   private refreshInProgress?: Promise<boolean>;
 
   public setRefreshCallback(callback: () => Promise<boolean>) {
-    console.info('[TokenManager] refresh callback set.');
+    logger.debug('[ClientWireApi.TokenManager] refresh callback set.');
     this.refreshCallback = callback;
   }
 
@@ -58,7 +60,7 @@ export class TokenManager {
 
   private async doActualRefresh(): Promise<boolean> {
     if (!this.refreshCallback) {
-      console.error('[TokenManager] No refresh callback set.');
+      logger.debug('[ClientWireApi.TokenManager] No refresh callback set.');
       return false;
     }
 
@@ -66,16 +68,16 @@ export class TokenManager {
       const refreshCallbackResult = await this.refreshCallback();
 
       if (refreshCallbackResult) {
-        console.log(
-          '[TokenManager] refreshCallback reports success; new tokens should now be set.'
+        logger.debug(
+          '[ClientWireApi.TokenManager] refreshCallback reports success; new tokens should now be set.'
         );
         return true;
       } else {
-        console.error('[TokenManager] refreshCallback reports failure.');
+        logger.warn('[ClientWireApi.TokenManager] refreshCallback reports failure.');
         return false;
       }
     } catch (err) {
-      console.error('[TokenManager] Error executing refreshCallback:', err);
+      logger.warn('[ClientWireApi.TokenManager] Error executing refreshCallback:', err);
       return false;
     }
   }

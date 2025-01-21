@@ -1,19 +1,14 @@
 import {
-  WsNewMessage,
-  WsNewConversation,
-  WsParticipantReadStatus,
-  WsPing,
   WsPong,
-  WsAuthenticate,
   WsSubscribe,
   WsUnsubscribe,
-  WsMessageUpdated,
   WsNewMessageFromJSON,
   WsNewConversationFromJSON,
   WsMessageUpdatedFromJSON,
   WsParticipantReadStatusFromJSON,
 } from './generated/models';
 import { TokenManager } from './token-manager';
+import * as logger from './logger';
 
 export class WireWebsocketConnection {
   private client: EventTarget;
@@ -48,7 +43,7 @@ export class WireWebsocketConnection {
   public connect(): void {
     this.shouldReconnect = true;
     if (!window.WebSocket) {
-      console.error('Browser does not support WebSocket.');
+      logger.error('[ClientWireApi.Websocket] Browser does not support WebSocket.');
       return;
     }
 
@@ -67,7 +62,7 @@ export class WireWebsocketConnection {
       try {
         this.socket.close();
       } catch (error) {
-        console.error('Failed to close WebSocket:', error);
+        logger.warn('[ClientWireApi.Websocket] Failed to close WebSocket:', error);
       }
     }
   }
@@ -103,6 +98,8 @@ export class WireWebsocketConnection {
   }
 
   private wsOnOpen(event: Event): void {
+    logger.debug('[ClientWireApi.Websocket] WebSocket connected');
+
     // Only emit "connected" if we were previously disconnected
     if (!this.connected) {
       this.connected = true;
@@ -128,7 +125,9 @@ export class WireWebsocketConnection {
     this.resubscribe(); // Resubscribe to all tracked subscriptions
   }
 
-  private wsOnClose(): void {
+  private wsOnClose(event: CloseEvent): void {
+    logger.debug('[ClientWireApi.Websocket] WebSocket closed', event);
+
     // Only emit "disconnected" if we were previously connected
     if (this.connected) {
       this.connected = false;
@@ -136,6 +135,11 @@ export class WireWebsocketConnection {
     }
 
     this.stopPing();
+
+    if ((event as CloseEvent).code === 1008) {
+      logger.info('[ClientWireApi.Websocket] WebSocket closed due to policy violation (code 1008)');
+      this.handleAuthExpired();
+    }
 
     if (this.shouldReconnect) {
       this.wsScheduleReconnect();
@@ -164,20 +168,20 @@ export class WireWebsocketConnection {
         }
 
         case 'NEW_CONVERSATION': {
-          // console.log('Received new NEW_CONVERSATION:', data);
+          logger.debug('[ClientWireApi.Websocket] Received new NEW_CONVERSATION:', data);
           let message = WsNewConversationFromJSON(data);
           this.client.dispatchEvent(new CustomEvent('conversations:new', { detail: message }));
           break;
         }
         case 'NEW_MESSAGE': {
-          // console.log('Received new NEW_MESSAGE:', data);
+          logger.debug('[ClientWireApi.Websocket] Received new NEW_MESSAGE:', data);
           let eventName = `conversations:${data.message.conversation_id}`;
           let message = WsNewMessageFromJSON(data);
           this.client.dispatchEvent(new CustomEvent(eventName, { detail: message }));
           break;
         }
         case 'MESSAGE_UPDATED': {
-          // console.log('Received new MESSAGE_UPDATED:', data);
+          logger.debug('[ClientWireApi.Websocket] Received new MESSAGE_UPDATED:', data);
           let eventName = `conversations:${data.message.conversation_id}`;
           let message = WsMessageUpdatedFromJSON(data);
           this.client.dispatchEvent(new CustomEvent(eventName, { detail: message }));
@@ -185,7 +189,7 @@ export class WireWebsocketConnection {
         }
 
         case 'PARTICIPANT_READ_STATUS': {
-          // console.log('Received new PARTICIPANT_READ_STATUS:', data);
+          logger.debug('[ClientWireApi.Websocket] Received new PARTICIPANT_READ_STATUS:', data);
           let eventName = `conversation:${data.message.conversation_id}:participant:${data.message.participant_id}`;
           let message = WsParticipantReadStatusFromJSON(data);
           this.client.dispatchEvent(new CustomEvent(eventName, { detail: message }));
@@ -193,22 +197,15 @@ export class WireWebsocketConnection {
         }
 
         default:
-          console.log('Unknown message type:', data);
+          logger.debug('[ClientWireApi.Websocket] Unknown message type:', data);
       }
     } catch (err) {
-      console.error('Failed to parse WebSocket message:', err);
+      logger.debug('[ClientWireApi.Websocket] Failed to parse WebSocket message:', err);
     }
   }
 
   private wsOnError(error: Event): void {
-    console.error('WebSocket error', error);
-
-    // Check if the error is a CloseEvent with code 1008
-    // which indicates an authentication error
-    if ((error as CloseEvent).code === 1008) {
-      console.error('WebSocket closed due to policy violation (code 1008)');
-      this.handleAuthExpired();
-    }
+    logger.debug('[ClientWireApi.Websocket] WebSocket error', error);
 
     // Only emit "disconnected" if we were previously connected
     if (this.connected) {
@@ -226,7 +223,9 @@ export class WireWebsocketConnection {
       // already scheduled
       return;
     }
-    console.log(`Scheduling websocket reconnect in ${this.reconnectDelay} ms...`);
+    logger.info(
+      `[ClientWireApi.Websocket] Scheduling websocket reconnect in ${this.reconnectDelay} ms...`
+    );
     this.reconnectTimer = window.setTimeout(() => {
       this.reconnectTimer = null;
       this.connect();
@@ -235,12 +234,12 @@ export class WireWebsocketConnection {
 
   private async handleAuthExpired() {
     this.socket?.close();
-    console.log('[WebSocket] Auth expired => attempting refresh...');
+    logger.debug('[ClientWireApi.Websocket] Auth expired => attempting refresh...');
     const ok = await this.tokenManager.refreshTokens();
     if (!ok) {
-      console.log('[WebSocket] Refresh failed => disconnect + forced logout?');
+      logger.debug('[ClientWireApi.Websocket] Refresh failed => disconnect + forced logout?');
     } else {
-      console.log('[WebSocket] Refresh succeeded => re-auth websocket?');
+      logger.debug('[ClientWireApi.Websocket] Refresh succeeded => re-auth websocket?');
     }
   }
 
@@ -259,7 +258,7 @@ export class WireWebsocketConnection {
   private startPongTimeout(): void {
     this.clearPongTimeout();
     this.pongTimeoutTimer = window.setTimeout(() => {
-      console.error('Pong timeout - no response from server.');
+      logger.debug('[ClientWireApi.Websocket] Pong timeout - no response from server.');
       this.socket?.close(); // Force a reconnection
     }, this.pongTimeout);
   }
