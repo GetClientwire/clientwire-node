@@ -20,7 +20,6 @@
 export const ParticipantKind = {
     None: 'NONE',
     User: 'USER',
-    Tenant: 'TENANT',
     Client: 'CLIENT'
 } as const;
 export type ParticipantKind = typeof ParticipantKind[keyof typeof ParticipantKind];

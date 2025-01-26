@@ -153,6 +153,15 @@ export class WireWebsocketConnection {
     });
   }
 
+  // Resubscribe might send SUBSCRIBE messages for addresses that are already subscribed
+  // but that's fine, the server will just ignore them.
+  private resubscribe(): void {
+    this.activeSubscriptions.forEach((address) => {
+      const msg: WsSubscribe = { type: 'SUBSCRIBE', address };
+      this.sendMessage(msg);
+    });
+  }
+
   private wsUrl(): string {
     return `${this.basePath}/api/v1/ws/conversations`;
   }
@@ -231,13 +240,6 @@ export class WireWebsocketConnection {
     if (this.shouldReconnect) {
       this.wsScheduleReconnect();
     }
-  }
-
-  private resubscribe(): void {
-    this.activeSubscriptions.forEach((address) => {
-      const msg: WsSubscribe = { type: 'SUBSCRIBE', address };
-      this.sendMessage(msg);
-    });
   }
 
   private wsOnMessage(event: MessageEvent): void {

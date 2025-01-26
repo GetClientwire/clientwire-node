@@ -38,6 +38,12 @@ export interface Tenant {
      */
     subdomain: string;
     /**
+     * Is your tenant allowed to create new tenants via the API?
+     * @type {boolean}
+     * @memberof Tenant
+     */
+    tenantCreationAllowed?: boolean;
+    /**
      * The endpoint that should be used to verify the token if you want to enable token-exchange flow and. It must be a oauth2 userinfo endpoint.
      * @type {string}
      * @memberof Tenant
@@ -74,6 +80,7 @@ export function TenantFromJSONTyped(json: any, ignoreDiscriminator: boolean): Te
         'id': json['id'],
         'name': json['name'],
         'subdomain': json['subdomain'],
+        'tenantCreationAllowed': json['tenant_creation_allowed'] == null ? undefined : json['tenant_creation_allowed'],
         'tokenExchangeUserinfoUrl': json['token_exchange_userinfo_url'] == null ? undefined : json['token_exchange_userinfo_url'],
         'userAutoProvisioningDomains': json['user_auto_provisioning_domains'] == null ? undefined : json['user_auto_provisioning_domains'],
     };
@@ -93,6 +100,7 @@ export function TenantToJSONTyped(value?: Tenant | null, ignoreDiscriminator: bo
         'id': value['id'],
         'name': value['name'],
         'subdomain': value['subdomain'],
+        'tenant_creation_allowed': value['tenantCreationAllowed'],
         'token_exchange_userinfo_url': value['tokenExchangeUserinfoUrl'],
         'user_auto_provisioning_domains': value['userAutoProvisioningDomains'],
     };

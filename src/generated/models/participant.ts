@@ -22,7 +22,7 @@ import {
 } from './participant-kind';
 
 /**
- * 
+ * Represents a participant in a conversation. There are three kinds of participants: USER, CLIENT.
  * @export
  * @interface Participant
  */

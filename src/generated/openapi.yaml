@@ -13,9 +13,6 @@ servers:
 - url: https://api.production.clientwire.net
 - url: https://api.staging.clientwire.net
 - url: https://api.int.clientwire.net
-- url: https://api.test.clientwire.net
-- url: https://api.dev.clientwire.net
-- url: http://localhost:8080
 tags:
 - name: Signup
   description: Operations related to signup.
@@ -3138,6 +3135,8 @@ components:
           items:
             $ref: "#/components/schemas/OidcConfig"
     Participant:
+      description: "Represents a participant in a conversation. There are three kinds\
+        \ of participants: USER, CLIENT."
       required:
       - id
       - tenant_id
@@ -3241,7 +3240,6 @@ components:
       enum:
       - NONE
       - USER
-      - TENANT
       - CLIENT
       type: string
     ParticipantListResponse:
@@ -3524,6 +3522,10 @@ components:
           pattern: "^[a-z0-9][a-z0-9_-]+[a-z0-9]?$"
           type: string
           example: autoclubmars
+        tenant_creation_allowed:
+          description: Is your tenant allowed to create new tenants via the API?
+          type: boolean
+          example: false
         token_exchange_userinfo_url:
           format: url
           description: The endpoint that should be used to verify the token if you
