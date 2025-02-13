@@ -50,10 +50,6 @@ export interface DeleteParticipantRequest {
     participantId: string;
 }
 
-export interface GetNewMessageCountRequest {
-    conversationId: string;
-}
-
 export interface GetParticipantRequest {
     conversationId: string;
     participantId: string;
@@ -154,22 +150,6 @@ export interface ParticipantsApiInterface {
     getClientParticipantHimself(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Participant>;
 
     /**
-     * Returns the unread message count for the participant across all conversations.
-     * @summary Get new message count for a participant.
-     * @param {string} conversationId 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof ParticipantsApiInterface
-     */
-    getNewMessageCountRaw(requestParameters: GetNewMessageCountRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
-
-    /**
-     * Returns the unread message count for the participant across all conversations.
-     * Get new message count for a participant.
-     */
-    getNewMessageCount(requestParameters: GetNewMessageCountRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
-
-    /**
      * Retrieves participant details by ID.
      * @summary Get a single participant in the specified conversation.
      * @param {string} conversationId 
@@ -246,13 +226,13 @@ export interface ParticipantsApiInterface {
      * @throws {RequiredError}
      * @memberof ParticipantsApiInterface
      */
-    updateParticipantActivityRaw(requestParameters: UpdateParticipantActivityRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Participant>>;
+    updateParticipantActivityRaw(requestParameters: UpdateParticipantActivityRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
 
     /**
      * Update participant’s message-seen info, etc.
      * Record participant activity.
      */
-    updateParticipantActivity(requestParameters: UpdateParticipantActivityRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Participant>;
+    updateParticipantActivity(requestParameters: UpdateParticipantActivityRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
 
 }
 
@@ -472,52 +452,6 @@ export class ParticipantsApi extends runtime.BaseAPI implements ParticipantsApiI
     }
 
     /**
-     * Returns the unread message count for the participant across all conversations.
-     * Get new message count for a participant.
-     */
-    async getNewMessageCountRaw(requestParameters: GetNewMessageCountRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
-        if (requestParameters['conversationId'] == null) {
-            throw new runtime.RequiredError(
-                'conversationId',
-                'Required parameter "conversationId" was null or undefined when calling getNewMessageCount().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        if (this.configuration && this.configuration.apiKey) {
-            headerParameters["X-API-KEY"] = await this.configuration.apiKey("X-API-KEY"); // ApiKeyAuth authentication
-        }
-
-        if (this.configuration && this.configuration.accessToken) {
-            const token = this.configuration.accessToken;
-            const tokenString = await token("BearerAuth", ["CLIENT_PARTICIPANT", "USER", "OWNER", "API_KEY"]);
-
-            if (tokenString) {
-                headerParameters["Authorization"] = `Bearer ${tokenString}`;
-            }
-        }
-        const response = await this.request({
-            path: `/api/v1/conversations/{conversation_id}/participants/new-message-count`.replace(`{${"conversation_id"}}`, encodeURIComponent(String(requestParameters['conversationId']))),
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.VoidApiResponse(response);
-    }
-
-    /**
-     * Returns the unread message count for the participant across all conversations.
-     * Get new message count for a participant.
-     */
-    async getNewMessageCount(requestParameters: GetNewMessageCountRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.getNewMessageCountRaw(requestParameters, initOverrides);
-    }
-
-    /**
      * Retrieves participant details by ID.
      * Get a single participant in the specified conversation.
      */
@@ -732,7 +666,7 @@ export class ParticipantsApi extends runtime.BaseAPI implements ParticipantsApiI
      * Update participant’s message-seen info, etc.
      * Record participant activity.
      */
-    async updateParticipantActivityRaw(requestParameters: UpdateParticipantActivityRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Participant>> {
+    async updateParticipantActivityRaw(requestParameters: UpdateParticipantActivityRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
         if (requestParameters['conversationId'] == null) {
             throw new runtime.RequiredError(
                 'conversationId',
@@ -780,16 +714,15 @@ export class ParticipantsApi extends runtime.BaseAPI implements ParticipantsApiI
             body: ParticipantActivityRequestToJSON(requestParameters['participantActivityRequest']),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ParticipantFromJSON(jsonValue));
+        return new runtime.VoidApiResponse(response);
     }
 
     /**
      * Update participant’s message-seen info, etc.
      * Record participant activity.
      */
-    async updateParticipantActivity(requestParameters: UpdateParticipantActivityRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Participant> {
-        const response = await this.updateParticipantActivityRaw(requestParameters, initOverrides);
-        return await response.value();
+    async updateParticipantActivity(requestParameters: UpdateParticipantActivityRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.updateParticipantActivityRaw(requestParameters, initOverrides);
     }
 
 }

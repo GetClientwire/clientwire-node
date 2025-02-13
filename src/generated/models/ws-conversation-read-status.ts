@@ -16,73 +16,65 @@ import { mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface WsParticipantReadStatus
+ * @interface WsConversationReadStatus
  */
-export interface WsParticipantReadStatus {
+export interface WsConversationReadStatus {
     /**
      * 
      * @type {string}
-     * @memberof WsParticipantReadStatus
+     * @memberof WsConversationReadStatus
      */
     type?: string | null;
     /**
-     * 
+     * The id of the conversation.
      * @type {string}
-     * @memberof WsParticipantReadStatus
-     */
-    participantId: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof WsParticipantReadStatus
+     * @memberof WsConversationReadStatus
      */
     conversationId: string;
     /**
      * 
      * @type {number}
-     * @memberof WsParticipantReadStatus
+     * @memberof WsConversationReadStatus
      */
     lastMessageSequenceSeen?: number;
     /**
-     * 
+     * The minimum of unread messages from all user participants.
      * @type {number}
-     * @memberof WsParticipantReadStatus
+     * @memberof WsConversationReadStatus
      */
-    unreadMessagesCount?: number;
+    unreadMessagesCount?: number | null;
 }
 
 /**
- * Check if a given object implements the WsParticipantReadStatus interface.
+ * Check if a given object implements the WsConversationReadStatus interface.
  */
-export function instanceOfWsParticipantReadStatus(value: object): value is WsParticipantReadStatus {
-    if (!('participantId' in value) || value['participantId'] === undefined) return false;
+export function instanceOfWsConversationReadStatus(value: object): value is WsConversationReadStatus {
     if (!('conversationId' in value) || value['conversationId'] === undefined) return false;
     return true;
 }
 
-export function WsParticipantReadStatusFromJSON(json: any): WsParticipantReadStatus {
-    return WsParticipantReadStatusFromJSONTyped(json, false);
+export function WsConversationReadStatusFromJSON(json: any): WsConversationReadStatus {
+    return WsConversationReadStatusFromJSONTyped(json, false);
 }
 
-export function WsParticipantReadStatusFromJSONTyped(json: any, ignoreDiscriminator: boolean): WsParticipantReadStatus {
+export function WsConversationReadStatusFromJSONTyped(json: any, ignoreDiscriminator: boolean): WsConversationReadStatus {
     if (json == null) {
         return json;
     }
     return {
         
         'type': json['type'] == null ? undefined : json['type'],
-        'participantId': json['participant_id'],
         'conversationId': json['conversation_id'],
         'lastMessageSequenceSeen': json['last_message_sequence_seen'] == null ? undefined : json['last_message_sequence_seen'],
         'unreadMessagesCount': json['unread_messages_count'] == null ? undefined : json['unread_messages_count'],
     };
 }
 
-export function WsParticipantReadStatusToJSON(json: any): WsParticipantReadStatus {
-    return WsParticipantReadStatusToJSONTyped(json, false);
+export function WsConversationReadStatusToJSON(json: any): WsConversationReadStatus {
+    return WsConversationReadStatusToJSONTyped(json, false);
 }
 
-export function WsParticipantReadStatusToJSONTyped(value?: WsParticipantReadStatus | null, ignoreDiscriminator: boolean = false): any {
+export function WsConversationReadStatusToJSONTyped(value?: WsConversationReadStatus | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
@@ -90,7 +82,6 @@ export function WsParticipantReadStatusToJSONTyped(value?: WsParticipantReadStat
     return {
         
         'type': value['type'],
-        'participant_id': value['participantId'],
         'conversation_id': value['conversationId'],
         'last_message_sequence_seen': value['lastMessageSequenceSeen'],
         'unread_messages_count': value['unreadMessagesCount'],

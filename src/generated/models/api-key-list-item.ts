@@ -32,11 +32,11 @@ export interface ApiKeyListItem {
      */
     name?: string | null;
     /**
-     * 
+     * Optional expiration time in ISO-8601 format
      * @type {Date}
      * @memberof ApiKeyListItem
      */
-    expiresAt?: Date;
+    expiresAt?: Date | null;
 }
 
 /**
@@ -76,7 +76,7 @@ export function ApiKeyListItemToJSONTyped(value?: ApiKeyListItem | null, ignoreD
         
         'key_id': value['keyId'],
         'name': value['name'],
-        'expires_at': value['expiresAt'] == null ? undefined : ((value['expiresAt']).toISOString()),
+        'expires_at': value['expiresAt'] == null ? undefined : ((value['expiresAt'] as any).toISOString()),
     };
 }
 

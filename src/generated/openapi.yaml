@@ -18,6 +18,8 @@ tags:
   description: Operations related to signup.
 - name: Signin
   description: Operations related to signin.
+- name: Password Reset
+  description: Operations related to resetting the password.
 - name: Conversation Types
   description: Operations for tenant-level conversation types.
 - name: Conversations
@@ -40,6 +42,7 @@ tags:
   description: Operations for managing per-tenant Twilio SMS settings.
 - name: Geocoding
   description: Operations to geocode locations.
+- name: Webhooks
 paths:
   /api/v1/api-keys:
     get:
@@ -253,7 +256,7 @@ paths:
       description: Request a password reset for the specified user.
       operationId: resetPassword
       tags:
-      - Signin
+      - Password Reset
       parameters:
       - name: tenant_id
         in: path
@@ -280,7 +283,7 @@ paths:
       description: Provide the token and new password to complete the reset.
       operationId: setPassword
       tags:
-      - Signin
+      - Password Reset
       parameters:
       - name: tenant_id
         in: path
@@ -583,7 +586,7 @@ paths:
         in: query
       - description: |-
           Include the specified related resources in the response.
-          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
+          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE', 'CURRENT_USER_READ_STATUS'.
           If empty, no related resource is returned
         schema:
           example: "PARTICIPANTS,CONVERSATION_TYPE"
@@ -659,7 +662,7 @@ paths:
       parameters:
       - description: |-
           Include the specified related resources in the response.
-          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
+          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE', 'CURRENT_USER_READ_STATUS'.
           If empty, no related resource is returned
         schema:
           example: "PARTICIPANTS,CONVERSATION_TYPE"
@@ -705,7 +708,7 @@ paths:
       parameters:
       - description: |-
           Include the specified related resources in the response.
-          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
+          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE', 'CURRENT_USER_READ_STATUS'.
           If empty, no related resource is returned
         schema:
           example: "PARTICIPANTS,CONVERSATION_TYPE"
@@ -756,7 +759,7 @@ paths:
           type: string
       - description: |-
           Include the specified related resources in the response.
-          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
+          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE', 'CURRENT_USER_READ_STATUS'.
           If empty, no related resource is returned
         schema:
           example: "PARTICIPANTS,CONVERSATION_TYPE"
@@ -813,7 +816,7 @@ paths:
           type: string
       - description: |-
           Include the specified related resources in the response.
-          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
+          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE', 'CURRENT_USER_READ_STATUS'.
           If empty, no related resource is returned
         schema:
           example: "PARTICIPANTS,CONVERSATION_TYPE"
@@ -889,7 +892,7 @@ paths:
           type: string
       - description: |-
           Include the specified related resources in the response.
-          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
+          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE', 'CURRENT_USER_READ_STATUS'.
           If empty, no related resource is returned
         schema:
           example: "PARTICIPANTS,CONVERSATION_TYPE"
@@ -1180,39 +1183,6 @@ paths:
         - USER
         - OWNER
         - API_KEY
-  /api/v1/conversations/{conversation_id}/participants/new-message-count:
-    get:
-      summary: Get new message count for a participant.
-      description: Returns the unread message count for the participant across all
-        conversations.
-      operationId: getNewMessageCount
-      tags:
-      - Participants
-      parameters:
-      - name: conversation_id
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: New message counts returned.
-        "400":
-          description: Bad request. Usually means that the input data was invalid
-            or misformed.
-        "401":
-          description: Missing or invalid credentials.
-        "403":
-          description: Forbidden.
-        "415":
-          description: Unsupported Content Type.
-      security:
-      - ApiKeyAuth: []
-      - BearerAuth:
-        - CLIENT_PARTICIPANT
-        - USER
-        - OWNER
-        - API_KEY
   /api/v1/conversations/{conversation_id}/participants/notify:
     post:
       summary: Notify conversation client participants.
@@ -1456,10 +1426,6 @@ paths:
       responses:
         "200":
           description: Conversation participant activity updated successfully.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Participant"
         "400":
           description: Bad request. Usually means that the input data was invalid
             or misformed.
@@ -2207,6 +2173,137 @@ paths:
       - BearerAuth:
         - API_KEY
         - OWNER
+  /api/v1/webhook-settings:
+    put:
+      summary: Update or create webhook settings (endpoint URL only).
+      description: "Allows setting the endpoint_url field. If the row doesn't exist,\
+        \ it will be created."
+      operationId: setWebhookSettings
+      tags:
+      - Webhooks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateWebhookSettingsRequest"
+        required: true
+      responses:
+        "200":
+          description: Endpoint URL updated (or created).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateWebhookSettingsRequest"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
+    get:
+      summary: Get the tenant’s webhook settings.
+      description: "Returns the current endpoint URL, signature scheme, and optionally\
+        \ the secret in plain text. In some scenarios, you might choose not to return\
+        \ the plain secret for security."
+      operationId: getWebhookSettings
+      tags:
+      - Webhooks
+      responses:
+        "200":
+          description: Webhook settings returned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateWebhookSettingsRequest"
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
+  /api/v1/webhook-settings/rotate-secret:
+    post:
+      summary: Rotate the webhook secret. Optionally update the signature scheme.
+      description: "Generates a new random whsec_ secret, encrypts it, and saves.\
+        \ Returns the plaintext once."
+      operationId: rotateWebhooksSecret
+      tags:
+      - Webhooks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RotateWebhookSecretRequest"
+        required: true
+      responses:
+        "200":
+          description: "Secret rotated, new plain secret returned."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RotateWebhookSecretRequest"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
+  /api/v1/webhook-settings/test:
+    post:
+      summary: Trigger a test webhook event
+      description: "\n            Enqueues a \"test.webhook\" event to be sent to\
+        \ your currently configured\n            webhook endpoint. This can help you\
+        \ verify your endpoint is receiving and\n            verifying Standard Webhooks\
+        \ signatures correctly.\n            \n            **Important**: Make sure\
+        \ you've set your webhook endpoint URL \n            via `PUT /api/v1/webhook-settings`\
+        \ before calling this.\n            \n            The test event payload is:\n\
+        \            ```\n            {\n              \"type\": \"test.webhook\"\
+        ,\n              \"timestamp\": \"2025-01-01T12:00:00Z\",\n              \"\
+        data\": {\n                \"example\": \"Hello World!\"\n              }\n\
+        \            }\n            ```\n            The event is signed using your\
+        \ stored secret, \n            then delivered to the endpoint URL with standard\
+        \ headers:\n            - `webhook-id`: a unique message ID \n           \
+        \ - `webhook-timestamp`: an integer (Unix seconds)\n            - `webhook-signature`:\
+        \ the signature(s), e.g. `v1,...`\n            If the endpoint responds with\
+        \ a 2xx status, the queue marks it successful. \n            Otherwise, the\
+        \ queue retries automatically, up to 6 times.\n        "
+      operationId: triggerTestWebhook
+      tags:
+      - Webhooks
+      responses:
+        "204":
+          description: A test webhook event has been scheduled.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - BearerAuth:
+        - OWNER
+        - API_KEY
 components:
   securitySchemes:
     BearerAuth:
@@ -2223,6 +2320,8 @@ components:
     Activity:
       enum:
       - MESSAGE_SEEN
+      - IS_TYPING
+      - HAS_CONVERSATION_OPEN
       type: string
     ApiKeyList:
       description: Wrapper object for returning a list of API keys.
@@ -2250,11 +2349,9 @@ components:
         expires_at:
           description: Optional expiration time in ISO-8601 format
           type: string
-          example: 2025-01-01T00:00:00Z
-          anyOf:
+          allOf:
           - $ref: "#/components/schemas/Instant"
-          - enum:
-            - null
+          example: 2025-01-01T00:00:00Z
           nullable: true
     AssetResponse:
       type: object
@@ -2272,11 +2369,9 @@ components:
         status:
           description: The status of the asset.
           type: string
-          example: UPLOAD_COMPLETED
-          anyOf:
+          allOf:
           - $ref: "#/components/schemas/Status"
-          - enum:
-            - null
+          example: UPLOAD_COMPLETED
           nullable: true
     AuthenticationOptions:
       required:
@@ -2303,6 +2398,7 @@ components:
       - id
       - tenant_id
       - archived
+      - conversation_type_id
       type: object
       properties:
         id:
@@ -2331,29 +2427,23 @@ components:
         conversation_type:
           description: The whole conversation_type type object.
           type: object
-          anyOf:
+          allOf:
           - $ref: "#/components/schemas/ConversationType"
-          - enum:
-            - null
           nullable: true
         created_at:
           description: Timestamp when the conversation was created.
           type: string
-          example: 2022-11-03T20:26:10.344522Z
-          anyOf:
+          allOf:
           - $ref: "#/components/schemas/Instant"
-          - enum:
-            - null
+          example: 2022-11-03T20:26:10.344522Z
           nullable: true
         updated_at:
           description: Timestamp when the conversation was last updated. Initially
             the same as created_at.
           type: string
-          example: 2022-11-03T20:26:10.344522Z
-          anyOf:
+          allOf:
           - $ref: "#/components/schemas/Instant"
-          - enum:
-            - null
+          example: 2022-11-03T20:26:10.344522Z
           nullable: true
         conversation_data:
           description: The data of a conversation corresponding to the conversation_data_schema
@@ -2365,30 +2455,22 @@ components:
         conversation_data_updated_at:
           description: Timestamp when the conversation data was last updated.
           type: string
-          example: 2022-11-03T21:26:10.344522Z
-          anyOf:
+          allOf:
           - $ref: "#/components/schemas/Instant"
-          - enum:
-            - null
+          example: 2022-11-03T21:26:10.344522Z
           nullable: true
         participants:
-          description: ""
+          description: The list of participants in the conversation.
           type: array
           items:
             $ref: "#/components/schemas/Participant"
           example: "null"
           nullable: true
-        new_message_count:
-          format: int32
-          description: Number of unread messages.
-          type: integer
-          example: 2
-          nullable: true
-        last_message_sequence_seen:
-          format: int32
-          description: Number of unread messages.
-          type: integer
-          example: 2
+        current_user_read_status:
+          description: The read status of the current user in the conversation.
+          type: object
+          allOf:
+          - $ref: "#/components/schemas/CurrentUserReadStatus"
           nullable: true
     ConversationListResponse:
       type: object
@@ -2552,6 +2634,12 @@ components:
           type: string
           example: A conversation type for handling breakdown cases.
           nullable: true
+        displayNameSharedByUsers:
+          description: "If set, all user participants will appear as the same user\
+            \ in the conversation to client participants."
+          type: string
+          example: "true"
+          nullable: true
         conversation_data_schema:
           description: A JSON Schema describing the data expected in the conversation.
           maxLength: 1073741824
@@ -2567,6 +2655,13 @@ components:
           maxLength: 1073741824
           type: string
           example: "{{status}} - {{created_at}}"
+          nullable: true
+        client_app_header_template:
+          description: An HTML template to reader the header in the client app which
+            has dynamic values based on the conversation_data
+          maxLength: 1073741824
+          type: string
+          example: "<div>{{client}}</div>"
           nullable: true
     ConversationTypeListResponse:
       required:
@@ -2606,6 +2701,12 @@ components:
           type: string
           example: A conversation type for handling breakdown cases.
           nullable: true
+        displayNameSharedByUsers:
+          description: "If set, all user participants will appear as the same user\
+            \ in the conversation to client participants."
+          type: string
+          example: "true"
+          nullable: true
         conversation_data_schema:
           description: A JSON Schema describing the data expected in the conversation.
           maxLength: 1073741824
@@ -2621,6 +2722,13 @@ components:
           maxLength: 1073741824
           type: string
           example: "{{status}} - {{created_at}}"
+          nullable: true
+        client_app_header_template:
+          description: An HTML template to reader the header in the client app which
+            has dynamic values based on the conversation_data
+          maxLength: 1073741824
+          type: string
+          example: "<div>{{client}}</div>"
           nullable: true
     ConversationTypePutRequest:
       type: object
@@ -2637,6 +2745,12 @@ components:
           type: string
           example: A conversation type for handling breakdown cases.
           nullable: true
+        displayNameSharedByUsers:
+          description: "If set, all user participants will appear as the same user\
+            \ in the conversation to client participants."
+          type: string
+          example: "true"
+          nullable: true
         conversation_data_schema:
           description: A JSON Schema describing the data expected in the conversation.
           maxLength: 1073741824
@@ -2652,6 +2766,13 @@ components:
           maxLength: 1073741824
           type: string
           example: "{{status}} - {{created_at}}"
+          nullable: true
+        client_app_header_template:
+          description: An HTML template to reader the header in the client app which
+            has dynamic values based on the conversation_data
+          maxLength: 1073741824
+          type: string
+          example: "<div>{{client}}</div>"
           nullable: true
     ConversationsByIdsRequest:
       required:
@@ -2697,11 +2818,9 @@ components:
         expires_at:
           description: "When this key expires, if any."
           type: string
-          example: 2022-03-10T16:15:50Z
-          anyOf:
+          allOf:
           - $ref: "#/components/schemas/Instant"
-          - enum:
-            - null
+          example: 2022-03-10T16:15:50Z
           nullable: true
     CreateOidcConfigRequest:
       description: DTO for creating or updating a Tenant OIDC configuration
@@ -2763,12 +2882,23 @@ components:
           description: The role assigned to the user. OWNER or USER
           default: USER
           type: string
-          example: OWNER
-          anyOf:
+          allOf:
           - $ref: "#/components/schemas/UserRole"
-          - enum:
-            - null
+          example: OWNER
           nullable: true
+    CurrentUserReadStatus:
+      type: object
+      properties:
+        last_message_seen:
+          format: int32
+          description: The last seen message sequence number.
+          type: integer
+          example: 0
+        unread_message_count:
+          format: int32
+          description: The unread message count.
+          type: integer
+          example: 0
     ErrorResponse:
       required:
       - code
@@ -2837,11 +2967,9 @@ components:
         positioned_at:
           description: ""
           type: string
-          example: 2024-09-01T23:59:59.999Z
-          anyOf:
+          allOf:
           - $ref: "#/components/schemas/Instant"
-          - enum:
-            - null
+          example: 2024-09-01T23:59:59.999Z
           nullable: true
     LocationWithAddress:
       type: object
@@ -2854,11 +2982,9 @@ components:
         location:
           description: ""
           type: object
-          example: "null"
-          anyOf:
+          allOf:
           - $ref: "#/components/schemas/Location"
-          - enum:
-            - null
+          example: "null"
           nullable: true
     LoginOptionsOidcProvider:
       required:
@@ -2949,10 +3075,8 @@ components:
         location:
           description: ""
           type: object
-          anyOf:
+          allOf:
           - $ref: "#/components/schemas/Location"
-          - enum:
-            - null
           nullable: true
         formatted_address:
           description: The formatted address of the location.
@@ -2962,10 +3086,8 @@ components:
         asset:
           description: ""
           type: object
-          anyOf:
+          allOf:
           - $ref: "#/components/schemas/AssetResponse"
-          - enum:
-            - null
           nullable: true
         source_id:
           description: Source id of the message.
@@ -3054,11 +3176,9 @@ components:
         location:
           description: ""
           type: object
-          example: "null"
-          anyOf:
+          allOf:
           - $ref: "#/components/schemas/Location"
-          - enum:
-            - null
+          example: "null"
           nullable: true
         formatted_address:
           description: The formatted address of the location.
@@ -3073,30 +3193,6 @@ components:
           type: string
           example: 0193df26-54b2-7142-ab2b-faba1babd679
           nullable: true
-    NewMessageCount:
-      required:
-      - conversation_id
-      - participant_id
-      - new_message_count
-      type: object
-      properties:
-        conversation_id:
-          description: Unique identifier for a conversation.
-          maxLength: 50
-          pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
-          type: string
-          example: Abc123
-        participant_id:
-          description: The id of the participant.
-          maxLength: 50
-          pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
-          type: string
-          example: client123
-        new_message_count:
-          format: int32
-          description: The number of new messages.
-          type: integer
-          example: 5
     OidcConfig:
       description: Represents a Tenant OIDC configuration object as returned by the
         API
@@ -3164,21 +3260,17 @@ components:
         created_at:
           description: Timestamp when the conversation was created.
           type: string
-          example: 2022-11-03T20:26:10.344522Z
-          anyOf:
+          allOf:
           - $ref: "#/components/schemas/Instant"
-          - enum:
-            - null
+          example: 2022-11-03T20:26:10.344522Z
           nullable: true
         updated_at:
           description: Timestamp when the conversation was last updated. Initially
             the same as created_at.
           type: string
-          example: 2022-11-03T20:26:10.344522Z
-          anyOf:
+          allOf:
           - $ref: "#/components/schemas/Instant"
-          - enum:
-            - null
+          example: 2022-11-03T20:26:10.344522Z
           nullable: true
         kind:
           description: The kind of the participant.
@@ -3219,10 +3311,29 @@ components:
           type: integer
           example: 5
           nullable: true
+        unread_messages_count:
+          format: int32
+          description: Number of unread messages.
+          type: integer
+          example: 2
+          nullable: true
+        had_conversation_open_at:
+          description: The last time the participant had the conversation open.
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/Instant"
+          example: 2025-11-03T20:26:10.344522Z
+          nullable: true
+        was_typing_at:
+          description: The last time the participant was seen typing.
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/Instant"
+          example: 2025-11-03T20:26:10.344522Z
+          nullable: true
     ParticipantActivityRequest:
       required:
       - activity
-      - last_message_sequence_seen
       type: object
       properties:
         activity:
@@ -3233,14 +3344,21 @@ components:
           example: MESSAGE_SEEN
         last_message_sequence_seen:
           format: int32
-          description: ""
+          description: last_message_sequence_seen is required for MESSAGE_SEEN activity.
           type: integer
           example: 5
+          nullable: true
+        source_id:
+          description: source_id is required for IS_TYPING activity.
+          type: string
+          example: "5"
+          nullable: true
     ParticipantKind:
       enum:
       - NONE
       - USER
       - CLIENT
+      - SHARED
       type: string
     ParticipantListResponse:
       required:
@@ -3368,6 +3486,19 @@ components:
           description: The email of the user.
           type: string
           example: owner@autoclubmars.com
+    RotateWebhookSecretRequest:
+      description: "Request to rotate the secret you can specify the signature schema,\
+        \ currently only v1 is supported."
+      type: object
+      properties:
+        signature_scheme:
+          description: "If provided, uses the signature_scheme to generate the secrets.\
+            \ Default and only supported is 'v1'."
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/WebhookSignatureScheme"
+          example: v1
+          nullable: true
     SetPasswordRequest:
       required:
       - email
@@ -3582,6 +3713,34 @@ components:
           description: Indicates whether the tenant is enabled.
           type: boolean
           example: true
+    TenantWebhookSettings:
+      description: Represents the webhook settings for a tenant.
+      required:
+      - tenant_id
+      type: object
+      properties:
+        tenant_id:
+          description: Tenant ID (UUID) as a string.
+          type: string
+          example: fa22b16e-2722-42c3-9106-d4c431ecd2ef
+        signature_scheme:
+          description: "Scheme used for signing webhooks, e.g. 'v1'."
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/WebhookSignatureScheme"
+          example: v1
+          nullable: true
+        endpoint_url:
+          description: The URL where webhooks will be posted.
+          type: string
+          example: https://example.com/webhooks
+          nullable: true
+        secret:
+          description: "The plain (decrypted) secret, prefixed with whsec_. This is\
+            \ only returned by certain endpoints."
+          type: string
+          example: whsec_ABC123...
+          nullable: true
     TokenResponseDto:
       required:
       - access_token
@@ -3639,6 +3798,16 @@ components:
       format: uuid
       pattern: "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
       type: string
+    UpdateWebhookSettingsRequest:
+      description: Request for updating only the endpoint URL.
+      required:
+      - endpoint_url
+      type: object
+      properties:
+        endpoint_url:
+          description: The new endpoint URL for receiving webhooks
+          type: string
+          example: https://myapp.com/webhooks
     User:
       description: Represents a user with an ID and email address.
       required:
@@ -3690,6 +3859,51 @@ components:
       - OWNER
       - USER
       type: string
+    WebhookConversation:
+      required:
+      - id
+      - archived
+      - conversation_type_id
+      type: object
+      properties:
+        id:
+          description: Unique identifier for a conversation.
+          type: string
+          example: Abc123
+        archived:
+          description: Indicates whether the conversation is archived.
+          type: boolean
+          example: true
+        conversation_type_id:
+          description: Unique identifier for a conversation type.
+          type: string
+          example: breakdowncase
+          nullable: true
+    WebhookConversationSharedUserParticipantReadStatus:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          description: Unique identifier for a conversation.
+          type: string
+          example: Abc123
+        lastMessageSeen:
+          format: int32
+          description: The last seen message sequence number for all user participants
+            in the conversation.
+          type: integer
+          example: 0
+        unreadMessageCount:
+          format: int32
+          description: The unread message count for all user participants in the conversation.
+          type: integer
+          example: 0
+    WebhookSignatureScheme:
+      description: Schemes for signing webhooks. Currently only `v1` is supported.
+      enum:
+      - v1
+      type: string
     WsAuthenticate:
       required:
       - token
@@ -3700,26 +3914,26 @@ components:
           nullable: true
         token:
           type: string
-    WsConversationsReadStatus:
+    WsConversationReadStatus:
+      required:
+      - conversation_id
       type: object
       properties:
+        type:
+          type: string
+          nullable: true
         conversation_id:
           description: The id of the conversation.
           maxLength: 50
           pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
           type: string
           example: Abc123
-          nullable: true
-        conversation_participant_id:
-          description: The id of the participant.
-          maxLength: 50
-          pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
-          type: string
-          example: Abc123
-          nullable: true
-        unread_messages:
+        last_message_sequence_seen:
           format: int32
-          description: The number of unread messages in the conversation.
+          type: integer
+        unread_messages_count:
+          format: int32
+          description: The minimum of unread messages from all user participants.
           type: integer
           example: 3
           nullable: true
@@ -3735,13 +3949,13 @@ components:
           $ref: "#/components/schemas/Message"
     WsNewConversation:
       required:
-      - conversationPublicId
+      - conversation_id
       type: object
       properties:
         type:
           type: string
           nullable: true
-        conversationPublicId:
+        conversation_id:
           type: string
     WsNewMessage:
       required:
@@ -3753,6 +3967,22 @@ components:
           nullable: true
         message:
           $ref: "#/components/schemas/Message"
+    WsParticipantHadConversationOpen:
+      required:
+      - participant_id
+      - conversation_id
+      - had_conversation_open_at
+      type: object
+      properties:
+        type:
+          type: string
+          nullable: true
+        participant_id:
+          type: string
+        conversation_id:
+          type: string
+        had_conversation_open_at:
+          $ref: "#/components/schemas/Instant"
     WsParticipantReadStatus:
       required:
       - participant_id
@@ -3766,9 +3996,31 @@ components:
           type: string
         conversation_id:
           type: string
-        unread_messages:
+        last_message_sequence_seen:
           format: int32
           type: integer
+        unread_messages_count:
+          format: int32
+          type: integer
+    WsParticipantWasTyping:
+      required:
+      - participant_id
+      - conversation_id
+      - was_typing_at
+      - source_id
+      type: object
+      properties:
+        type:
+          type: string
+          nullable: true
+        participant_id:
+          type: string
+        conversation_id:
+          type: string
+        was_typing_at:
+          $ref: "#/components/schemas/Instant"
+        source_id:
+          type: string
     WsPing:
       type: object
       properties:

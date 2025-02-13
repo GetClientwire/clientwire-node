@@ -6,8 +6,12 @@ import {
   WsNewConversationFromJSON,
   WsMessageUpdatedFromJSON,
   WsParticipantReadStatusFromJSON,
+  WsParticipantHadConversationOpenFromJSON,
+  WsParticipantWasTypingFromJSON,
+  WsConversationReadStatusFromJSON,
 } from './generated/models';
 import { TokenManager } from './token-manager';
+import { NEW_CONVERSATION_EVENT, CONVERSATION_READ_STATUS_EVENT } from './wire-events';
 import * as logger from './logger';
 
 export class WireWebsocketConnection {
@@ -163,6 +167,11 @@ export class WireWebsocketConnection {
   }
 
   private wsUrl(): string {
+    if (this.basePath.includes("https")) {
+      this.basePath.replace("https", "wss")
+    } else {
+      this.basePath.replace("http", "ws")
+    }
     return `${this.basePath}/api/v1/ws/conversations`;
   }
 
@@ -259,7 +268,15 @@ export class WireWebsocketConnection {
         case 'NEW_CONVERSATION': {
           logger.debug('[ClientWireApi.Websocket] Received NEW_CONVERSATION:', data);
           const message = WsNewConversationFromJSON(data);
-          this.client.dispatchEvent(new CustomEvent('conversations:new', { detail: message }));
+          this.client.dispatchEvent(new CustomEvent(NEW_CONVERSATION_EVENT, { detail: message }));
+          break;
+        }
+        case 'CONVERSATION_READ_STATUS': {
+          logger.debug('[ClientWireApi.Websocket] Received CONVERSATION_READ_STATUS:', data);
+          const message = WsConversationReadStatusFromJSON(data);
+          this.client.dispatchEvent(
+            new CustomEvent(CONVERSATION_READ_STATUS_EVENT, { detail: message })
+          );
           break;
         }
         case 'NEW_MESSAGE': {
@@ -278,8 +295,25 @@ export class WireWebsocketConnection {
         }
         case 'PARTICIPANT_READ_STATUS': {
           logger.debug('[ClientWireApi.Websocket] Received PARTICIPANT_READ_STATUS:', data);
-          const eventName = `conversation:${data.message.conversation_id}:participant:${data.message.participant_id}`;
+          const eventName = `conversations:${data.conversation_id}`;
           const message = WsParticipantReadStatusFromJSON(data);
+          this.client.dispatchEvent(new CustomEvent(eventName, { detail: message }));
+          break;
+        }
+        case 'PARTICIPANT_WAS_TYPING': {
+          logger.debug('[ClientWireApi.Websocket] Received PARTICIPANT_WAS_TYPING:', data);
+          const eventName = `conversations:${data.conversation_id}`;
+          const message = WsParticipantWasTypingFromJSON(data);
+          this.client.dispatchEvent(new CustomEvent(eventName, { detail: message }));
+          break;
+        }
+        case 'PARTICIPANT_HAD_CONVERSATION_OPEN': {
+          logger.debug(
+            '[ClientWireApi.Websocket] Received PARTICIPANT_HAD_CONVERSATION_OPEN:',
+            data
+          );
+          const eventName = `conversations:${data.conversation_id}`;
+          const message = WsParticipantHadConversationOpenFromJSON(data);
           this.client.dispatchEvent(new CustomEvent(eventName, { detail: message }));
           break;
         }

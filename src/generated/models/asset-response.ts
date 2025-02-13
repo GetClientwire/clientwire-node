@@ -40,7 +40,7 @@ export interface AssetResponse {
      */
     uploadUrl?: string | null;
     /**
-     * 
+     * The status of the asset.
      * @type {Status}
      * @memberof AssetResponse
      */

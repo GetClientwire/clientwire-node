@@ -18,7 +18,9 @@
  * @export
  */
 export const Activity = {
-    MessageSeen: 'MESSAGE_SEEN'
+    MessageSeen: 'MESSAGE_SEEN',
+    IsTyping: 'IS_TYPING',
+    HasConversationOpen: 'HAS_CONVERSATION_OPEN'
 } as const;
 export type Activity = typeof Activity[keyof typeof Activity];
 

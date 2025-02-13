@@ -30,14 +30,14 @@ export interface WsNewConversation {
      * @type {string}
      * @memberof WsNewConversation
      */
-    conversationPublicId: string;
+    conversationId: string;
 }
 
 /**
  * Check if a given object implements the WsNewConversation interface.
  */
 export function instanceOfWsNewConversation(value: object): value is WsNewConversation {
-    if (!('conversationPublicId' in value) || value['conversationPublicId'] === undefined) return false;
+    if (!('conversationId' in value) || value['conversationId'] === undefined) return false;
     return true;
 }
 
@@ -52,7 +52,7 @@ export function WsNewConversationFromJSONTyped(json: any, ignoreDiscriminator: b
     return {
         
         'type': json['type'] == null ? undefined : json['type'],
-        'conversationPublicId': json['conversationPublicId'],
+        'conversationId': json['conversation_id'],
     };
 }
 
@@ -68,7 +68,7 @@ export function WsNewConversationToJSONTyped(value?: WsNewConversation | null, i
     return {
         
         'type': value['type'],
-        'conversationPublicId': value['conversationPublicId'],
+        'conversation_id': value['conversationId'],
     };
 }
 

@@ -20,6 +20,13 @@ import {
     ParticipantToJSON,
     ParticipantToJSONTyped,
 } from './participant';
+import type { CurrentUserReadStatus } from './current-user-read-status';
+import {
+    CurrentUserReadStatusFromJSON,
+    CurrentUserReadStatusFromJSONTyped,
+    CurrentUserReadStatusToJSON,
+    CurrentUserReadStatusToJSONTyped,
+} from './current-user-read-status';
 import type { ConversationType } from './conversation-type';
 import {
     ConversationTypeFromJSON,
@@ -57,25 +64,25 @@ export interface Conversation {
      * @type {string}
      * @memberof Conversation
      */
-    conversationTypeId?: string | null;
+    conversationTypeId: string | null;
     /**
-     * 
+     * The whole conversation_type type object.
      * @type {ConversationType}
      * @memberof Conversation
      */
     conversationType?: ConversationType | null;
     /**
-     * 
+     * Timestamp when the conversation was created.
      * @type {Date}
      * @memberof Conversation
      */
-    createdAt?: Date;
+    createdAt?: Date | null;
     /**
-     * 
+     * Timestamp when the conversation was last updated. Initially the same as created_at.
      * @type {Date}
      * @memberof Conversation
      */
-    updatedAt?: Date;
+    updatedAt?: Date | null;
     /**
      * The data of a conversation corresponding to the conversation_data_schema of the conversation type.
      * @type {any}
@@ -83,29 +90,23 @@ export interface Conversation {
      */
     conversationData?: any | null;
     /**
-     * 
+     * Timestamp when the conversation data was last updated.
      * @type {Date}
      * @memberof Conversation
      */
-    conversationDataUpdatedAt?: Date;
+    conversationDataUpdatedAt?: Date | null;
     /**
-     * 
+     * The list of participants in the conversation.
      * @type {Array<Participant>}
      * @memberof Conversation
      */
     participants?: Array<Participant> | null;
     /**
-     * Number of unread messages.
-     * @type {number}
+     * The read status of the current user in the conversation.
+     * @type {CurrentUserReadStatus}
      * @memberof Conversation
      */
-    newMessageCount?: number | null;
-    /**
-     * Number of unread messages.
-     * @type {number}
-     * @memberof Conversation
-     */
-    lastMessageSequenceSeen?: number | null;
+    currentUserReadStatus?: CurrentUserReadStatus | null;
 }
 
 /**
@@ -115,6 +116,7 @@ export function instanceOfConversation(value: object): value is Conversation {
     if (!('id' in value) || value['id'] === undefined) return false;
     if (!('tenantId' in value) || value['tenantId'] === undefined) return false;
     if (!('archived' in value) || value['archived'] === undefined) return false;
+    if (!('conversationTypeId' in value) || value['conversationTypeId'] === undefined) return false;
     return true;
 }
 
@@ -131,15 +133,14 @@ export function ConversationFromJSONTyped(json: any, ignoreDiscriminator: boolea
         'id': json['id'],
         'tenantId': json['tenant_id'],
         'archived': json['archived'],
-        'conversationTypeId': json['conversation_type_id'] == null ? undefined : json['conversation_type_id'],
+        'conversationTypeId': json['conversation_type_id'],
         'conversationType': json['conversation_type'] == null ? undefined : ConversationTypeFromJSON(json['conversation_type']),
         'createdAt': json['created_at'] == null ? undefined : (new Date(json['created_at'])),
         'updatedAt': json['updated_at'] == null ? undefined : (new Date(json['updated_at'])),
         'conversationData': json['conversation_data'] == null ? undefined : json['conversation_data'],
         'conversationDataUpdatedAt': json['conversation_data_updated_at'] == null ? undefined : (new Date(json['conversation_data_updated_at'])),
         'participants': json['participants'] == null ? undefined : ((json['participants'] as Array<any>).map(ParticipantFromJSON)),
-        'newMessageCount': json['new_message_count'] == null ? undefined : json['new_message_count'],
-        'lastMessageSequenceSeen': json['last_message_sequence_seen'] == null ? undefined : json['last_message_sequence_seen'],
+        'currentUserReadStatus': json['current_user_read_status'] == null ? undefined : CurrentUserReadStatusFromJSON(json['current_user_read_status']),
     };
 }
 
@@ -159,13 +160,12 @@ export function ConversationToJSONTyped(value?: Conversation | null, ignoreDiscr
         'archived': value['archived'],
         'conversation_type_id': value['conversationTypeId'],
         'conversation_type': ConversationTypeToJSON(value['conversationType']),
-        'created_at': value['createdAt'] == null ? undefined : ((value['createdAt']).toISOString()),
-        'updated_at': value['updatedAt'] == null ? undefined : ((value['updatedAt']).toISOString()),
+        'created_at': value['createdAt'] == null ? undefined : ((value['createdAt'] as any).toISOString()),
+        'updated_at': value['updatedAt'] == null ? undefined : ((value['updatedAt'] as any).toISOString()),
         'conversation_data': value['conversationData'],
-        'conversation_data_updated_at': value['conversationDataUpdatedAt'] == null ? undefined : ((value['conversationDataUpdatedAt']).toISOString()),
+        'conversation_data_updated_at': value['conversationDataUpdatedAt'] == null ? undefined : ((value['conversationDataUpdatedAt'] as any).toISOString()),
         'participants': value['participants'] == null ? undefined : ((value['participants'] as Array<any>).map(ParticipantToJSON)),
-        'new_message_count': value['newMessageCount'],
-        'last_message_sequence_seen': value['lastMessageSequenceSeen'],
+        'current_user_read_status': CurrentUserReadStatusToJSON(value['currentUserReadStatus']),
     };
 }
 

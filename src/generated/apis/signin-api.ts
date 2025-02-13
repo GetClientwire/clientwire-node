@@ -16,17 +16,11 @@
 import * as runtime from '../runtime';
 import type {
   AuthenticationOptions,
-  ResetPasswordRequest,
-  SetPasswordRequest,
   TokenResponseDto,
 } from '../models/index';
 import {
     AuthenticationOptionsFromJSON,
     AuthenticationOptionsToJSON,
-    ResetPasswordRequestFromJSON,
-    ResetPasswordRequestToJSON,
-    SetPasswordRequestFromJSON,
-    SetPasswordRequestToJSON,
     TokenResponseDtoFromJSON,
     TokenResponseDtoToJSON,
 } from '../models/index';
@@ -46,16 +40,6 @@ export interface Oauth2TokenEndpointRequest {
     codeVerifier?: string | null;
     providerName?: string | null;
     refreshToken?: string | null;
-}
-
-export interface ResetPasswordOperationRequest {
-    tenantId: string;
-    resetPasswordRequest: ResetPasswordRequest;
-}
-
-export interface SetPasswordOperationRequest {
-    tenantId: string;
-    setPasswordRequest: SetPasswordRequest;
 }
 
 export interface SigninOptionsRequest {
@@ -98,40 +82,6 @@ export interface SigninApiInterface {
      * OAuth2 Token Endpoint
      */
     oauth2TokenEndpoint(requestParameters: Oauth2TokenEndpointRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TokenResponseDto>;
-
-    /**
-     * Request a password reset for the specified user.
-     * @summary Request a password reset.
-     * @param {string} tenantId 
-     * @param {ResetPasswordRequest} resetPasswordRequest 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof SigninApiInterface
-     */
-    resetPasswordRaw(requestParameters: ResetPasswordOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
-
-    /**
-     * Request a password reset for the specified user.
-     * Request a password reset.
-     */
-    resetPassword(requestParameters: ResetPasswordOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
-
-    /**
-     * Provide the token and new password to complete the reset.
-     * @summary Set password after reset.
-     * @param {string} tenantId 
-     * @param {SetPasswordRequest} setPasswordRequest 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof SigninApiInterface
-     */
-    setPasswordRaw(requestParameters: SetPasswordOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
-
-    /**
-     * Provide the token and new password to complete the reset.
-     * Set password after reset.
-     */
-    setPassword(requestParameters: SetPasswordOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
 
     /**
      * Based on the tenant_id and the email, we lookup what options for signin are available.
@@ -257,94 +207,6 @@ export class SigninApi extends runtime.BaseAPI implements SigninApiInterface {
     async oauth2TokenEndpoint(requestParameters: Oauth2TokenEndpointRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TokenResponseDto> {
         const response = await this.oauth2TokenEndpointRaw(requestParameters, initOverrides);
         return await response.value();
-    }
-
-    /**
-     * Request a password reset for the specified user.
-     * Request a password reset.
-     */
-    async resetPasswordRaw(requestParameters: ResetPasswordOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
-        if (requestParameters['tenantId'] == null) {
-            throw new runtime.RequiredError(
-                'tenantId',
-                'Required parameter "tenantId" was null or undefined when calling resetPassword().'
-            );
-        }
-
-        if (requestParameters['resetPasswordRequest'] == null) {
-            throw new runtime.RequiredError(
-                'resetPasswordRequest',
-                'Required parameter "resetPasswordRequest" was null or undefined when calling resetPassword().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'application/json';
-
-        const response = await this.request({
-            path: `/api/v1/auth/{tenant_id}/password-reset`.replace(`{${"tenant_id"}}`, encodeURIComponent(String(requestParameters['tenantId']))),
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-            body: ResetPasswordRequestToJSON(requestParameters['resetPasswordRequest']),
-        }, initOverrides);
-
-        return new runtime.VoidApiResponse(response);
-    }
-
-    /**
-     * Request a password reset for the specified user.
-     * Request a password reset.
-     */
-    async resetPassword(requestParameters: ResetPasswordOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.resetPasswordRaw(requestParameters, initOverrides);
-    }
-
-    /**
-     * Provide the token and new password to complete the reset.
-     * Set password after reset.
-     */
-    async setPasswordRaw(requestParameters: SetPasswordOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
-        if (requestParameters['tenantId'] == null) {
-            throw new runtime.RequiredError(
-                'tenantId',
-                'Required parameter "tenantId" was null or undefined when calling setPassword().'
-            );
-        }
-
-        if (requestParameters['setPasswordRequest'] == null) {
-            throw new runtime.RequiredError(
-                'setPasswordRequest',
-                'Required parameter "setPasswordRequest" was null or undefined when calling setPassword().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'application/json';
-
-        const response = await this.request({
-            path: `/api/v1/auth/{tenant_id}/password-reset/set`.replace(`{${"tenant_id"}}`, encodeURIComponent(String(requestParameters['tenantId']))),
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-            body: SetPasswordRequestToJSON(requestParameters['setPasswordRequest']),
-        }, initOverrides);
-
-        return new runtime.VoidApiResponse(response);
-    }
-
-    /**
-     * Provide the token and new password to complete the reset.
-     * Set password after reset.
-     */
-    async setPassword(requestParameters: SetPasswordOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.setPasswordRaw(requestParameters, initOverrides);
     }
 
     /**

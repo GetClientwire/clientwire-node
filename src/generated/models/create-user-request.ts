@@ -52,7 +52,7 @@ export interface CreateUserRequest {
      */
     lastname?: string | null;
     /**
-     * 
+     * The role assigned to the user. OWNER or USER
      * @type {UserRole}
      * @memberof CreateUserRequest
      */

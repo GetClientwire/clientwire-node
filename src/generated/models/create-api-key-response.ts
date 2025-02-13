@@ -38,11 +38,11 @@ export interface CreateApiKeyResponse {
      */
     name?: string | null;
     /**
-     * 
+     * When this key expires, if any.
      * @type {Date}
      * @memberof CreateApiKeyResponse
      */
-    expiresAt?: Date;
+    expiresAt?: Date | null;
 }
 
 /**
@@ -85,7 +85,7 @@ export function CreateApiKeyResponseToJSONTyped(value?: CreateApiKeyResponse | n
         'key_id': value['keyId'],
         'api_key': value['apiKey'],
         'name': value['name'],
-        'expires_at': value['expiresAt'] == null ? undefined : ((value['expiresAt']).toISOString()),
+        'expires_at': value['expiresAt'] == null ? undefined : ((value['expiresAt'] as any).toISOString()),
     };
 }
 

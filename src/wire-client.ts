@@ -13,13 +13,17 @@ import {
   APIKeysApi,
   SMSSettingsApi,
   OIDCConfigsApi,
+  PasswordResetApi,
+  SigninOptionsRequest,
 } from './generated/apis';
-import { TenantConfig } from './generated/models';
+import { AuthenticationOptions, TenantConfig } from './generated/models';
 import { WireWebsocketConnection } from './wire-websocket-connection';
 import {
   ClientWireEventMap,
   SUBSCRIPTION_ERROR_EVENT,
   AUTHENTICATION_ERROR_EVENT,
+  NEW_CONVERSATION_EVENT,
+  CONVERSATION_READ_STATUS_EVENT,
 } from './wire-events';
 import { TokenManager } from './token-manager';
 import { createFetchWithRefresh } from './fetch-with-refresh';
@@ -36,6 +40,7 @@ export class ClientWireApiClient extends EventTarget {
   public tenantConfigApi: TenantConfigApi;
   private signinApi: SigninApi;
   public signupApi: SignupApi;
+  public passwordResetApi: PasswordResetApi;
 
   public conversationsApi: ConversationsApi;
   public conversationTypesApi: ConversationTypesApi;
@@ -95,6 +100,7 @@ export class ClientWireApiClient extends EventTarget {
     this.tenantConfigApi = new TenantConfigApi(this.apiConfig);
     this.signinApi = new SigninApi(this.apiConfig);
     this.signupApi = new SignupApi(this.apiConfig);
+    this.passwordResetApi = new PasswordResetApi(this.apiConfig);
 
     // Apis gets re-initialized later with appropriate headers
     this.usersApi = new UsersApi(this.apiConfig);
@@ -476,7 +482,17 @@ export class ClientWireApiClient extends EventTarget {
 
   private isWebsocketEvent(eventName: keyof ClientWireEventMap | string): boolean {
     if (typeof eventName !== 'string') return false;
-    return eventName.startsWith('conversations:');
+    return (
+      eventName.startsWith('conversations:') ||
+      eventName === NEW_CONVERSATION_EVENT ||
+      eventName === CONVERSATION_READ_STATUS_EVENT
+    );
   }
   //#endregion
+
+  public async getSignInOptions(
+    signIngOptionsRequest: SigninOptionsRequest
+  ): Promise<AuthenticationOptions> {
+    return this.signinApi.signinOptions(signIngOptionsRequest);
+  }
 }

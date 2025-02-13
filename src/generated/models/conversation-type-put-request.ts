@@ -32,6 +32,12 @@ export interface ConversationTypePutRequest {
      */
     description?: string | null;
     /**
+     * If set, all user participants will appear as the same user in the conversation to client participants.
+     * @type {string}
+     * @memberof ConversationTypePutRequest
+     */
+    displayNameSharedByUsers?: string | null;
+    /**
      * A JSON Schema describing the data expected in the conversation.
      * @type {any}
      * @memberof ConversationTypePutRequest
@@ -43,6 +49,12 @@ export interface ConversationTypePutRequest {
      * @memberof ConversationTypePutRequest
      */
     conversationDataListItemTemplate?: string | null;
+    /**
+     * An HTML template to reader the header in the client app which has dynamic values based on the conversation_data
+     * @type {string}
+     * @memberof ConversationTypePutRequest
+     */
+    clientAppHeaderTemplate?: string | null;
 }
 
 /**
@@ -64,8 +76,10 @@ export function ConversationTypePutRequestFromJSONTyped(json: any, ignoreDiscrim
         
         'id': json['id'] == null ? undefined : json['id'],
         'description': json['description'] == null ? undefined : json['description'],
+        'displayNameSharedByUsers': json['displayNameSharedByUsers'] == null ? undefined : json['displayNameSharedByUsers'],
         'conversationDataSchema': json['conversation_data_schema'] == null ? undefined : json['conversation_data_schema'],
         'conversationDataListItemTemplate': json['conversation_data_list_item_template'] == null ? undefined : json['conversation_data_list_item_template'],
+        'clientAppHeaderTemplate': json['client_app_header_template'] == null ? undefined : json['client_app_header_template'],
     };
 }
 
@@ -82,8 +96,10 @@ export function ConversationTypePutRequestToJSONTyped(value?: ConversationTypePu
         
         'id': value['id'],
         'description': value['description'],
+        'displayNameSharedByUsers': value['displayNameSharedByUsers'],
         'conversation_data_schema': value['conversationDataSchema'],
         'conversation_data_list_item_template': value['conversationDataListItemTemplate'],
+        'client_app_header_template': value['clientAppHeaderTemplate'],
     };
 }
 

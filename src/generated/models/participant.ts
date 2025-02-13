@@ -46,17 +46,17 @@ export interface Participant {
      */
     conversationId: string;
     /**
-     * 
+     * Timestamp when the conversation was created.
      * @type {Date}
      * @memberof Participant
      */
-    createdAt?: Date;
+    createdAt?: Date | null;
     /**
-     * 
+     * Timestamp when the conversation was last updated. Initially the same as created_at.
      * @type {Date}
      * @memberof Participant
      */
-    updatedAt?: Date;
+    updatedAt?: Date | null;
     /**
      * The kind of the participant.
      * @type {ParticipantKind}
@@ -93,6 +93,24 @@ export interface Participant {
      * @memberof Participant
      */
     lastMessageSequenceSeen?: number | null;
+    /**
+     * Number of unread messages.
+     * @type {number}
+     * @memberof Participant
+     */
+    unreadMessagesCount?: number | null;
+    /**
+     * The last time the participant had the conversation open.
+     * @type {Date}
+     * @memberof Participant
+     */
+    hadConversationOpenAt?: Date | null;
+    /**
+     * The last time the participant was seen typing.
+     * @type {Date}
+     * @memberof Participant
+     */
+    wasTypingAt?: Date | null;
 }
 
 
@@ -129,6 +147,9 @@ export function ParticipantFromJSONTyped(json: any, ignoreDiscriminator: boolean
         'email': json['email'] == null ? undefined : json['email'],
         'userId': json['user_id'] == null ? undefined : json['user_id'],
         'lastMessageSequenceSeen': json['last_message_sequence_seen'] == null ? undefined : json['last_message_sequence_seen'],
+        'unreadMessagesCount': json['unread_messages_count'] == null ? undefined : json['unread_messages_count'],
+        'hadConversationOpenAt': json['had_conversation_open_at'] == null ? undefined : (new Date(json['had_conversation_open_at'])),
+        'wasTypingAt': json['was_typing_at'] == null ? undefined : (new Date(json['was_typing_at'])),
     };
 }
 
@@ -146,14 +167,17 @@ export function ParticipantToJSONTyped(value?: Participant | null, ignoreDiscrim
         'id': value['id'],
         'tenant_id': value['tenantId'],
         'conversation_id': value['conversationId'],
-        'created_at': value['createdAt'] == null ? undefined : ((value['createdAt']).toISOString()),
-        'updated_at': value['updatedAt'] == null ? undefined : ((value['updatedAt']).toISOString()),
+        'created_at': value['createdAt'] == null ? undefined : ((value['createdAt'] as any).toISOString()),
+        'updated_at': value['updatedAt'] == null ? undefined : ((value['updatedAt'] as any).toISOString()),
         'kind': ParticipantKindToJSON(value['kind']),
         'display_name': value['displayName'],
         'phone_number': value['phoneNumber'],
         'email': value['email'],
         'user_id': value['userId'],
         'last_message_sequence_seen': value['lastMessageSequenceSeen'],
+        'unread_messages_count': value['unreadMessagesCount'],
+        'had_conversation_open_at': value['hadConversationOpenAt'] == null ? undefined : ((value['hadConversationOpenAt'] as any).toISOString()),
+        'was_typing_at': value['wasTypingAt'] == null ? undefined : ((value['wasTypingAt'] as any).toISOString()),
     };
 }
 

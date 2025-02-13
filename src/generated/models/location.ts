@@ -42,7 +42,7 @@ export interface Location {
      * @type {Date}
      * @memberof Location
      */
-    positionedAt?: Date;
+    positionedAt?: Date | null;
 }
 
 /**
@@ -85,7 +85,7 @@ export function LocationToJSONTyped(value?: Location | null, ignoreDiscriminator
         'latitude': value['latitude'],
         'longitude': value['longitude'],
         'accuracy': value['accuracy'],
-        'positioned_at': value['positionedAt'] == null ? undefined : ((value['positionedAt']).toISOString()),
+        'positioned_at': value['positionedAt'] == null ? undefined : ((value['positionedAt'] as any).toISOString()),
     };
 }
 

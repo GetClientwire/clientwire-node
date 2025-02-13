@@ -34,11 +34,17 @@ export interface ParticipantActivityRequest {
      */
     activity: Activity;
     /**
-     * 
+     * last_message_sequence_seen is required for MESSAGE_SEEN activity.
      * @type {number}
      * @memberof ParticipantActivityRequest
      */
-    lastMessageSequenceSeen: number;
+    lastMessageSequenceSeen?: number | null;
+    /**
+     * source_id is required for IS_TYPING activity.
+     * @type {string}
+     * @memberof ParticipantActivityRequest
+     */
+    sourceId?: string | null;
 }
 
 
@@ -48,7 +54,6 @@ export interface ParticipantActivityRequest {
  */
 export function instanceOfParticipantActivityRequest(value: object): value is ParticipantActivityRequest {
     if (!('activity' in value) || value['activity'] === undefined) return false;
-    if (!('lastMessageSequenceSeen' in value) || value['lastMessageSequenceSeen'] === undefined) return false;
     return true;
 }
 
@@ -63,7 +68,8 @@ export function ParticipantActivityRequestFromJSONTyped(json: any, ignoreDiscrim
     return {
         
         'activity': ActivityFromJSON(json['activity']),
-        'lastMessageSequenceSeen': json['last_message_sequence_seen'],
+        'lastMessageSequenceSeen': json['last_message_sequence_seen'] == null ? undefined : json['last_message_sequence_seen'],
+        'sourceId': json['source_id'] == null ? undefined : json['source_id'],
     };
 }
 
@@ -80,6 +86,7 @@ export function ParticipantActivityRequestToJSONTyped(value?: ParticipantActivit
         
         'activity': ActivityToJSON(value['activity']),
         'last_message_sequence_seen': value['lastMessageSequenceSeen'],
+        'source_id': value['sourceId'],
     };
 }
 

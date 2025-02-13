@@ -50,6 +50,12 @@ export interface ConversationType {
      */
     description?: string | null;
     /**
+     * If set, all user participants will appear as the same user in the conversation to client participants.
+     * @type {string}
+     * @memberof ConversationType
+     */
+    displayNameSharedByUsers?: string | null;
+    /**
      * A JSON Schema describing the data expected in the conversation.
      * @type {any}
      * @memberof ConversationType
@@ -61,6 +67,12 @@ export interface ConversationType {
      * @memberof ConversationType
      */
     conversationDataListItemTemplate?: string | null;
+    /**
+     * An HTML template to reader the header in the client app which has dynamic values based on the conversation_data
+     * @type {string}
+     * @memberof ConversationType
+     */
+    clientAppHeaderTemplate?: string | null;
 }
 
 /**
@@ -89,8 +101,10 @@ export function ConversationTypeFromJSONTyped(json: any, ignoreDiscriminator: bo
         'createdAt': (new Date(json['created_at'])),
         'updatedAt': (new Date(json['updated_at'])),
         'description': json['description'] == null ? undefined : json['description'],
+        'displayNameSharedByUsers': json['displayNameSharedByUsers'] == null ? undefined : json['displayNameSharedByUsers'],
         'conversationDataSchema': json['conversation_data_schema'] == null ? undefined : json['conversation_data_schema'],
         'conversationDataListItemTemplate': json['conversation_data_list_item_template'] == null ? undefined : json['conversation_data_list_item_template'],
+        'clientAppHeaderTemplate': json['client_app_header_template'] == null ? undefined : json['client_app_header_template'],
     };
 }
 
@@ -110,8 +124,10 @@ export function ConversationTypeToJSONTyped(value?: ConversationType | null, ign
         'created_at': ((value['createdAt']).toISOString()),
         'updated_at': ((value['updatedAt']).toISOString()),
         'description': value['description'],
+        'displayNameSharedByUsers': value['displayNameSharedByUsers'],
         'conversation_data_schema': value['conversationDataSchema'],
         'conversation_data_list_item_template': value['conversationDataListItemTemplate'],
+        'client_app_header_template': value['clientAppHeaderTemplate'],
     };
 }
 
