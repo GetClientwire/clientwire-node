@@ -50,13 +50,13 @@ export interface User {
      * @type {string}
      * @memberof User
      */
-    firstname?: string | null;
+    firstname: string;
     /**
      * The last name of the user to create.
      * @type {string}
      * @memberof User
      */
-    lastname?: string | null;
+    lastname: string;
 }
 
 
@@ -68,6 +68,8 @@ export function instanceOfUser(value: object): value is User {
     if (!('id' in value) || value['id'] === undefined) return false;
     if (!('email' in value) || value['email'] === undefined) return false;
     if (!('role' in value) || value['role'] === undefined) return false;
+    if (!('firstname' in value) || value['firstname'] === undefined) return false;
+    if (!('lastname' in value) || value['lastname'] === undefined) return false;
     return true;
 }
 
@@ -84,8 +86,8 @@ export function UserFromJSONTyped(json: any, ignoreDiscriminator: boolean): User
         'id': json['id'],
         'email': json['email'],
         'role': UserRoleFromJSON(json['role']),
-        'firstname': json['firstname'] == null ? undefined : json['firstname'],
-        'lastname': json['lastname'] == null ? undefined : json['lastname'],
+        'firstname': json['firstname'],
+        'lastname': json['lastname'],
     };
 }
 

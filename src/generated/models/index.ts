@@ -6,6 +6,8 @@ export * from './api-key-list-item';
 export * from './asset-response';
 export * from './authentication-options';
 export * from './conversation';
+export * from './conversation-label-post-request';
+export * from './conversation-label-put-request';
 export * from './conversation-list-response';
 export * from './conversation-paginated-response';
 export * from './conversation-post-request';

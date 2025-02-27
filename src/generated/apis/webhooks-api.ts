@@ -16,11 +16,14 @@
 import * as runtime from '../runtime';
 import type {
   RotateWebhookSecretRequest,
+  TenantWebhookSettings,
   UpdateWebhookSettingsRequest,
 } from '../models/index';
 import {
     RotateWebhookSecretRequestFromJSON,
     RotateWebhookSecretRequestToJSON,
+    TenantWebhookSettingsFromJSON,
+    TenantWebhookSettingsToJSON,
     UpdateWebhookSettingsRequestFromJSON,
     UpdateWebhookSettingsRequestToJSON,
 } from '../models/index';
@@ -41,35 +44,35 @@ export interface SetWebhookSettingsRequest {
  */
 export interface WebhooksApiInterface {
     /**
-     * Returns the current endpoint URL, signature scheme, and optionally the secret in plain text. In some scenarios, you might choose not to return the plain secret for security.
+     * Returns the current endpoint URL, signature scheme, and the secret in plain text. 
      * @summary Get the tenant’s webhook settings.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof WebhooksApiInterface
      */
-    getWebhookSettingsRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<UpdateWebhookSettingsRequest>>;
+    getWebhookSettingsRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TenantWebhookSettings>>;
 
     /**
-     * Returns the current endpoint URL, signature scheme, and optionally the secret in plain text. In some scenarios, you might choose not to return the plain secret for security.
+     * Returns the current endpoint URL, signature scheme, and the secret in plain text. 
      * Get the tenant’s webhook settings.
      */
-    getWebhookSettings(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UpdateWebhookSettingsRequest>;
+    getWebhookSettings(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TenantWebhookSettings>;
 
     /**
-     * Generates a new random whsec_ secret, encrypts it, and saves. Returns the plaintext once.
+     * Generates a new random whsec_ secret, encrypts, and saves it.
      * @summary Rotate the webhook secret. Optionally update the signature scheme.
      * @param {RotateWebhookSecretRequest} rotateWebhookSecretRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof WebhooksApiInterface
      */
-    rotateWebhooksSecretRaw(requestParameters: RotateWebhooksSecretRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<RotateWebhookSecretRequest>>;
+    rotateWebhooksSecretRaw(requestParameters: RotateWebhooksSecretRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TenantWebhookSettings>>;
 
     /**
-     * Generates a new random whsec_ secret, encrypts it, and saves. Returns the plaintext once.
+     * Generates a new random whsec_ secret, encrypts, and saves it.
      * Rotate the webhook secret. Optionally update the signature scheme.
      */
-    rotateWebhooksSecret(requestParameters: RotateWebhooksSecretRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<RotateWebhookSecretRequest>;
+    rotateWebhooksSecret(requestParameters: RotateWebhooksSecretRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TenantWebhookSettings>;
 
     /**
      * Allows setting the endpoint_url field. If the row doesn\'t exist, it will be created.
@@ -79,13 +82,13 @@ export interface WebhooksApiInterface {
      * @throws {RequiredError}
      * @memberof WebhooksApiInterface
      */
-    setWebhookSettingsRaw(requestParameters: SetWebhookSettingsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<UpdateWebhookSettingsRequest>>;
+    setWebhookSettingsRaw(requestParameters: SetWebhookSettingsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TenantWebhookSettings>>;
 
     /**
      * Allows setting the endpoint_url field. If the row doesn\'t exist, it will be created.
      * Update or create webhook settings (endpoint URL only).
      */
-    setWebhookSettings(requestParameters: SetWebhookSettingsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UpdateWebhookSettingsRequest>;
+    setWebhookSettings(requestParameters: SetWebhookSettingsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TenantWebhookSettings>;
 
     /**
      *              Enqueues a \"test.webhook\" event to be sent to your currently configured             webhook endpoint. This can help you verify your endpoint is receiving and             verifying Standard Webhooks signatures correctly.                          **Important**: Make sure you\'ve set your webhook endpoint URL              via `PUT /api/v1/webhook-settings` before calling this.                          The test event payload is:             ```             {               \"type\": \"test.webhook\",               \"timestamp\": \"2025-01-01T12:00:00Z\",               \"data\": {                 \"example\": \"Hello World!\"               }             }             ```             The event is signed using your stored secret,              then delivered to the endpoint URL with standard headers:             - `webhook-id`: a unique message ID              - `webhook-timestamp`: an integer (Unix seconds)             - `webhook-signature`: the signature(s), e.g. `v1,...`             If the endpoint responds with a 2xx status, the queue marks it successful.              Otherwise, the queue retries automatically, up to 6 times.         
@@ -110,10 +113,10 @@ export interface WebhooksApiInterface {
 export class WebhooksApi extends runtime.BaseAPI implements WebhooksApiInterface {
 
     /**
-     * Returns the current endpoint URL, signature scheme, and optionally the secret in plain text. In some scenarios, you might choose not to return the plain secret for security.
+     * Returns the current endpoint URL, signature scheme, and the secret in plain text. 
      * Get the tenant’s webhook settings.
      */
-    async getWebhookSettingsRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<UpdateWebhookSettingsRequest>> {
+    async getWebhookSettingsRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TenantWebhookSettings>> {
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -137,23 +140,23 @@ export class WebhooksApi extends runtime.BaseAPI implements WebhooksApiInterface
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => UpdateWebhookSettingsRequestFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => TenantWebhookSettingsFromJSON(jsonValue));
     }
 
     /**
-     * Returns the current endpoint URL, signature scheme, and optionally the secret in plain text. In some scenarios, you might choose not to return the plain secret for security.
+     * Returns the current endpoint URL, signature scheme, and the secret in plain text. 
      * Get the tenant’s webhook settings.
      */
-    async getWebhookSettings(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UpdateWebhookSettingsRequest> {
+    async getWebhookSettings(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TenantWebhookSettings> {
         const response = await this.getWebhookSettingsRaw(initOverrides);
         return await response.value();
     }
 
     /**
-     * Generates a new random whsec_ secret, encrypts it, and saves. Returns the plaintext once.
+     * Generates a new random whsec_ secret, encrypts, and saves it.
      * Rotate the webhook secret. Optionally update the signature scheme.
      */
-    async rotateWebhooksSecretRaw(requestParameters: RotateWebhooksSecretRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<RotateWebhookSecretRequest>> {
+    async rotateWebhooksSecretRaw(requestParameters: RotateWebhooksSecretRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TenantWebhookSettings>> {
         if (requestParameters['rotateWebhookSecretRequest'] == null) {
             throw new runtime.RequiredError(
                 'rotateWebhookSecretRequest',
@@ -187,14 +190,14 @@ export class WebhooksApi extends runtime.BaseAPI implements WebhooksApiInterface
             body: RotateWebhookSecretRequestToJSON(requestParameters['rotateWebhookSecretRequest']),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => RotateWebhookSecretRequestFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => TenantWebhookSettingsFromJSON(jsonValue));
     }
 
     /**
-     * Generates a new random whsec_ secret, encrypts it, and saves. Returns the plaintext once.
+     * Generates a new random whsec_ secret, encrypts, and saves it.
      * Rotate the webhook secret. Optionally update the signature scheme.
      */
-    async rotateWebhooksSecret(requestParameters: RotateWebhooksSecretRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<RotateWebhookSecretRequest> {
+    async rotateWebhooksSecret(requestParameters: RotateWebhooksSecretRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TenantWebhookSettings> {
         const response = await this.rotateWebhooksSecretRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -203,7 +206,7 @@ export class WebhooksApi extends runtime.BaseAPI implements WebhooksApiInterface
      * Allows setting the endpoint_url field. If the row doesn\'t exist, it will be created.
      * Update or create webhook settings (endpoint URL only).
      */
-    async setWebhookSettingsRaw(requestParameters: SetWebhookSettingsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<UpdateWebhookSettingsRequest>> {
+    async setWebhookSettingsRaw(requestParameters: SetWebhookSettingsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TenantWebhookSettings>> {
         if (requestParameters['updateWebhookSettingsRequest'] == null) {
             throw new runtime.RequiredError(
                 'updateWebhookSettingsRequest',
@@ -237,14 +240,14 @@ export class WebhooksApi extends runtime.BaseAPI implements WebhooksApiInterface
             body: UpdateWebhookSettingsRequestToJSON(requestParameters['updateWebhookSettingsRequest']),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => UpdateWebhookSettingsRequestFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => TenantWebhookSettingsFromJSON(jsonValue));
     }
 
     /**
      * Allows setting the endpoint_url field. If the row doesn\'t exist, it will be created.
      * Update or create webhook settings (endpoint URL only).
      */
-    async setWebhookSettings(requestParameters: SetWebhookSettingsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UpdateWebhookSettingsRequest> {
+    async setWebhookSettings(requestParameters: SetWebhookSettingsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TenantWebhookSettings> {
         const response = await this.setWebhookSettingsRaw(requestParameters, initOverrides);
         return await response.value();
     }

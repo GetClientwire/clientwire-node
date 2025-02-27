@@ -1,5 +1,6 @@
 .openapi-generator-ignore
 apis/api-keys-api.ts
+apis/conversation-labels-api.ts
 apis/conversation-types-api.ts
 apis/conversations-api.ts
 apis/geocoding-api.ts
@@ -21,6 +22,8 @@ models/api-key-list-item.ts
 models/api-key-list.ts
 models/asset-response.ts
 models/authentication-options.ts
+models/conversation-label-post-request.ts
+models/conversation-label-put-request.ts
 models/conversation-list-response.ts
 models/conversation-paginated-response.ts
 models/conversation-post-request.ts

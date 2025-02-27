@@ -15,6 +15,8 @@ import {
   OIDCConfigsApi,
   PasswordResetApi,
   SigninOptionsRequest,
+  ConversationLabelsApi,
+  WebhooksApi,
 } from './generated/apis';
 import { AuthenticationOptions, TenantConfig } from './generated/models';
 import { WireWebsocketConnection } from './wire-websocket-connection';
@@ -41,9 +43,10 @@ export class ClientWireApiClient extends EventTarget {
   private signinApi: SigninApi;
   public signupApi: SignupApi;
   public passwordResetApi: PasswordResetApi;
-
+  public webhooksApi: WebhooksApi;
   public conversationsApi: ConversationsApi;
   public conversationTypesApi: ConversationTypesApi;
+  public conversationLabelsApi: ConversationLabelsApi;
   public participantsApi: ParticipantsApi;
   public messagesApi: MessagesApi;
   public geocodingApi: GeocodingApi;
@@ -105,6 +108,7 @@ export class ClientWireApiClient extends EventTarget {
     // Apis gets re-initialized later with appropriate headers
     this.usersApi = new UsersApi(this.apiConfig);
     this.tenantsApi = new TenantsApi(this.apiConfig);
+    this.webhooksApi = new WebhooksApi(this.apiConfig);
     this.conversationsApi = new ConversationsApi(this.apiConfig);
     this.conversationTypesApi = new ConversationTypesApi(this.apiConfig);
     this.participantsApi = new ParticipantsApi(this.apiConfig);
@@ -113,6 +117,7 @@ export class ClientWireApiClient extends EventTarget {
     this.apiKeysApi = new APIKeysApi(this.apiConfig);
     this.oidcConfigsApi = new OIDCConfigsApi(this.apiConfig);
     this.smsSettingsApi = new SMSSettingsApi(this.apiConfig);
+    this.conversationLabelsApi = new ConversationLabelsApi(this.apiConfig);
     logger.debug('[ClientWireApi] New instance created: ', this.instanceId);
   }
 

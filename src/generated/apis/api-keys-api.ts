@@ -16,11 +16,14 @@
 import * as runtime from '../runtime';
 import type {
   ApiKeyList,
+  ApiKeyListItem,
   CreateApiKeyRequest,
 } from '../models/index';
 import {
     ApiKeyListFromJSON,
     ApiKeyListToJSON,
+    ApiKeyListItemFromJSON,
+    ApiKeyListItemToJSON,
     CreateApiKeyRequestFromJSON,
     CreateApiKeyRequestToJSON,
 } from '../models/index';
@@ -31,6 +34,11 @@ export interface CreateApiKeyOperationRequest {
 
 export interface DeleteApiKeyRequest {
     keyId: string;
+}
+
+export interface UpdateApiKeyRequest {
+    keyId: string;
+    requestBody: { [key: string]: any; };
 }
 
 /**
@@ -83,6 +91,23 @@ export interface APIKeysApiInterface {
      * List the API keys for this tenant.
      */
     listApiKeys(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiKeyList>;
+
+    /**
+     * Updates an API key\'s information by key_id for the specified tenant.
+     * @summary Update an API key.
+     * @param {string} keyId 
+     * @param {{ [key: string]: any; }} requestBody 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof APIKeysApiInterface
+     */
+    updateApiKeyRaw(requestParameters: UpdateApiKeyRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiKeyListItem>>;
+
+    /**
+     * Updates an API key\'s information by key_id for the specified tenant.
+     * Update an API key.
+     */
+    updateApiKey(requestParameters: UpdateApiKeyRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiKeyListItem>;
 
 }
 
@@ -217,6 +242,63 @@ export class APIKeysApi extends runtime.BaseAPI implements APIKeysApiInterface {
      */
     async listApiKeys(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiKeyList> {
         const response = await this.listApiKeysRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Updates an API key\'s information by key_id for the specified tenant.
+     * Update an API key.
+     */
+    async updateApiKeyRaw(requestParameters: UpdateApiKeyRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiKeyListItem>> {
+        if (requestParameters['keyId'] == null) {
+            throw new runtime.RequiredError(
+                'keyId',
+                'Required parameter "keyId" was null or undefined when calling updateApiKey().'
+            );
+        }
+
+        if (requestParameters['requestBody'] == null) {
+            throw new runtime.RequiredError(
+                'requestBody',
+                'Required parameter "requestBody" was null or undefined when calling updateApiKey().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.apiKey) {
+            headerParameters["X-API-KEY"] = await this.configuration.apiKey("X-API-KEY"); // ApiKeyAuth authentication
+        }
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", ["API_KEY", "OWNER"]);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/api/v1/api-keys/{key_id}`.replace(`{${"key_id"}}`, encodeURIComponent(String(requestParameters['keyId']))),
+            method: 'PATCH',
+            headers: headerParameters,
+            query: queryParameters,
+            body: requestParameters['requestBody'],
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ApiKeyListItemFromJSON(jsonValue));
+    }
+
+    /**
+     * Updates an API key\'s information by key_id for the specified tenant.
+     * Update an API key.
+     */
+    async updateApiKey(requestParameters: UpdateApiKeyRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiKeyListItem> {
+        const response = await this.updateApiKeyRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

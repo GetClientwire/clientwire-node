@@ -44,13 +44,13 @@ export interface CreateUserRequest {
      * @type {string}
      * @memberof CreateUserRequest
      */
-    firstname?: string | null;
+    firstname: string;
     /**
      * The last name of the user to create.
      * @type {string}
      * @memberof CreateUserRequest
      */
-    lastname?: string | null;
+    lastname: string;
     /**
      * The role assigned to the user. OWNER or USER
      * @type {UserRole}
@@ -67,6 +67,8 @@ export interface CreateUserRequest {
 export function instanceOfCreateUserRequest(value: object): value is CreateUserRequest {
     if (!('email' in value) || value['email'] === undefined) return false;
     if (!('password' in value) || value['password'] === undefined) return false;
+    if (!('firstname' in value) || value['firstname'] === undefined) return false;
+    if (!('lastname' in value) || value['lastname'] === undefined) return false;
     return true;
 }
 
@@ -82,8 +84,8 @@ export function CreateUserRequestFromJSONTyped(json: any, ignoreDiscriminator: b
         
         'email': json['email'],
         'password': json['password'],
-        'firstname': json['firstname'] == null ? undefined : json['firstname'],
-        'lastname': json['lastname'] == null ? undefined : json['lastname'],
+        'firstname': json['firstname'],
+        'lastname': json['lastname'],
         'role': json['role'] == null ? undefined : UserRoleFromJSON(json['role']),
     };
 }

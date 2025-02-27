@@ -40,6 +40,11 @@ export interface GetUserRequest {
     userId: string;
 }
 
+export interface UpdateUserRequest {
+    userId: string;
+    requestBody: { [key: string]: any; };
+}
+
 /**
  * UsersApi - interface
  * 
@@ -48,7 +53,7 @@ export interface GetUserRequest {
  */
 export interface UsersApiInterface {
     /**
-     * Creates a new user with the provided details.
+     * Creates a new user for the specified tenant.
      * @summary Create a new user.
      * @param {CreateUserRequest} createUserRequest The details of the user to create.
      * @param {*} [options] Override http request option.
@@ -58,7 +63,7 @@ export interface UsersApiInterface {
     createUserRaw(requestParameters: CreateUserOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<User>>;
 
     /**
-     * Creates a new user with the provided details.
+     * Creates a new user for the specified tenant.
      * Create a new user.
      */
     createUser(requestParameters: CreateUserOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<User>;
@@ -111,19 +116,36 @@ export interface UsersApiInterface {
     getUser(requestParameters: GetUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<User>;
 
     /**
-     * Returns a list of all users for the tenant.
-     * @summary List all users.
+     * Returns a list of all users for the specified tenant.
+     * @summary List all users for a tenant.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof UsersApiInterface
      */
-    listAllUsersRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<UserListResponse>>;
+    listUsersRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<UserListResponse>>;
 
     /**
-     * Returns a list of all users for the tenant.
-     * List all users.
+     * Returns a list of all users for the specified tenant.
+     * List all users for a tenant.
      */
-    listAllUsers(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UserListResponse>;
+    listUsers(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UserListResponse>;
+
+    /**
+     * Updates a user\'s information by ID for the specified tenant.
+     * @summary Update a user.
+     * @param {string} userId 
+     * @param {{ [key: string]: any; }} requestBody The patch body for updating the users fields.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApiInterface
+     */
+    updateUserRaw(requestParameters: UpdateUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<User>>;
+
+    /**
+     * Updates a user\'s information by ID for the specified tenant.
+     * Update a user.
+     */
+    updateUser(requestParameters: UpdateUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<User>;
 
 }
 
@@ -133,7 +155,7 @@ export interface UsersApiInterface {
 export class UsersApi extends runtime.BaseAPI implements UsersApiInterface {
 
     /**
-     * Creates a new user with the provided details.
+     * Creates a new user for the specified tenant.
      * Create a new user.
      */
     async createUserRaw(requestParameters: CreateUserOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<User>> {
@@ -174,7 +196,7 @@ export class UsersApi extends runtime.BaseAPI implements UsersApiInterface {
     }
 
     /**
-     * Creates a new user with the provided details.
+     * Creates a new user for the specified tenant.
      * Create a new user.
      */
     async createUser(requestParameters: CreateUserOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<User> {
@@ -290,7 +312,7 @@ export class UsersApi extends runtime.BaseAPI implements UsersApiInterface {
 
         if (this.configuration && this.configuration.accessToken) {
             const token = this.configuration.accessToken;
-            const tokenString = await token("BearerAuth", ["API_KEY", "OWNER"]);
+            const tokenString = await token("BearerAuth", ["OWNER", "USER"]);
 
             if (tokenString) {
                 headerParameters["Authorization"] = `Bearer ${tokenString}`;
@@ -316,10 +338,10 @@ export class UsersApi extends runtime.BaseAPI implements UsersApiInterface {
     }
 
     /**
-     * Returns a list of all users for the tenant.
-     * List all users.
+     * Returns a list of all users for the specified tenant.
+     * List all users for a tenant.
      */
-    async listAllUsersRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<UserListResponse>> {
+    async listUsersRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<UserListResponse>> {
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -330,7 +352,7 @@ export class UsersApi extends runtime.BaseAPI implements UsersApiInterface {
 
         if (this.configuration && this.configuration.accessToken) {
             const token = this.configuration.accessToken;
-            const tokenString = await token("BearerAuth", ["API_KEY", "OWNER"]);
+            const tokenString = await token("BearerAuth", ["OWNER", "API_KEY"]);
 
             if (tokenString) {
                 headerParameters["Authorization"] = `Bearer ${tokenString}`;
@@ -347,11 +369,68 @@ export class UsersApi extends runtime.BaseAPI implements UsersApiInterface {
     }
 
     /**
-     * Returns a list of all users for the tenant.
-     * List all users.
+     * Returns a list of all users for the specified tenant.
+     * List all users for a tenant.
      */
-    async listAllUsers(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UserListResponse> {
-        const response = await this.listAllUsersRaw(initOverrides);
+    async listUsers(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UserListResponse> {
+        const response = await this.listUsersRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Updates a user\'s information by ID for the specified tenant.
+     * Update a user.
+     */
+    async updateUserRaw(requestParameters: UpdateUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<User>> {
+        if (requestParameters['userId'] == null) {
+            throw new runtime.RequiredError(
+                'userId',
+                'Required parameter "userId" was null or undefined when calling updateUser().'
+            );
+        }
+
+        if (requestParameters['requestBody'] == null) {
+            throw new runtime.RequiredError(
+                'requestBody',
+                'Required parameter "requestBody" was null or undefined when calling updateUser().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.apiKey) {
+            headerParameters["X-API-KEY"] = await this.configuration.apiKey("X-API-KEY"); // ApiKeyAuth authentication
+        }
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", ["API_KEY", "OWNER", "USER"]);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/api/v1/users/{user_id}`.replace(`{${"user_id"}}`, encodeURIComponent(String(requestParameters['userId']))),
+            method: 'PATCH',
+            headers: headerParameters,
+            query: queryParameters,
+            body: requestParameters['requestBody'],
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => UserFromJSON(jsonValue));
+    }
+
+    /**
+     * Updates a user\'s information by ID for the specified tenant.
+     * Update a user.
+     */
+    async updateUser(requestParameters: UpdateUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<User> {
+        const response = await this.updateUserRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

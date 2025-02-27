@@ -42,6 +42,8 @@ tags:
   description: Operations for managing per-tenant Twilio SMS settings.
 - name: Geocoding
   description: Operations to geocode locations.
+- name: Conversation Labels
+  description: Operations for conversation-level labels
 - name: Webhooks
 paths:
   /api/v1/api-keys:
@@ -100,6 +102,51 @@ paths:
         - API_KEY
         - OWNER
   /api/v1/api-keys/{key_id}:
+    patch:
+      summary: Update an API key.
+      description: Updates an API key's information by key_id for the specified tenant.
+      operationId: updateApiKey
+      tags:
+      - API Keys
+      parameters:
+      - name: key_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: "Allowed fields are: name."
+              type: object
+              additionalProperties: {}
+              example:
+                name: new name
+        required: true
+      responses:
+        "200":
+          description: API key updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiKeyListItem"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Not found.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - API_KEY
+        - OWNER
     delete:
       summary: Delete an API key by key_id.
       operationId: deleteApiKey
@@ -913,6 +960,204 @@ paths:
                 $ref: "#/components/schemas/Conversation"
         "200":
           description: Conversation updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
+  /api/v1/conversations/{conversation_id}/labels:
+    put:
+      summary: Updates all labels for the specified conversation
+      description: Updates labels for conversations
+      operationId: updateConversationLabels
+      tags:
+      - Conversation Labels
+      parameters:
+      - name: conversation_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - description: |-
+          Include the specified related resources in the response.
+          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE', 'CURRENT_USER_READ_STATUS'.
+          If empty, no related resource is returned
+        schema:
+          example: "PARTICIPANTS,CONVERSATION_TYPE"
+        name: include
+        in: query
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConversationLabelPutRequest"
+        required: true
+      responses:
+        "200":
+          description: Conversation labels updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
+    post:
+      summary: Create new labels for the specified conversation
+      description: Creates labels for conversations
+      operationId: createConversationLabels
+      tags:
+      - Conversation Labels
+      parameters:
+      - name: conversation_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - description: |-
+          Include the specified related resources in the response.
+          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE', 'CURRENT_USER_READ_STATUS'.
+          If empty, no related resource is returned
+        schema:
+          example: "PARTICIPANTS,CONVERSATION_TYPE"
+        name: include
+        in: query
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConversationLabelPostRequest"
+        required: true
+      responses:
+        "201":
+          description: Conversation label created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
+  /api/v1/conversations/{conversation_id}/labels/{label}:
+    put:
+      summary: Updates a specific label with a new one
+      description: Updates a specific label
+      operationId: updateConversationLabel
+      tags:
+      - Conversation Labels
+      parameters:
+      - name: conversation_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: label
+        in: path
+        required: true
+        schema:
+          type: string
+      - description: |-
+          Include the specified related resources in the response.
+          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE', 'CURRENT_USER_READ_STATUS'.
+          If empty, no related resource is returned
+        schema:
+          example: "PARTICIPANTS,CONVERSATION_TYPE"
+        name: include
+        in: query
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConversationLabelPutRequest"
+        required: true
+      responses:
+        "200":
+          description: Conversation labels updated successfully
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
+    delete:
+      summary: Deletes a label for the specified conversation
+      description: Deletes label for a conversation
+      operationId: deleteConversationLabel
+      tags:
+      - Conversation Labels
+      parameters:
+      - name: conversation_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: label
+        in: path
+        required: true
+        schema:
+          type: string
+      - description: |-
+          Include the specified related resources in the response.
+          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE', 'CURRENT_USER_READ_STATUS'.
+          If empty, no related resource is returned
+        schema:
+          example: "PARTICIPANTS,CONVERSATION_TYPE"
+        name: include
+        in: query
+      responses:
+        "200":
+          description: Conversation label deleted successfully
           content:
             application/json:
               schema:
@@ -2016,14 +2261,14 @@ paths:
           description: Unsupported Content Type.
   /api/v1/users:
     get:
-      summary: List all users.
-      description: Returns a list of all users for the tenant.
-      operationId: listAllUsers
+      summary: List all users for a tenant.
+      description: Returns a list of all users for the specified tenant.
+      operationId: listUsers
       tags:
       - Users
       responses:
         "200":
-          description: A list of users returned.
+          description: List of users returned.
           content:
             application/json:
               schema:
@@ -2040,11 +2285,11 @@ paths:
       security:
       - ApiKeyAuth: []
       - BearerAuth:
-        - API_KEY
         - OWNER
+        - API_KEY
     post:
       summary: Create a new user.
-      description: Creates a new user with the provided details.
+      description: Creates a new user for the specified tenant.
       operationId: createUser
       tags:
       - Users
@@ -2107,6 +2352,55 @@ paths:
         - OWNER
         - USER
   /api/v1/users/{user_id}:
+    patch:
+      summary: Update a user.
+      description: Updates a user's information by ID for the specified tenant.
+      operationId: updateUser
+      tags:
+      - Users
+      parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: The patch body for updating the users fields.
+        required: true
+        content:
+          application/json:
+            schema:
+              description: "Allowed fields are: email, role, firstname, lastname."
+              type: object
+              additionalProperties: {}
+              example:
+                description: new description
+      responses:
+        "200":
+          description: User updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Not found.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - API_KEY
+        - OWNER
+        - USER
     get:
       summary: Get a user by ID.
       description: Returns details of a user by tenant ID and user ID.
@@ -2118,7 +2412,7 @@ paths:
         in: path
         required: true
         schema:
-          $ref: "#/components/schemas/UUID"
+          type: string
       responses:
         "200":
           description: The user.
@@ -2140,8 +2434,8 @@ paths:
       security:
       - ApiKeyAuth: []
       - BearerAuth:
-        - API_KEY
         - OWNER
+        - USER
     delete:
       summary: Delete a user.
       description: Deletes a user by ID for the specified tenant.
@@ -2193,7 +2487,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UpdateWebhookSettingsRequest"
+                $ref: "#/components/schemas/TenantWebhookSettings"
         "400":
           description: Bad request. Usually means that the input data was invalid
             or misformed.
@@ -2210,9 +2504,8 @@ paths:
         - API_KEY
     get:
       summary: Get the tenant’s webhook settings.
-      description: "Returns the current endpoint URL, signature scheme, and optionally\
-        \ the secret in plain text. In some scenarios, you might choose not to return\
-        \ the plain secret for security."
+      description: "Returns the current endpoint URL, signature scheme, and the secret\
+        \ in plain text. "
       operationId: getWebhookSettings
       tags:
       - Webhooks
@@ -2222,7 +2515,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UpdateWebhookSettingsRequest"
+                $ref: "#/components/schemas/TenantWebhookSettings"
         "401":
           description: Missing or invalid credentials.
         "403":
@@ -2237,8 +2530,7 @@ paths:
   /api/v1/webhook-settings/rotate-secret:
     post:
       summary: Rotate the webhook secret. Optionally update the signature scheme.
-      description: "Generates a new random whsec_ secret, encrypts it, and saves.\
-        \ Returns the plaintext once."
+      description: "Generates a new random whsec_ secret, encrypts, and saves it."
       operationId: rotateWebhooksSecret
       tags:
       - Webhooks
@@ -2254,7 +2546,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RotateWebhookSecretRequest"
+                $ref: "#/components/schemas/TenantWebhookSettings"
         "400":
           description: Bad request. Usually means that the input data was invalid
             or misformed.
@@ -2472,6 +2764,30 @@ components:
           allOf:
           - $ref: "#/components/schemas/CurrentUserReadStatus"
           nullable: true
+    ConversationLabelPostRequest:
+      required:
+      - labels
+      type: object
+      properties:
+        labels:
+          description: "Labels for the conversation. If one label contains : it means\
+            \ its a scoped label"
+          type: array
+          items:
+            type: string
+          example: "[flag:blue,critical]"
+    ConversationLabelPutRequest:
+      required:
+      - labels
+      type: object
+      properties:
+        labels:
+          description: "Labels for the conversation. If one label contains : it means\
+            \ its a scoped label"
+          type: array
+          items:
+            type: string
+          example: "[flag:blue,critical]"
     ConversationListResponse:
       type: object
       properties:
@@ -2857,6 +3173,8 @@ components:
       required:
       - email
       - password
+      - firstname
+      - lastname
       type: object
       properties:
         email:
@@ -2872,12 +3190,10 @@ components:
           description: The first name of the user to create.
           type: string
           example: Philipp
-          nullable: true
         lastname:
           description: The last name of the user to create.
           type: string
           example: Schmid
-          nullable: true
         role:
           description: The role assigned to the user. OWNER or USER
           default: USER
@@ -3563,6 +3879,8 @@ components:
       - tenant_subdomain
       - user_email
       - user_password
+      - user_firstname
+      - user_lastname
       type: object
       properties:
         tenant_name:
@@ -3595,12 +3913,10 @@ components:
           description: The first name of the user to create.
           type: string
           example: Philipp
-          nullable: true
         user_lastname:
           description: The last name of the user to create.
           type: string
           example: Schmid
-          nullable: true
         signup_invite_code:
           description: The invite code to use for signing up.
           type: string
@@ -3814,6 +4130,8 @@ components:
       - id
       - email
       - role
+      - firstname
+      - lastname
       type: object
       properties:
         id:
@@ -3838,12 +4156,10 @@ components:
           description: The first name of the user to create.
           type: string
           example: Philipp
-          nullable: true
         lastname:
           description: The last name of the user to create.
           type: string
           example: Schmid
-          nullable: true
     UserListResponse:
       required:
       - users

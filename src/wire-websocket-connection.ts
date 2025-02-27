@@ -167,12 +167,8 @@ export class WireWebsocketConnection {
   }
 
   private wsUrl(): string {
-    if (this.basePath.includes("https")) {
-      this.basePath.replace("https", "wss")
-    } else {
-      this.basePath.replace("http", "ws")
-    }
-    return `${this.basePath}/api/v1/ws/conversations`;
+    const newBasePath = this.basePath.replace("http", "ws")
+    return `${newBasePath}/api/v1/ws/conversations`;
   }
 
   private wsOnOpen(event: Event): void {

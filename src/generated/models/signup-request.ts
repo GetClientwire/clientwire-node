@@ -48,13 +48,13 @@ export interface SignupRequest {
      * @type {string}
      * @memberof SignupRequest
      */
-    userFirstname?: string | null;
+    userFirstname: string;
     /**
      * The last name of the user to create.
      * @type {string}
      * @memberof SignupRequest
      */
-    userLastname?: string | null;
+    userLastname: string;
     /**
      * The invite code to use for signing up.
      * @type {string}
@@ -71,6 +71,8 @@ export function instanceOfSignupRequest(value: object): value is SignupRequest {
     if (!('tenantSubdomain' in value) || value['tenantSubdomain'] === undefined) return false;
     if (!('userEmail' in value) || value['userEmail'] === undefined) return false;
     if (!('userPassword' in value) || value['userPassword'] === undefined) return false;
+    if (!('userFirstname' in value) || value['userFirstname'] === undefined) return false;
+    if (!('userLastname' in value) || value['userLastname'] === undefined) return false;
     return true;
 }
 
@@ -88,8 +90,8 @@ export function SignupRequestFromJSONTyped(json: any, ignoreDiscriminator: boole
         'tenantSubdomain': json['tenant_subdomain'],
         'userEmail': json['user_email'],
         'userPassword': json['user_password'],
-        'userFirstname': json['user_firstname'] == null ? undefined : json['user_firstname'],
-        'userLastname': json['user_lastname'] == null ? undefined : json['user_lastname'],
+        'userFirstname': json['user_firstname'],
+        'userLastname': json['user_lastname'],
         'signupInviteCode': json['signup_invite_code'] == null ? undefined : json['signup_invite_code'],
     };
 }
