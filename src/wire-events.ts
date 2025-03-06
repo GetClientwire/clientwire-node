@@ -5,7 +5,7 @@ import {
   WsNewMessage,
   WsParticipantHadConversationOpen,
   WsParticipantReadStatus,
-  WsParticipantWasTyping,
+  WsParticipantWasTyping, WsConversationUpdated,
 } from './generated/models';
 
 export const CONNECTED_EVENT = 'connected';
@@ -14,6 +14,7 @@ export const AUTHENTICATION_ERROR_EVENT = 'authentication:error';
 export const SUBSCRIPTION_ERROR_EVENT = 'subscription:error';
 export const NEW_CONVERSATION_EVENT = 'conversations:new';
 export const CONVERSATION_READ_STATUS_EVENT = 'conversations:read_status';
+export const CONVERSATION_UPDATED_EVENT = 'conversations:updates';
 
 type ClientWireEventMap = {
   [CONNECTED_EVENT]: void;
@@ -21,6 +22,7 @@ type ClientWireEventMap = {
   [AUTHENTICATION_ERROR_EVENT]: { reason?: string };
   [NEW_CONVERSATION_EVENT]: WsNewConversation;
   [CONVERSATION_READ_STATUS_EVENT]: WsConversationReadStatus;
+  [CONVERSATION_UPDATED_EVENT]: WsConversationUpdated;
 } & {
   /**
    * For conversation-specific updates.
@@ -31,7 +33,8 @@ type ClientWireEventMap = {
     | WsMessageUpdated
     | WsParticipantReadStatus
     | WsParticipantWasTyping
-    | WsParticipantHadConversationOpen;
+    | WsParticipantHadConversationOpen
+    | WsConversationUpdated;
 };
 
 export { ClientWireEventMap };

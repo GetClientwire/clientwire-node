@@ -25,6 +25,7 @@ models/authentication-options.ts
 models/conversation-label-post-request.ts
 models/conversation-label-put-request.ts
 models/conversation-list-response.ts
+models/conversation-lock-request.ts
 models/conversation-paginated-response.ts
 models/conversation-post-request.ts
 models/conversation-put-request.ts
@@ -79,6 +80,7 @@ models/webhook-conversation.ts
 models/webhook-signature-scheme.ts
 models/ws-authenticate.ts
 models/ws-conversation-read-status.ts
+models/ws-conversation-updated.ts
 models/ws-message-updated.ts
 models/ws-new-conversation.ts
 models/ws-new-message.ts

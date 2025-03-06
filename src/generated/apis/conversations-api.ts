@@ -17,6 +17,7 @@ import * as runtime from '../runtime';
 import type {
   Conversation,
   ConversationListResponse,
+  ConversationLockRequest,
   ConversationPaginatedResponse,
   ConversationPostRequest,
   ConversationPutRequest,
@@ -27,6 +28,8 @@ import {
     ConversationToJSON,
     ConversationListResponseFromJSON,
     ConversationListResponseToJSON,
+    ConversationLockRequestFromJSON,
+    ConversationLockRequestToJSON,
     ConversationPaginatedResponseFromJSON,
     ConversationPaginatedResponseToJSON,
     ConversationPostRequestFromJSON,
@@ -73,6 +76,17 @@ export interface GetConversationsRequest {
 
 export interface GetConversationsByIdsRequest {
     conversationsByIdsRequest: ConversationsByIdsRequest;
+    include?: any;
+}
+
+export interface LockConversationRequest {
+    conversationId: string;
+    conversationLockRequest: ConversationLockRequest;
+    include?: any;
+}
+
+export interface UnlockConversationRequest {
+    conversationId: string;
     include?: any;
 }
 
@@ -199,6 +213,41 @@ export interface ConversationsApiInterface {
      * Get a list of conversations by their ids.
      */
     getConversationsByIds(requestParameters: GetConversationsByIdsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ConversationListResponse>;
+
+    /**
+     * Lock a conversation until a specified time, optionally create a note also
+     * @summary Lock a conversation
+     * @param {string} conversationId 
+     * @param {ConversationLockRequest} conversationLockRequest 
+     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;, \&#39;CURRENT_USER_READ_STATUS\&#39;. If empty, no related resource is returned
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ConversationsApiInterface
+     */
+    lockConversationRaw(requestParameters: LockConversationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Conversation>>;
+
+    /**
+     * Lock a conversation until a specified time, optionally create a note also
+     * Lock a conversation
+     */
+    lockConversation(requestParameters: LockConversationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Conversation>;
+
+    /**
+     * Unlock a conversation
+     * @summary Unlock a conversation
+     * @param {string} conversationId 
+     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;, \&#39;CURRENT_USER_READ_STATUS\&#39;. If empty, no related resource is returned
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ConversationsApiInterface
+     */
+    unlockConversationRaw(requestParameters: UnlockConversationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Conversation>>;
+
+    /**
+     * Unlock a conversation
+     * Unlock a conversation
+     */
+    unlockConversation(requestParameters: UnlockConversationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Conversation>;
 
     /**
      * Allows patching id, archived, conversation_data, etc.
@@ -572,6 +621,118 @@ export class ConversationsApi extends runtime.BaseAPI implements ConversationsAp
      */
     async getConversationsByIds(requestParameters: GetConversationsByIdsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ConversationListResponse> {
         const response = await this.getConversationsByIdsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Lock a conversation until a specified time, optionally create a note also
+     * Lock a conversation
+     */
+    async lockConversationRaw(requestParameters: LockConversationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Conversation>> {
+        if (requestParameters['conversationId'] == null) {
+            throw new runtime.RequiredError(
+                'conversationId',
+                'Required parameter "conversationId" was null or undefined when calling lockConversation().'
+            );
+        }
+
+        if (requestParameters['conversationLockRequest'] == null) {
+            throw new runtime.RequiredError(
+                'conversationLockRequest',
+                'Required parameter "conversationLockRequest" was null or undefined when calling lockConversation().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['include'] != null) {
+            queryParameters['include'] = requestParameters['include'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.apiKey) {
+            headerParameters["X-API-KEY"] = await this.configuration.apiKey("X-API-KEY"); // ApiKeyAuth authentication
+        }
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", ["OWNER", "API_KEY"]);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/api/v1/conversations/{conversation_id}/lock`.replace(`{${"conversation_id"}}`, encodeURIComponent(String(requestParameters['conversationId']))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: ConversationLockRequestToJSON(requestParameters['conversationLockRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ConversationFromJSON(jsonValue));
+    }
+
+    /**
+     * Lock a conversation until a specified time, optionally create a note also
+     * Lock a conversation
+     */
+    async lockConversation(requestParameters: LockConversationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Conversation> {
+        const response = await this.lockConversationRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Unlock a conversation
+     * Unlock a conversation
+     */
+    async unlockConversationRaw(requestParameters: UnlockConversationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Conversation>> {
+        if (requestParameters['conversationId'] == null) {
+            throw new runtime.RequiredError(
+                'conversationId',
+                'Required parameter "conversationId" was null or undefined when calling unlockConversation().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['include'] != null) {
+            queryParameters['include'] = requestParameters['include'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.apiKey) {
+            headerParameters["X-API-KEY"] = await this.configuration.apiKey("X-API-KEY"); // ApiKeyAuth authentication
+        }
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", ["OWNER", "API_KEY"]);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/api/v1/conversations/{conversation_id}/unlock`.replace(`{${"conversation_id"}}`, encodeURIComponent(String(requestParameters['conversationId']))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ConversationFromJSON(jsonValue));
+    }
+
+    /**
+     * Unlock a conversation
+     * Unlock a conversation
+     */
+    async unlockConversation(requestParameters: UnlockConversationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Conversation> {
+        const response = await this.unlockConversationRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

@@ -107,6 +107,18 @@ export interface Conversation {
      * @memberof Conversation
      */
     currentUserReadStatus?: CurrentUserReadStatus | null;
+    /**
+     * The date when the lock expires
+     * @type {Date}
+     * @memberof Conversation
+     */
+    lockExpiresAt?: Date | null;
+    /**
+     * The note for the lock
+     * @type {string}
+     * @memberof Conversation
+     */
+    lockNote?: string | null;
 }
 
 /**
@@ -141,6 +153,8 @@ export function ConversationFromJSONTyped(json: any, ignoreDiscriminator: boolea
         'conversationDataUpdatedAt': json['conversation_data_updated_at'] == null ? undefined : (new Date(json['conversation_data_updated_at'])),
         'participants': json['participants'] == null ? undefined : ((json['participants'] as Array<any>).map(ParticipantFromJSON)),
         'currentUserReadStatus': json['current_user_read_status'] == null ? undefined : CurrentUserReadStatusFromJSON(json['current_user_read_status']),
+        'lockExpiresAt': json['lock_expires_at'] == null ? undefined : (new Date(json['lock_expires_at'])),
+        'lockNote': json['lock_note'] == null ? undefined : json['lock_note'],
     };
 }
 
@@ -166,6 +180,8 @@ export function ConversationToJSONTyped(value?: Conversation | null, ignoreDiscr
         'conversation_data_updated_at': value['conversationDataUpdatedAt'] == null ? undefined : ((value['conversationDataUpdatedAt'] as any).toISOString()),
         'participants': value['participants'] == null ? undefined : ((value['participants'] as Array<any>).map(ParticipantToJSON)),
         'current_user_read_status': CurrentUserReadStatusToJSON(value['currentUserReadStatus']),
+        'lock_expires_at': value['lockExpiresAt'] == null ? undefined : ((value['lockExpiresAt'] as any).toISOString()),
+        'lock_note': value['lockNote'],
     };
 }
 

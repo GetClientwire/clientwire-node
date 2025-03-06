@@ -1178,6 +1178,57 @@ paths:
       - BearerAuth:
         - OWNER
         - API_KEY
+  /api/v1/conversations/{conversation_id}/lock:
+    post:
+      summary: Lock a conversation
+      description: "Lock a conversation until a specified time, optionally create\
+        \ a note also"
+      operationId: lockConversation
+      tags:
+      - Conversations
+      parameters:
+      - name: conversation_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - description: |-
+          Include the specified related resources in the response.
+          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE', 'CURRENT_USER_READ_STATUS'.
+          If empty, no related resource is returned
+        schema:
+          example: "PARTICIPANTS,CONVERSATION_TYPE"
+        name: include
+        in: query
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConversationLockRequest"
+      responses:
+        "200":
+          description: Conversation locked successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
   /api/v1/conversations/{conversation_id}/messages:
     get:
       summary: Get messages of a conversation.
@@ -1687,6 +1738,50 @@ paths:
       - BearerAuth:
         - CLIENT_PARTICIPANT
         - USER
+        - OWNER
+        - API_KEY
+  /api/v1/conversations/{conversation_id}/unlock:
+    post:
+      summary: Unlock a conversation
+      description: Unlock a conversation
+      operationId: unlockConversation
+      tags:
+      - Conversations
+      parameters:
+      - name: conversation_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - description: |-
+          Include the specified related resources in the response.
+          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE', 'CURRENT_USER_READ_STATUS'.
+          If empty, no related resource is returned
+        schema:
+          example: "PARTICIPANTS,CONVERSATION_TYPE"
+        name: include
+        in: query
+      responses:
+        "200":
+          description: Conversation unlocked successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
         - OWNER
         - API_KEY
   /api/v1/geocoder/reverse:
@@ -2764,6 +2859,18 @@ components:
           allOf:
           - $ref: "#/components/schemas/CurrentUserReadStatus"
           nullable: true
+        lock_expires_at:
+          description: The date when the lock expires
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/Instant"
+          example: 2022-11-03T21:26:10.344522Z
+          nullable: true
+        lock_note:
+          description: The note for the lock
+          type: string
+          example: Locked until consulted with the mechanic
+          nullable: true
     ConversationLabelPostRequest:
       required:
       - labels
@@ -2797,6 +2904,22 @@ components:
           items:
             $ref: "#/components/schemas/Conversation"
           example: "null"
+          nullable: true
+    ConversationLockRequest:
+      required:
+      - lock_expires_at
+      type: object
+      properties:
+        lock_expires_at:
+          description: The date when the lock expires
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/Instant"
+          example: 2022-11-03T21:26:10.344522Z
+        lock_note:
+          description: The note for the lock
+          type: string
+          example: Locked until consulted with the mechanic
           nullable: true
     ConversationPaginatedResponse:
       required:
@@ -4253,6 +4376,16 @@ components:
           type: integer
           example: 3
           nullable: true
+    WsConversationUpdated:
+      required:
+      - conversation
+      type: object
+      properties:
+        type:
+          type: string
+          nullable: true
+        conversation:
+          $ref: "#/components/schemas/Conversation"
     WsMessageUpdated:
       required:
       - message

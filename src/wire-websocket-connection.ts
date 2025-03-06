@@ -8,10 +8,10 @@ import {
   WsParticipantReadStatusFromJSON,
   WsParticipantHadConversationOpenFromJSON,
   WsParticipantWasTypingFromJSON,
-  WsConversationReadStatusFromJSON,
-} from './generated/models';
+  WsConversationReadStatusFromJSON, WsConversationUpdatedToJSON, WsConversationUpdatedFromJSON,
+} from './generated';
 import { TokenManager } from './token-manager';
-import { NEW_CONVERSATION_EVENT, CONVERSATION_READ_STATUS_EVENT } from './wire-events';
+import { NEW_CONVERSATION_EVENT, CONVERSATION_READ_STATUS_EVENT, CONVERSATION_UPDATED_EVENT } from './wire-events';
 import * as logger from './logger';
 
 export class WireWebsocketConnection {
@@ -312,6 +312,15 @@ export class WireWebsocketConnection {
           const message = WsParticipantHadConversationOpenFromJSON(data);
           this.client.dispatchEvent(new CustomEvent(eventName, { detail: message }));
           break;
+        }
+        case 'CONVERSATION_UPDATED': {
+          logger.debug(
+            '[ClientWireApi.Websocket] Received CONVERSATION_UPDATED_EVENT:',
+            data
+          );
+          const message = WsConversationUpdatedFromJSON(data)
+          this.client.dispatchEvent(new CustomEvent(CONVERSATION_UPDATED_EVENT, { detail: message }));
+          break
         }
         default:
           logger.debug('[ClientWireApi.Websocket] Unknown message type:', data);
