@@ -32,6 +32,12 @@ export interface Tenant {
      */
     name: string;
     /**
+     * The preferred language of the tenant.
+     * @type {string}
+     * @memberof Tenant
+     */
+    preferredLanguage: string;
+    /**
      * The subdomain of the tenant. Used as the subdomain in the URL.
      * @type {string}
      * @memberof Tenant
@@ -63,6 +69,7 @@ export interface Tenant {
 export function instanceOfTenant(value: object): value is Tenant {
     if (!('id' in value) || value['id'] === undefined) return false;
     if (!('name' in value) || value['name'] === undefined) return false;
+    if (!('preferredLanguage' in value) || value['preferredLanguage'] === undefined) return false;
     if (!('subdomain' in value) || value['subdomain'] === undefined) return false;
     return true;
 }
@@ -79,6 +86,7 @@ export function TenantFromJSONTyped(json: any, ignoreDiscriminator: boolean): Te
         
         'id': json['id'],
         'name': json['name'],
+        'preferredLanguage': json['preferred_language'],
         'subdomain': json['subdomain'],
         'tenantCreationAllowed': json['tenant_creation_allowed'] == null ? undefined : json['tenant_creation_allowed'],
         'tokenExchangeUserinfoUrl': json['token_exchange_userinfo_url'] == null ? undefined : json['token_exchange_userinfo_url'],
@@ -99,6 +107,7 @@ export function TenantToJSONTyped(value?: Tenant | null, ignoreDiscriminator: bo
         
         'id': value['id'],
         'name': value['name'],
+        'preferred_language': value['preferredLanguage'],
         'subdomain': value['subdomain'],
         'tenant_creation_allowed': value['tenantCreationAllowed'],
         'token_exchange_userinfo_url': value['tokenExchangeUserinfoUrl'],

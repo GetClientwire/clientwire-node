@@ -17,6 +17,8 @@ import {
   SigninOptionsRequest,
   ConversationLabelsApi,
   WebhooksApi,
+  MessageTemplatesApi,
+  WorkflowsApi,
 } from './generated/apis';
 import { AuthenticationOptions, TenantConfig } from './generated/models';
 import { WireWebsocketConnection } from './wire-websocket-connection';
@@ -55,6 +57,8 @@ export class ClientWireApiClient extends EventTarget {
   public smsSettingsApi: SMSSettingsApi;
   public usersApi: UsersApi;
   public tenantsApi: TenantsApi;
+  public messageTemplateApi: MessageTemplatesApi;
+  public wokrflowsApi: WorkflowsApi;
 
   public tenantConfig?: TenantConfig;
   private websocketConnection?: WireWebsocketConnection;
@@ -118,6 +122,8 @@ export class ClientWireApiClient extends EventTarget {
     this.oidcConfigsApi = new OIDCConfigsApi(this.apiConfig);
     this.smsSettingsApi = new SMSSettingsApi(this.apiConfig);
     this.conversationLabelsApi = new ConversationLabelsApi(this.apiConfig);
+    this.messageTemplateApi = new MessageTemplatesApi(this.apiConfig);
+    this.wokrflowsApi = new WorkflowsApi(this.apiConfig);
     logger.debug('[ClientWireApi] New instance created: ', this.instanceId);
   }
 
@@ -168,7 +174,7 @@ export class ClientWireApiClient extends EventTarget {
           const refreshRequestParameters = {
             tenantId: tenantId,
             grantType: 'refresh_token',
-            refresh_token: currentRefreshToken,
+            refreshToken: currentRefreshToken,
           };
           const refreshResponse =
             await this.signinApi.oauth2TokenEndpoint(refreshRequestParameters);

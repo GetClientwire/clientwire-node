@@ -61,6 +61,12 @@ export interface SignupRequest {
      * @memberof SignupRequest
      */
     signupInviteCode?: string | null;
+    /**
+     * The preferred language for the tenant.
+     * @type {string}
+     * @memberof SignupRequest
+     */
+    preferredLanguage: string;
 }
 
 /**
@@ -73,6 +79,7 @@ export function instanceOfSignupRequest(value: object): value is SignupRequest {
     if (!('userPassword' in value) || value['userPassword'] === undefined) return false;
     if (!('userFirstname' in value) || value['userFirstname'] === undefined) return false;
     if (!('userLastname' in value) || value['userLastname'] === undefined) return false;
+    if (!('preferredLanguage' in value) || value['preferredLanguage'] === undefined) return false;
     return true;
 }
 
@@ -93,6 +100,7 @@ export function SignupRequestFromJSONTyped(json: any, ignoreDiscriminator: boole
         'userFirstname': json['user_firstname'],
         'userLastname': json['user_lastname'],
         'signupInviteCode': json['signup_invite_code'] == null ? undefined : json['signup_invite_code'],
+        'preferredLanguage': json['preferred_language'],
     };
 }
 
@@ -114,6 +122,7 @@ export function SignupRequestToJSONTyped(value?: SignupRequest | null, ignoreDis
         'user_firstname': value['userFirstname'],
         'user_lastname': value['userLastname'],
         'signup_invite_code': value['signupInviteCode'],
+        'preferred_language': value['preferredLanguage'],
     };
 }
 

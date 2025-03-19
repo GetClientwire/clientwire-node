@@ -70,6 +70,12 @@ export interface Participant {
      */
     displayName?: string | null;
     /**
+     * The preferred language of the participant.
+     * @type {string}
+     * @memberof Participant
+     */
+    preferredLanguage?: string | null;
+    /**
      * The phone number of a participant if he is a CLIENT. The field is otherwise always null.
      * @type {string}
      * @memberof Participant
@@ -143,6 +149,7 @@ export function ParticipantFromJSONTyped(json: any, ignoreDiscriminator: boolean
         'updatedAt': json['updated_at'] == null ? undefined : (new Date(json['updated_at'])),
         'kind': ParticipantKindFromJSON(json['kind']),
         'displayName': json['display_name'] == null ? undefined : json['display_name'],
+        'preferredLanguage': json['preferred_language'] == null ? undefined : json['preferred_language'],
         'phoneNumber': json['phone_number'] == null ? undefined : json['phone_number'],
         'email': json['email'] == null ? undefined : json['email'],
         'userId': json['user_id'] == null ? undefined : json['user_id'],
@@ -171,6 +178,7 @@ export function ParticipantToJSONTyped(value?: Participant | null, ignoreDiscrim
         'updated_at': value['updatedAt'] == null ? undefined : ((value['updatedAt'] as any).toISOString()),
         'kind': ParticipantKindToJSON(value['kind']),
         'display_name': value['displayName'],
+        'preferred_language': value['preferredLanguage'],
         'phone_number': value['phoneNumber'],
         'email': value['email'],
         'user_id': value['userId'],

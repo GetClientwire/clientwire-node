@@ -44,6 +44,12 @@ export interface TenantConfig {
      */
     name: string;
     /**
+     * The preferred language of the tenant.
+     * @type {string}
+     * @memberof TenantConfig
+     */
+    preferredLanguage: string;
+    /**
      * Indicates whether the tenant is enabled.
      * @type {boolean}
      * @memberof TenantConfig
@@ -59,6 +65,7 @@ export function instanceOfTenantConfig(value: object): value is TenantConfig {
     if (!('subdomain' in value) || value['subdomain'] === undefined) return false;
     if (!('frontendUrl' in value) || value['frontendUrl'] === undefined) return false;
     if (!('name' in value) || value['name'] === undefined) return false;
+    if (!('preferredLanguage' in value) || value['preferredLanguage'] === undefined) return false;
     if (!('enabled' in value) || value['enabled'] === undefined) return false;
     return true;
 }
@@ -77,6 +84,7 @@ export function TenantConfigFromJSONTyped(json: any, ignoreDiscriminator: boolea
         'subdomain': json['subdomain'],
         'frontendUrl': json['frontend_url'],
         'name': json['name'],
+        'preferredLanguage': json['preferred_language'],
         'enabled': json['enabled'],
     };
 }
@@ -96,6 +104,7 @@ export function TenantConfigToJSONTyped(value?: TenantConfig | null, ignoreDiscr
         'subdomain': value['subdomain'],
         'frontend_url': value['frontendUrl'],
         'name': value['name'],
+        'preferred_language': value['preferredLanguage'],
         'enabled': value['enabled'],
     };
 }

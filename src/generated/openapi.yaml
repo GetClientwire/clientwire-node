@@ -44,7 +44,11 @@ tags:
   description: Operations to geocode locations.
 - name: Conversation Labels
   description: Operations for conversation-level labels
+- name: Message Templates
+  description: Operation for message templates
 - name: Webhooks
+- name: Workflows
+  description: Operation for workflows
 paths:
   /api/v1/api-keys:
     get:
@@ -1908,6 +1912,198 @@ paths:
         - USER
         - OWNER
         - API_KEY
+  /api/v1/message_templates:
+    get:
+      summary: Paged message templates.
+      description: Fetches message templates for the tenant.
+      operationId: listMessageTemplates
+      tags:
+      - Message Templates
+      parameters:
+      - name: direction
+        in: query
+        schema:
+          type: string
+          nullable: true
+      - name: limit
+        in: query
+        schema:
+          format: int32
+          default: 10
+          type: integer
+      - name: offset
+        in: query
+        schema:
+          format: int32
+          default: 0
+          type: integer
+      - name: sortBy
+        in: query
+        schema:
+          type: string
+          nullable: true
+      responses:
+        "200":
+          description: Page of message templates returned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageTemplatePaginatedResponse"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
+    post:
+      summary: Create a new message template for the specified tenant.
+      description: Creates a message template.
+      operationId: createMessageTemplate
+      tags:
+      - Message Templates
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageTemplatePostRequest"
+        required: true
+      responses:
+        "201":
+          description: Message template created successfully.
+          content:
+            application/json:
+              schema:
+                type: string
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
+  /api/v1/message_templates/{name}:
+    put:
+      summary: Update a message template.
+      description: Updates a message template.
+      operationId: updateMessageTemplate
+      tags:
+      - Message Templates
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageTemplatePutRequest"
+        required: true
+      responses:
+        "200":
+          description: Message template updated successfully.
+          content:
+            application/json:
+              schema:
+                type: string
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
+    get:
+      summary: Message template
+      description: Fetches message templates by id.
+      operationId: getMessageTemplateById
+      tags:
+      - Message Templates
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Message template returned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageTemplate"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
+    delete:
+      summary: Delete a message template.
+      description: Removes a message template by ID.
+      operationId: deleteMessageTemplate
+      tags:
+      - Message Templates
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: Message template deleted successfully.
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Not found.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
   /api/v1/oidc-configs:
     get:
       summary: List all OIDC provider configs for the specified tenant.
@@ -2691,6 +2887,208 @@ paths:
       - BearerAuth:
         - OWNER
         - API_KEY
+  /api/v1/workflows:
+    get:
+      summary: List all workflows for the specified tenant.
+      description: Returns a list of workflows for the tenant.
+      operationId: listWorkflows
+      tags:
+      - Workflows
+      parameters:
+      - name: conversation_type_id
+        in: query
+        schema:
+          type: string
+          nullable: true
+      - name: direction
+        in: query
+        schema:
+          type: string
+          nullable: true
+      - name: limit
+        in: query
+        schema:
+          format: int32
+          default: 10
+          type: integer
+      - name: offset
+        in: query
+        schema:
+          format: int32
+          default: 0
+          type: integer
+      - name: sortBy
+        in: query
+        schema:
+          type: string
+          nullable: true
+      responses:
+        "200":
+          description: List of workflows returned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowPaginatedResponse"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - USER
+        - OWNER
+        - API_KEY
+    post:
+      summary: Create a new workflow for the specified tenant.
+      description: Creates a workflow.
+      operationId: createWorkflow
+      tags:
+      - Workflows
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowPostRequest"
+        required: true
+      responses:
+        "201":
+          description: Workflow created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Workflow"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
+  /api/v1/workflows/{workflow_id}:
+    put:
+      summary: Update a workflow.
+      description: Updates a workflow by ID.
+      operationId: updateWorkflow
+      tags:
+      - Workflows
+      parameters:
+      - name: workflow_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowPutRequest"
+        required: true
+      responses:
+        "200":
+          description: Workflow updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Workflow"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Not found.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
+    get:
+      summary: Get a single workflow.
+      description: Retrieves workflow by ID.
+      operationId: getWorkflow
+      tags:
+      - Workflows
+      parameters:
+      - name: workflow_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Workflow found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Workflow"
+        "404":
+          description: Not found.
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - USER
+        - OWNER
+        - API_KEY
+        - CLIENT_PARTICIPANT
+    delete:
+      summary: Delete a workflow.
+      description: Removes a workflow by ID.
+      operationId: deleteWorkflow
+      tags:
+      - Workflows
+      parameters:
+      - name: workflow_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: Workflow deleted successfully.
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Not found.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
 components:
   securitySchemes:
     BearerAuth:
@@ -2704,6 +3102,11 @@ components:
       in: header
       description: Authenticate via an API key.
   schemas:
+    ActionKind:
+      enum:
+      - NOTIFY_PARTICIPANTS
+      - SEND_MESSAGE
+      type: string
     Activity:
       enum:
       - MESSAGE_SEEN
@@ -2780,6 +3183,13 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/LoginOptionsOidcProvider"
+    ConditionOperator:
+      enum:
+      - EQUALS
+      - CHANGED_FROM_TO
+      - EXISTS
+      - NOT_EXISTS
+      type: string
     Conversation:
       required:
       - id
@@ -2870,6 +3280,48 @@ components:
           description: The note for the lock
           type: string
           example: Locked until consulted with the mechanic
+          nullable: true
+    ConversationCreatedTrigger:
+      description: Trigger fired when a conversation is created
+      required:
+      - kind
+      type: object
+      properties:
+        kind:
+          description: Discriminator property to identify the trigger type
+          enum:
+          - MESSAGE_ADDED_TO_CONVERSATION
+          - CONVERSATION_CREATED
+          - CONVERSATION_DATA_CHANGED
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/TriggerKind"
+    ConversationDataChangedTrigger:
+      description: Trigger fired when conversation data changes
+      required:
+      - kind
+      - json_path
+      - operator
+      type: object
+      properties:
+        kind:
+          description: Discriminator property to identify the trigger type
+          enum:
+          - MESSAGE_ADDED_TO_CONVERSATION
+          - CONVERSATION_CREATED
+          - CONVERSATION_DATA_CHANGED
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/TriggerKind"
+        json_path:
+          type: string
+        operator:
+          $ref: "#/components/schemas/ConditionOperator"
+        new_value:
+          type: string
+          nullable: true
+        old_value:
+          type: string
           nullable: true
     ConversationLabelPostRequest:
       required:
@@ -3533,6 +3985,34 @@ components:
           type: string
           example: 0193df26-54b2-7142-ab2b-faba1babd679
           nullable: true
+    MessageAddedToConversationTrigger:
+      required:
+      - kind
+      - message_sequence
+      type: object
+      properties:
+        kind:
+          description: Discriminator property to identify the trigger type
+          enum:
+          - MESSAGE_ADDED_TO_CONVERSATION
+          - CONVERSATION_CREATED
+          - CONVERSATION_DATA_CHANGED
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/TriggerKind"
+        message_sequence:
+          format: int32
+          description: The sequence of the message in the conversation that should
+            trigger the workflow.
+          type: integer
+          example: 0
+        participant_kind:
+          description: "The participant kind of the message that should trigger the\
+            \ workflow. When missing, the workflow will be executed regardless of\
+            \ the participant kind"
+          type: string
+          example: CLIENT
+          nullable: true
     MessageKind:
       enum:
       - TEXT
@@ -3632,6 +4112,130 @@ components:
           type: string
           example: 0193df26-54b2-7142-ab2b-faba1babd679
           nullable: true
+    MessageTemplate:
+      required:
+      - name
+      - texts
+      - is_system_template
+      - parameters
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        texts:
+          type: object
+          additionalProperties:
+            type: string
+        is_system_template:
+          type: boolean
+        created_at:
+          allOf:
+          - $ref: "#/components/schemas/Instant"
+          nullable: true
+        updated_at:
+          allOf:
+          - $ref: "#/components/schemas/Instant"
+          nullable: true
+        parameters:
+          type: array
+          items:
+            $ref: "#/components/schemas/MessageTemplateParameter"
+    MessageTemplatePaginatedResponse:
+      required:
+      - has_more
+      - total_elements
+      - limit
+      - message_templates
+      type: object
+      properties:
+        has_more:
+          description: Indicates if there are more pages to fetch.
+          type: boolean
+          example: "null"
+        total_elements:
+          format: int32
+          description: Total number of elements across all pages.
+          type: integer
+          example: "null"
+          nullable: true
+        limit:
+          format: int32
+          description: The maximum number of elements in this page.
+          type: integer
+          example: "null"
+          nullable: true
+        message_templates:
+          description: List of message templates.
+          type: array
+          items:
+            $ref: "#/components/schemas/MessageTemplate"
+        offset:
+          format: int32
+          description: The offset of the first element in this page (for offset-based
+            pagination). Either offset or last_sequence must be set.
+          type: integer
+          example: "null"
+          nullable: true
+        last_sequence:
+          format: int32
+          description: The sequence (or key) of the last element in this page (for
+            key-based pagination). Either offset or last_sequence must be set.
+          type: integer
+          example: "null"
+          nullable: true
+    MessageTemplateParameter:
+      required:
+      - name
+      - kind
+      type: object
+      properties:
+        name:
+          type: string
+        kind:
+          $ref: "#/components/schemas/ParameterKind"
+        value_path:
+          type: string
+          nullable: true
+    MessageTemplatePostRequest:
+      required:
+      - name
+      - texts
+      - parameters
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        texts:
+          type: object
+          additionalProperties:
+            type: string
+        parameters:
+          type: array
+          items:
+            $ref: "#/components/schemas/MessageTemplateParameter"
+    MessageTemplatePutRequest:
+      required:
+      - texts
+      - parameters
+      type: object
+      properties:
+        description:
+          type: string
+          nullable: true
+        texts:
+          type: object
+          additionalProperties:
+            type: string
+        parameters:
+          type: array
+          items:
+            $ref: "#/components/schemas/MessageTemplateParameter"
     OidcConfig:
       description: Represents a Tenant OIDC configuration object as returned by the
         API
@@ -3669,6 +4273,14 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/OidcConfig"
+    ParameterKind:
+      enum:
+      - CURRENT_TIMESTAMP
+      - CONVERSATION_DATA
+      - APP_URL
+      - WORKFLOW_ID
+      - ERROR
+      type: string
     Participant:
       description: "Represents a participant in a conversation. There are three kinds\
         \ of participants: USER, CLIENT."
@@ -3723,6 +4335,11 @@ components:
           minLength: 1
           type: string
           example: John Doe
+          nullable: true
+        preferred_language:
+          description: The preferred language of the participant.
+          type: string
+          example: en
           nullable: true
         phone_number:
           description: The phone number of a participant if he is a CLIENT. The field
@@ -3798,6 +4415,7 @@ components:
       - USER
       - CLIENT
       - SHARED
+      - WORKFLOW
       type: string
     ParticipantListResponse:
       required:
@@ -3896,6 +4514,12 @@ components:
           type: string
           example: John Doe
           nullable: true
+        preferred_language:
+          description: The preferred language of the participant. The preferred language
+            can not be empty or null.
+          type: string
+          example: en
+          nullable: true
         phone_number:
           description: The phone number of a participant if he is a CLIENT. The field
             is otherwise always null.
@@ -3962,7 +4586,6 @@ components:
       required:
       - tenant_name
       - tenant_subdomain
-      - user_email
       type: object
       properties:
         tenant_name:
@@ -4000,10 +4623,14 @@ components:
       required:
       - tenant_name
       - tenant_subdomain
+      - user_firstname
+      - user_lastname
+      - preferred_language
       - user_email
       - user_password
       - user_firstname
       - user_lastname
+      - preferred_language
       type: object
       properties:
         tenant_name:
@@ -4045,6 +4672,10 @@ components:
           type: string
           example: Ji9sllks
           nullable: true
+        preferred_language:
+          description: The preferred language for the tenant.
+          type: string
+          example: en
     SignupResponse:
       description: The data returned after a successful signup.
       required:
@@ -4070,6 +4701,7 @@ components:
       - id
       - name
       - subdomain
+      - preferred_language
       type: object
       properties:
         id:
@@ -4085,6 +4717,10 @@ components:
           pattern: "^[\\p{L}0-9][\\p{L}0-9 \\p{L}]+[\\p{L}0-9]$"
           type: string
           example: Autoclub of Mars
+        preferred_language:
+          description: The preferred language of the tenant.
+          type: string
+          example: en
         subdomain:
           description: The subdomain of the tenant. Used as the subdomain in the URL.
           maxLength: 20
@@ -4122,6 +4758,7 @@ components:
       - name
       - enabled
       - frontend_url
+      - preferred_language
       type: object
       properties:
         id:
@@ -4148,6 +4785,10 @@ components:
           pattern: "^[\\p{L}0-9][\\p{L}0-9 \\p{L}]+[\\p{L}0-9]$"
           type: string
           example: Autoclub of Mars
+        preferred_language:
+          description: The preferred language of the tenant.
+          type: string
+          example: en
         enabled:
           description: Indicates whether the tenant is enabled.
           type: boolean
@@ -4205,6 +4846,12 @@ components:
           description: "Seconds until expiration, e.g. 3600."
           type: integer
           nullable: true
+    TriggerKind:
+      enum:
+      - MESSAGE_ADDED_TO_CONVERSATION
+      - CONVERSATION_CREATED
+      - CONVERSATION_DATA_CHANGED
+      type: string
     TwilioSettings:
       required:
       - username
@@ -4343,6 +4990,169 @@ components:
       enum:
       - v1
       type: string
+    Workflow:
+      required:
+      - id
+      - trigger
+      - action
+      - createdAt
+      - updatedAt
+      type: object
+      properties:
+        id:
+          format: uuid
+          description: Unique identifier for the workflow.
+          type: string
+          example: ace00000-ace0-ace0-ace0-ace000000000
+          nullable: true
+        conversation_type_id:
+          description: The id of the conversation type to be assigned to this conversation.
+          maxLength: 50
+          pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
+          type: string
+          example: breakdowncase
+          nullable: true
+        trigger:
+          $ref: "#/components/schemas/WorkflowTrigger"
+        action:
+          description: Action to be executed when trigger happens.
+          type: object
+          allOf:
+          - $ref: "#/components/schemas/WorkflowAction"
+          example: NOTIFY_PARTICIPANTS
+        createdAt:
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/Instant"
+          example: 2023-09-10T12:34:56.789Z
+          nullable: true
+        updatedAt:
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/Instant"
+          example: 2023-09-10T12:35:00.123Z
+          nullable: true
+    WorkflowAction:
+      required:
+      - kind
+      type: object
+      properties:
+        kind:
+          description: What should happen when a workflow is triggered.
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/ActionKind"
+          example: NOTIFY_PARTICIPANTS
+        template_name:
+          description: The name of the message template that should be used to build
+            the message if relevant.
+          type: string
+          example: MyTemplate
+          nullable: true
+    WorkflowPaginatedResponse:
+      required:
+      - has_more
+      - total_elements
+      - limit
+      - workflows
+      type: object
+      properties:
+        has_more:
+          description: Indicates if there are more pages to fetch.
+          type: boolean
+          example: "null"
+        total_elements:
+          format: int32
+          description: Total number of elements across all pages.
+          type: integer
+          example: "null"
+          nullable: true
+        limit:
+          format: int32
+          description: The maximum number of elements in this page.
+          type: integer
+          example: "null"
+          nullable: true
+        workflows:
+          description: List of workflows.
+          type: array
+          items:
+            $ref: "#/components/schemas/Workflow"
+        offset:
+          format: int32
+          description: The offset of the first element in this page (for offset-based
+            pagination). Either offset or last_sequence must be set.
+          type: integer
+          example: "null"
+          nullable: true
+        last_sequence:
+          format: int32
+          description: The sequence (or key) of the last element in this page (for
+            key-based pagination). Either offset or last_sequence must be set.
+          type: integer
+          example: "null"
+          nullable: true
+    WorkflowPostRequest:
+      required:
+      - trigger
+      - action
+      type: object
+      properties:
+        conversation_type_id:
+          description: The id of the conversation type to be assigned to this conversation.
+          maxLength: 50
+          pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
+          type: string
+          example: breakdowncase
+          nullable: true
+        trigger:
+          $ref: "#/components/schemas/WorkflowTrigger"
+        action:
+          description: Action for this workflow.
+          type: object
+          allOf:
+          - $ref: "#/components/schemas/WorkflowAction"
+    WorkflowPutRequest:
+      required:
+      - trigger
+      - action
+      type: object
+      properties:
+        conversation_type_id:
+          description: The id of the conversation type to be assigned to this conversation.
+          maxLength: 50
+          pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
+          type: string
+          example: breakdowncase
+          nullable: true
+        trigger:
+          $ref: "#/components/schemas/WorkflowTrigger"
+        action:
+          description: Action for this workflow.
+          type: object
+          allOf:
+          - $ref: "#/components/schemas/WorkflowAction"
+    WorkflowTrigger:
+      description: Base interface for workflow triggers
+      required:
+      - kind
+      type: object
+      properties:
+        kind:
+          description: Discriminator property to identify the trigger type
+          enum:
+          - MESSAGE_ADDED_TO_CONVERSATION
+          - CONVERSATION_CREATED
+          - CONVERSATION_DATA_CHANGED
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/TriggerKind"
+      discriminator:
+        propertyName: kind
+        mapping:
+          MESSAGE_ADDED_TO_CONVERSATION: "#/components/schemas/MessageAddedToConversationTrigger"
+          CONVERSATION_CREATED: "#/components/schemas/ConversationCreatedTrigger"
+          CONVERSATION_DATA_CHANGED: "#/components/schemas/ConversationDataChangedTrigger"
     WsAuthenticate:
       required:
       - token

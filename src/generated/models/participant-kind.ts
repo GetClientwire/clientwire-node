@@ -21,7 +21,8 @@ export const ParticipantKind = {
     None: 'NONE',
     User: 'USER',
     Client: 'CLIENT',
-    Shared: 'SHARED'
+    Shared: 'SHARED',
+    Workflow: 'WORKFLOW'
 } as const;
 export type ParticipantKind = typeof ParticipantKind[keyof typeof ParticipantKind];
 
