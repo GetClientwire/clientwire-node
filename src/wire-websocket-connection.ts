@@ -8,10 +8,18 @@ import {
   WsParticipantReadStatusFromJSON,
   WsParticipantHadConversationOpenFromJSON,
   WsParticipantWasTypingFromJSON,
-  WsConversationReadStatusFromJSON, WsConversationUpdatedToJSON, WsConversationUpdatedFromJSON,
+  WsConversationReadStatusFromJSON,
+  WsConversationUpdatedToJSON,
+  WsConversationUpdatedFromJSON,
+  WsConversationArchivedFromJSON,
 } from './generated';
 import { TokenManager } from './token-manager';
-import { NEW_CONVERSATION_EVENT, CONVERSATION_READ_STATUS_EVENT, CONVERSATION_UPDATED_EVENT } from './wire-events';
+import {
+  NEW_CONVERSATION_EVENT,
+  CONVERSATION_READ_STATUS_EVENT,
+  CONVERSATION_UPDATED_EVENT,
+  CONVERSATION_ARCHIVED_EVENT,
+} from './wire-events';
 import * as logger from './logger';
 
 export class WireWebsocketConnection {
@@ -320,6 +328,17 @@ export class WireWebsocketConnection {
           );
           const message = WsConversationUpdatedFromJSON(data)
           this.client.dispatchEvent(new CustomEvent(CONVERSATION_UPDATED_EVENT, { detail: message }));
+          break
+        }
+        case 'CONVERSATION_ARCHIVED': {
+          logger.debug(
+            '[ClientWireApi.Websocket] Received CONVERSATION_ARCHIVED_EVENT:',
+            data
+          );
+          const message = WsConversationArchivedFromJSON(data)
+          const eventName = `conversations:${data.conversation_id}`;
+          this.client.dispatchEvent(new CustomEvent(eventName, { detail: message }));
+          this.client.dispatchEvent(new CustomEvent(CONVERSATION_ARCHIVED_EVENT, { detail: message }));
           break
         }
         default:

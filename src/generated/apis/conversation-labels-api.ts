@@ -65,7 +65,7 @@ export interface ConversationLabelsApiInterface {
      * @summary Create new labels for the specified conversation
      * @param {string} conversationId 
      * @param {ConversationLabelPostRequest} conversationLabelPostRequest 
-     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;, \&#39;CURRENT_USER_READ_STATUS\&#39;. If empty, no related resource is returned
+     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;. If empty, no related resource is returned
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ConversationLabelsApiInterface
@@ -83,7 +83,7 @@ export interface ConversationLabelsApiInterface {
      * @summary Deletes a label for the specified conversation
      * @param {string} conversationId 
      * @param {string} label 
-     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;, \&#39;CURRENT_USER_READ_STATUS\&#39;. If empty, no related resource is returned
+     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;. If empty, no related resource is returned
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ConversationLabelsApiInterface
@@ -102,7 +102,7 @@ export interface ConversationLabelsApiInterface {
      * @param {string} conversationId 
      * @param {string} label 
      * @param {ConversationLabelPutRequest} conversationLabelPutRequest 
-     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;, \&#39;CURRENT_USER_READ_STATUS\&#39;. If empty, no related resource is returned
+     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;. If empty, no related resource is returned
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ConversationLabelsApiInterface
@@ -120,7 +120,7 @@ export interface ConversationLabelsApiInterface {
      * @summary Updates all labels for the specified conversation
      * @param {string} conversationId 
      * @param {ConversationLabelPutRequest} conversationLabelPutRequest 
-     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;, \&#39;CURRENT_USER_READ_STATUS\&#39;. If empty, no related resource is returned
+     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;. If empty, no related resource is returned
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ConversationLabelsApiInterface

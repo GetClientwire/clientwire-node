@@ -61,6 +61,30 @@ export interface Tenant {
      * @memberof Tenant
      */
     userAutoProvisioningDomains?: Array<string> | null;
+    /**
+     * The header color of the main app
+     * @type {string}
+     * @memberof Tenant
+     */
+    headerColor?: string | null;
+    /**
+     * The button color of the main app.
+     * @type {string}
+     * @memberof Tenant
+     */
+    buttonColor?: string | null;
+    /**
+     * The button hover color of the main app.
+     * @type {string}
+     * @memberof Tenant
+     */
+    buttonHoverColor?: string | null;
+    /**
+     * The button hover color of the main app.
+     * @type {string}
+     * @memberof Tenant
+     */
+    buttonLabelColor?: string | null;
 }
 
 /**
@@ -91,6 +115,10 @@ export function TenantFromJSONTyped(json: any, ignoreDiscriminator: boolean): Te
         'tenantCreationAllowed': json['tenant_creation_allowed'] == null ? undefined : json['tenant_creation_allowed'],
         'tokenExchangeUserinfoUrl': json['token_exchange_userinfo_url'] == null ? undefined : json['token_exchange_userinfo_url'],
         'userAutoProvisioningDomains': json['user_auto_provisioning_domains'] == null ? undefined : json['user_auto_provisioning_domains'],
+        'headerColor': json['header_color'] == null ? undefined : json['header_color'],
+        'buttonColor': json['button_color'] == null ? undefined : json['button_color'],
+        'buttonHoverColor': json['button_hover_color'] == null ? undefined : json['button_hover_color'],
+        'buttonLabelColor': json['button_label_color'] == null ? undefined : json['button_label_color'],
     };
 }
 
@@ -112,6 +140,10 @@ export function TenantToJSONTyped(value?: Tenant | null, ignoreDiscriminator: bo
         'tenant_creation_allowed': value['tenantCreationAllowed'],
         'token_exchange_userinfo_url': value['tokenExchangeUserinfoUrl'],
         'user_auto_provisioning_domains': value['userAutoProvisioningDomains'],
+        'header_color': value['headerColor'],
+        'button_color': value['buttonColor'],
+        'button_hover_color': value['buttonHoverColor'],
+        'button_label_color': value['buttonLabelColor'],
     };
 }
 

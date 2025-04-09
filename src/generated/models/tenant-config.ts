@@ -55,6 +55,30 @@ export interface TenantConfig {
      * @memberof TenantConfig
      */
     enabled: boolean;
+    /**
+     * The header color of the main app
+     * @type {string}
+     * @memberof TenantConfig
+     */
+    headerColor?: string | null;
+    /**
+     * The button color of the main app.
+     * @type {string}
+     * @memberof TenantConfig
+     */
+    buttonColor?: string | null;
+    /**
+     * The button hover color of the main app.
+     * @type {string}
+     * @memberof TenantConfig
+     */
+    buttonHoverColor?: string | null;
+    /**
+     * The button label color of the main app.
+     * @type {string}
+     * @memberof TenantConfig
+     */
+    buttonLabelColor?: string | null;
 }
 
 /**
@@ -86,6 +110,10 @@ export function TenantConfigFromJSONTyped(json: any, ignoreDiscriminator: boolea
         'name': json['name'],
         'preferredLanguage': json['preferred_language'],
         'enabled': json['enabled'],
+        'headerColor': json['header_color'] == null ? undefined : json['header_color'],
+        'buttonColor': json['button_color'] == null ? undefined : json['button_color'],
+        'buttonHoverColor': json['button_hover_color'] == null ? undefined : json['button_hover_color'],
+        'buttonLabelColor': json['button_label_color'] == null ? undefined : json['button_label_color'],
     };
 }
 
@@ -106,6 +134,10 @@ export function TenantConfigToJSONTyped(value?: TenantConfig | null, ignoreDiscr
         'name': value['name'],
         'preferred_language': value['preferredLanguage'],
         'enabled': value['enabled'],
+        'header_color': value['headerColor'],
+        'button_color': value['buttonColor'],
+        'button_hover_color': value['buttonHoverColor'],
+        'button_label_color': value['buttonLabelColor'],
     };
 }
 

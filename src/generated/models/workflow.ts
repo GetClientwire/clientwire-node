@@ -70,6 +70,12 @@ export interface Workflow {
      * @memberof Workflow
      */
     updatedAt: Date | null;
+    /**
+     * The workflow status. The workflow will run only if it is enabled.
+     * @type {boolean}
+     * @memberof Workflow
+     */
+    enabled?: boolean;
 }
 
 /**
@@ -100,6 +106,7 @@ export function WorkflowFromJSONTyped(json: any, ignoreDiscriminator: boolean): 
         'action': WorkflowActionFromJSON(json['action']),
         'createdAt': (json['createdAt'] == null ? null : new Date(json['createdAt'])),
         'updatedAt': (json['updatedAt'] == null ? null : new Date(json['updatedAt'])),
+        'enabled': json['enabled'] == null ? undefined : json['enabled'],
     };
 }
 
@@ -120,6 +127,7 @@ export function WorkflowToJSONTyped(value?: Workflow | null, ignoreDiscriminator
         'action': WorkflowActionToJSON(value['action']),
         'createdAt': (value['createdAt'] == null ? null : (value['createdAt'] as any).toISOString()),
         'updatedAt': (value['updatedAt'] == null ? null : (value['updatedAt'] as any).toISOString()),
+        'enabled': value['enabled'],
     };
 }
 

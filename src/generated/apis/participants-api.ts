@@ -50,6 +50,11 @@ export interface DeleteParticipantRequest {
     participantId: string;
 }
 
+export interface GetClientParticipantAuthUrlRequest {
+    conversationId: string;
+    participantId: string;
+}
+
 export interface GetParticipantRequest {
     conversationId: string;
     participantId: string;
@@ -133,6 +138,23 @@ export interface ParticipantsApiInterface {
      * Delete a participant from the specified conversation.
      */
     deleteParticipant(requestParameters: DeleteParticipantRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+
+    /**
+     * Retrieves the URL for the client participant
+     * @summary Get the client participant URL
+     * @param {string} conversationId 
+     * @param {string} participantId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ParticipantsApiInterface
+     */
+    getClientParticipantAuthUrlRaw(requestParameters: GetClientParticipantAuthUrlRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Participant>>;
+
+    /**
+     * Retrieves the URL for the client participant
+     * Get the client participant URL
+     */
+    getClientParticipantAuthUrl(requestParameters: GetClientParticipantAuthUrlRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Participant>;
 
     /**
      * Retrieves the participant details for the calling CLIENT_PARTICIPANT token.
@@ -413,6 +435,60 @@ export class ParticipantsApi extends runtime.BaseAPI implements ParticipantsApiI
      */
     async deleteParticipant(requestParameters: DeleteParticipantRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
         await this.deleteParticipantRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Retrieves the URL for the client participant
+     * Get the client participant URL
+     */
+    async getClientParticipantAuthUrlRaw(requestParameters: GetClientParticipantAuthUrlRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Participant>> {
+        if (requestParameters['conversationId'] == null) {
+            throw new runtime.RequiredError(
+                'conversationId',
+                'Required parameter "conversationId" was null or undefined when calling getClientParticipantAuthUrl().'
+            );
+        }
+
+        if (requestParameters['participantId'] == null) {
+            throw new runtime.RequiredError(
+                'participantId',
+                'Required parameter "participantId" was null or undefined when calling getClientParticipantAuthUrl().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.apiKey) {
+            headerParameters["X-API-KEY"] = await this.configuration.apiKey("X-API-KEY"); // ApiKeyAuth authentication
+        }
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", ["USER", "OWNER", "API_KEY"]);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/api/v1/conversations/{conversation_id}/participants/{participant_id}/client-url`.replace(`{${"conversation_id"}}`, encodeURIComponent(String(requestParameters['conversationId']))).replace(`{${"participant_id"}}`, encodeURIComponent(String(requestParameters['participantId']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ParticipantFromJSON(jsonValue));
+    }
+
+    /**
+     * Retrieves the URL for the client participant
+     * Get the client participant URL
+     */
+    async getClientParticipantAuthUrl(requestParameters: GetClientParticipantAuthUrlRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Participant> {
+        const response = await this.getClientParticipantAuthUrlRaw(requestParameters, initOverrides);
+        return await response.value();
     }
 
     /**

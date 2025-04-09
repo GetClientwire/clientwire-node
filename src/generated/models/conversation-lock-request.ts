@@ -31,6 +31,12 @@ export interface ConversationLockRequest {
      * @memberof ConversationLockRequest
      */
     lockNote?: string | null;
+    /**
+     * The id of the USER/OWNER who locked the conversation
+     * @type {string}
+     * @memberof ConversationLockRequest
+     */
+    lockedBy?: string | null;
 }
 
 /**
@@ -53,6 +59,7 @@ export function ConversationLockRequestFromJSONTyped(json: any, ignoreDiscrimina
         
         'lockExpiresAt': (new Date(json['lock_expires_at'])),
         'lockNote': json['lock_note'] == null ? undefined : json['lock_note'],
+        'lockedBy': json['locked_by'] == null ? undefined : json['locked_by'],
     };
 }
 
@@ -69,6 +76,7 @@ export function ConversationLockRequestToJSONTyped(value?: ConversationLockReque
         
         'lock_expires_at': ((value['lockExpiresAt']).toISOString()),
         'lock_note': value['lockNote'],
+        'locked_by': value['lockedBy'],
     };
 }
 

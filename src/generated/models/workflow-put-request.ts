@@ -52,6 +52,12 @@ export interface WorkflowPutRequest {
      * @memberof WorkflowPutRequest
      */
     action: WorkflowAction;
+    /**
+     * The workflow status. The workflow will run only if it is enabled.
+     * @type {boolean}
+     * @memberof WorkflowPutRequest
+     */
+    enabled?: boolean;
 }
 
 /**
@@ -76,6 +82,7 @@ export function WorkflowPutRequestFromJSONTyped(json: any, ignoreDiscriminator: 
         'conversationTypeId': json['conversation_type_id'] == null ? undefined : json['conversation_type_id'],
         'trigger': WorkflowTriggerFromJSON(json['trigger']),
         'action': WorkflowActionFromJSON(json['action']),
+        'enabled': json['enabled'] == null ? undefined : json['enabled'],
     };
 }
 
@@ -93,6 +100,7 @@ export function WorkflowPutRequestToJSONTyped(value?: WorkflowPutRequest | null,
         'conversation_type_id': value['conversationTypeId'],
         'trigger': WorkflowTriggerToJSON(value['trigger']),
         'action': WorkflowActionToJSON(value['action']),
+        'enabled': value['enabled'],
     };
 }
 

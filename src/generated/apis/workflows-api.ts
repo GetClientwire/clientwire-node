@@ -51,6 +51,11 @@ export interface ListWorkflowsRequest {
     sortBy?: string | null;
 }
 
+export interface PatchWorkflowRequest {
+    workflowId: string;
+    requestBody: { [key: string]: any; };
+}
+
 export interface UpdateWorkflowRequest {
     workflowId: string;
     workflowPutRequest: WorkflowPutRequest;
@@ -130,6 +135,23 @@ export interface WorkflowsApiInterface {
      * List all workflows for the specified tenant.
      */
     listWorkflows(requestParameters: ListWorkflowsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WorkflowPaginatedResponse>;
+
+    /**
+     * Patches a workflow by ID.
+     * @summary Patch a workflow.
+     * @param {string} workflowId 
+     * @param {{ [key: string]: any; }} requestBody The patch body for updating workflow fields.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof WorkflowsApiInterface
+     */
+    patchWorkflowRaw(requestParameters: PatchWorkflowRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Workflow>>;
+
+    /**
+     * Patches a workflow by ID.
+     * Patch a workflow.
+     */
+    patchWorkflow(requestParameters: PatchWorkflowRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Workflow>;
 
     /**
      * Updates a workflow by ID.
@@ -355,6 +377,63 @@ export class WorkflowsApi extends runtime.BaseAPI implements WorkflowsApiInterfa
      */
     async listWorkflows(requestParameters: ListWorkflowsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WorkflowPaginatedResponse> {
         const response = await this.listWorkflowsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Patches a workflow by ID.
+     * Patch a workflow.
+     */
+    async patchWorkflowRaw(requestParameters: PatchWorkflowRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Workflow>> {
+        if (requestParameters['workflowId'] == null) {
+            throw new runtime.RequiredError(
+                'workflowId',
+                'Required parameter "workflowId" was null or undefined when calling patchWorkflow().'
+            );
+        }
+
+        if (requestParameters['requestBody'] == null) {
+            throw new runtime.RequiredError(
+                'requestBody',
+                'Required parameter "requestBody" was null or undefined when calling patchWorkflow().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.apiKey) {
+            headerParameters["X-API-KEY"] = await this.configuration.apiKey("X-API-KEY"); // ApiKeyAuth authentication
+        }
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", ["OWNER", "API_KEY"]);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/api/v1/workflows/{workflow_id}`.replace(`{${"workflow_id"}}`, encodeURIComponent(String(requestParameters['workflowId']))),
+            method: 'PATCH',
+            headers: headerParameters,
+            query: queryParameters,
+            body: requestParameters['requestBody'],
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WorkflowFromJSON(jsonValue));
+    }
+
+    /**
+     * Patches a workflow by ID.
+     * Patch a workflow.
+     */
+    async patchWorkflow(requestParameters: PatchWorkflowRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Workflow> {
+        const response = await this.patchWorkflowRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

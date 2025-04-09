@@ -637,7 +637,7 @@ paths:
         in: query
       - description: |-
           Include the specified related resources in the response.
-          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE', 'CURRENT_USER_READ_STATUS'.
+          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
           If empty, no related resource is returned
         schema:
           example: "PARTICIPANTS,CONVERSATION_TYPE"
@@ -713,7 +713,7 @@ paths:
       parameters:
       - description: |-
           Include the specified related resources in the response.
-          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE', 'CURRENT_USER_READ_STATUS'.
+          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
           If empty, no related resource is returned
         schema:
           example: "PARTICIPANTS,CONVERSATION_TYPE"
@@ -759,7 +759,7 @@ paths:
       parameters:
       - description: |-
           Include the specified related resources in the response.
-          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE', 'CURRENT_USER_READ_STATUS'.
+          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
           If empty, no related resource is returned
         schema:
           example: "PARTICIPANTS,CONVERSATION_TYPE"
@@ -810,7 +810,7 @@ paths:
           type: string
       - description: |-
           Include the specified related resources in the response.
-          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE', 'CURRENT_USER_READ_STATUS'.
+          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
           If empty, no related resource is returned
         schema:
           example: "PARTICIPANTS,CONVERSATION_TYPE"
@@ -867,7 +867,7 @@ paths:
           type: string
       - description: |-
           Include the specified related resources in the response.
-          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE', 'CURRENT_USER_READ_STATUS'.
+          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
           If empty, no related resource is returned
         schema:
           example: "PARTICIPANTS,CONVERSATION_TYPE"
@@ -943,7 +943,7 @@ paths:
           type: string
       - description: |-
           Include the specified related resources in the response.
-          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE', 'CURRENT_USER_READ_STATUS'.
+          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
           If empty, no related resource is returned
         schema:
           example: "PARTICIPANTS,CONVERSATION_TYPE"
@@ -999,7 +999,7 @@ paths:
           type: string
       - description: |-
           Include the specified related resources in the response.
-          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE', 'CURRENT_USER_READ_STATUS'.
+          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
           If empty, no related resource is returned
         schema:
           example: "PARTICIPANTS,CONVERSATION_TYPE"
@@ -1048,7 +1048,7 @@ paths:
           type: string
       - description: |-
           Include the specified related resources in the response.
-          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE', 'CURRENT_USER_READ_STATUS'.
+          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
           If empty, no related resource is returned
         schema:
           example: "PARTICIPANTS,CONVERSATION_TYPE"
@@ -1103,7 +1103,7 @@ paths:
           type: string
       - description: |-
           Include the specified related resources in the response.
-          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE', 'CURRENT_USER_READ_STATUS'.
+          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
           If empty, no related resource is returned
         schema:
           example: "PARTICIPANTS,CONVERSATION_TYPE"
@@ -1153,7 +1153,7 @@ paths:
           type: string
       - description: |-
           Include the specified related resources in the response.
-          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE', 'CURRENT_USER_READ_STATUS'.
+          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
           If empty, no related resource is returned
         schema:
           example: "PARTICIPANTS,CONVERSATION_TYPE"
@@ -1198,7 +1198,7 @@ paths:
           type: string
       - description: |-
           Include the specified related resources in the response.
-          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE', 'CURRENT_USER_READ_STATUS'.
+          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
           If empty, no related resource is returned
         schema:
           example: "PARTICIPANTS,CONVERSATION_TYPE"
@@ -1231,6 +1231,7 @@ paths:
       security:
       - ApiKeyAuth: []
       - BearerAuth:
+        - USER
         - OWNER
         - API_KEY
   /api/v1/conversations/{conversation_id}/messages:
@@ -1744,6 +1745,48 @@ paths:
         - USER
         - OWNER
         - API_KEY
+  /api/v1/conversations/{conversation_id}/participants/{participant_id}/client-url:
+    get:
+      summary: Get the client participant URL
+      description: Retrieves the URL for the client participant
+      operationId: getClientParticipantAuthUrl
+      tags:
+      - Participants
+      parameters:
+      - name: conversation_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: participant_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: The URL of the client participant
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Participant"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Not found.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - USER
+        - OWNER
+        - API_KEY
   /api/v1/conversations/{conversation_id}/unlock:
     post:
       summary: Unlock a conversation
@@ -1759,7 +1802,7 @@ paths:
           type: string
       - description: |-
           Include the specified related resources in the response.
-          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE', 'CURRENT_USER_READ_STATUS'.
+          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
           If empty, no related resource is returned
         schema:
           example: "PARTICIPANTS,CONVERSATION_TYPE"
@@ -1786,6 +1829,40 @@ paths:
       security:
       - ApiKeyAuth: []
       - BearerAuth:
+        - USER
+        - OWNER
+        - API_KEY
+  /api/v1/conversations/{user_id}/unlock:
+    put:
+      summary: Unlock conversations locked by user
+      description: Unlock all conversations locked by this user
+      operationId: unlockConversationsFromUsers
+      tags:
+      - Conversations
+      parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: Conversations unlocked successfully.
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - USER
         - OWNER
         - API_KEY
   /api/v1/geocoder/reverse:
@@ -1925,11 +2002,19 @@ paths:
         schema:
           type: string
           nullable: true
+      - description: |-
+          Include the specified related resources in the response.
+          Supported values: 'PARAMETERS', 'TEXTS'.
+          If empty, no related resource is returned
+        schema:
+          example: "PARAMETERS,TEXTS"
+        name: includes
+        in: query
       - name: limit
         in: query
         schema:
           format: int32
-          default: 10
+          default: 2147483647
           type: integer
       - name: offset
         in: query
@@ -2011,6 +2096,14 @@ paths:
         required: true
         schema:
           type: string
+      - description: |-
+          Include the specified related resources in the response.
+          Supported values: 'PARAMETERS', 'TEXTS'.
+          If empty, no related resource is returned
+        schema:
+          example: "PARAMETERS,TEXTS"
+        name: includes
+        in: query
       requestBody:
         content:
           application/json:
@@ -2052,6 +2145,14 @@ paths:
         required: true
         schema:
           type: string
+      - description: |-
+          Include the specified related resources in the response.
+          Supported values: 'PARAMETERS', 'TEXTS'.
+          If empty, no related resource is returned
+        schema:
+          example: "PARAMETERS,TEXTS"
+        name: includes
+        in: query
       responses:
         "200":
           description: Message template returned.
@@ -2909,7 +3010,7 @@ paths:
         in: query
         schema:
           format: int32
-          default: 10
+          default: 2147483647
           type: integer
       - name: offset
         in: query
@@ -3001,6 +3102,52 @@ paths:
       responses:
         "200":
           description: Workflow updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Workflow"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Not found.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
+    patch:
+      summary: Patch a workflow.
+      description: Patches a workflow by ID.
+      operationId: patchWorkflow
+      tags:
+      - Workflows
+      parameters:
+      - name: workflow_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: The patch body for updating workflow fields.
+        required: true
+        content:
+          application/json:
+            schema:
+              description: "Allowed fields are: enabled"
+              type: object
+              additionalProperties: {}
+              example:
+                enabled: "true"
+      responses:
+        "200":
+          description: Workflow patched successfully.
           content:
             application/json:
               schema:
@@ -3263,11 +3410,16 @@ components:
             $ref: "#/components/schemas/Participant"
           example: "null"
           nullable: true
-        current_user_read_status:
-          description: The read status of the current user in the conversation.
+        read_status:
+          description: The read status for the conversation. If the permission context
+            is CLIENT we always return the read status of the client. If the permission
+            context is API_KEY we return the shared_read_status. If the permission
+            context is USER and the conversation_type has shared_read_status_for_user_participants=true
+            we return the shared_read_status. If the permission context is USER but
+            user is not part of the conversation we return the shared_read_status.
           type: object
           allOf:
-          - $ref: "#/components/schemas/CurrentUserReadStatus"
+          - $ref: "#/components/schemas/ReadStatusDto"
           nullable: true
         lock_expires_at:
           description: The date when the lock expires
@@ -3372,6 +3524,11 @@ components:
           description: The note for the lock
           type: string
           example: Locked until consulted with the mechanic
+          nullable: true
+        locked_by:
+          description: The id of the USER/OWNER who locked the conversation
+          type: string
+          example: C8E62D56-80BE-437E-A967-6861803729B9
           nullable: true
     ConversationPaginatedResponse:
       required:
@@ -3777,19 +3934,6 @@ components:
           - $ref: "#/components/schemas/UserRole"
           example: OWNER
           nullable: true
-    CurrentUserReadStatus:
-      type: object
-      properties:
-        last_message_seen:
-          format: int32
-          description: The last seen message sequence number.
-          type: integer
-          example: 0
-        unread_message_count:
-          format: int32
-          description: The unread message count.
-          type: integer
-          example: 0
     ErrorResponse:
       required:
       - code
@@ -3832,6 +3976,11 @@ components:
           example:
             info: Additional detail about the error
           nullable: true
+    IncludeOption:
+      enum:
+      - TEXTS
+      - PARAMETERS
+      type: string
     Instant:
       format: date-time
       type: string
@@ -4409,6 +4558,14 @@ components:
           type: string
           example: "5"
           nullable: true
+    ParticipantClientUrlDto:
+      type: object
+      properties:
+        url:
+          description: URL for the client participant
+          type: string
+          example: https://test.wire.net/encrypted-key
+          nullable: true
     ParticipantKind:
       enum:
       - NONE
@@ -4540,6 +4697,19 @@ components:
           type: string
           example: C8E62D56-80BE-437E-A967-6861803729B8
           nullable: true
+    ReadStatusDto:
+      type: object
+      properties:
+        last_message_seen:
+          format: int32
+          description: The last seen message sequence number.
+          type: integer
+          example: 0
+        unread_message_count:
+          format: int32
+          description: The unread message count.
+          type: integer
+          example: 0
     ResetPasswordRequest:
       required:
       - email
@@ -4749,6 +4919,26 @@ components:
           example:
           - autoclubmars.com
           nullable: true
+        header_color:
+          description: The header color of the main app
+          type: string
+          example: "#00000"
+          nullable: true
+        button_color:
+          description: The button color of the main app.
+          type: string
+          example: "#00000"
+          nullable: true
+        button_hover_color:
+          description: The button hover color of the main app.
+          type: string
+          example: "#00000"
+          nullable: true
+        button_label_color:
+          description: The button hover color of the main app.
+          type: string
+          example: "#00000"
+          nullable: true
     TenantConfig:
       description: Configuration object for a specific tenant.
       required:
@@ -4793,6 +4983,26 @@ components:
           description: Indicates whether the tenant is enabled.
           type: boolean
           example: true
+        header_color:
+          description: The header color of the main app
+          type: string
+          example: "#00000"
+          nullable: true
+        button_color:
+          description: The button color of the main app.
+          type: string
+          example: "#00000"
+          nullable: true
+        button_hover_color:
+          description: The button hover color of the main app.
+          type: string
+          example: "#00000"
+          nullable: true
+        button_label_color:
+          description: The button label color of the main app.
+          type: string
+          example: "#00000"
+          nullable: true
     TenantWebhookSettings:
       description: Represents the webhook settings for a tenant.
       required:
@@ -5032,6 +5242,9 @@ components:
           - $ref: "#/components/schemas/Instant"
           example: 2023-09-10T12:35:00.123Z
           nullable: true
+        enabled:
+          description: The workflow status. The workflow will run only if it is enabled.
+          type: boolean
     WorkflowAction:
       required:
       - kind
@@ -5132,6 +5345,9 @@ components:
           type: object
           allOf:
           - $ref: "#/components/schemas/WorkflowAction"
+        enabled:
+          description: The workflow status. The workflow will run only if it is enabled.
+          type: boolean
     WorkflowTrigger:
       description: Base interface for workflow triggers
       required:
@@ -5154,8 +5370,6 @@ components:
           CONVERSATION_CREATED: "#/components/schemas/ConversationCreatedTrigger"
           CONVERSATION_DATA_CHANGED: "#/components/schemas/ConversationDataChangedTrigger"
     WsAuthenticate:
-      required:
-      - token
       type: object
       properties:
         type:
@@ -5163,6 +5377,19 @@ components:
           nullable: true
         token:
           type: string
+          nullable: true
+    WsConversationArchived:
+      required:
+      - conversation_id
+      type: object
+      properties:
+        type:
+          type: string
+          nullable: true
+        conversation_id:
+          type: string
+        archived:
+          type: boolean
     WsConversationReadStatus:
       required:
       - conversation_id

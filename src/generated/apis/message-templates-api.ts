@@ -41,10 +41,12 @@ export interface DeleteMessageTemplateRequest {
 
 export interface GetMessageTemplateByIdRequest {
     name: string;
+    includes?: any;
 }
 
 export interface ListMessageTemplatesRequest {
     direction?: string | null;
+    includes?: any;
     limit?: number;
     offset?: number;
     sortBy?: string | null;
@@ -53,6 +55,7 @@ export interface ListMessageTemplatesRequest {
 export interface UpdateMessageTemplateRequest {
     name: string;
     messageTemplatePutRequest: MessageTemplatePutRequest;
+    includes?: any;
 }
 
 /**
@@ -98,6 +101,7 @@ export interface MessageTemplatesApiInterface {
      * Fetches message templates by id.
      * @summary Message template
      * @param {string} name 
+     * @param {any} [includes] Include the specified related resources in the response. Supported values: \&#39;PARAMETERS\&#39;, \&#39;TEXTS\&#39;. If empty, no related resource is returned
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof MessageTemplatesApiInterface
@@ -114,6 +118,7 @@ export interface MessageTemplatesApiInterface {
      * Fetches message templates for the tenant.
      * @summary Paged message templates.
      * @param {string} [direction] 
+     * @param {any} [includes] Include the specified related resources in the response. Supported values: \&#39;PARAMETERS\&#39;, \&#39;TEXTS\&#39;. If empty, no related resource is returned
      * @param {number} [limit] 
      * @param {number} [offset] 
      * @param {string} [sortBy] 
@@ -134,6 +139,7 @@ export interface MessageTemplatesApiInterface {
      * @summary Update a message template.
      * @param {string} name 
      * @param {MessageTemplatePutRequest} messageTemplatePutRequest 
+     * @param {any} [includes] Include the specified related resources in the response. Supported values: \&#39;PARAMETERS\&#39;, \&#39;TEXTS\&#39;. If empty, no related resource is returned
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof MessageTemplatesApiInterface
@@ -267,6 +273,10 @@ export class MessageTemplatesApi extends runtime.BaseAPI implements MessageTempl
 
         const queryParameters: any = {};
 
+        if (requestParameters['includes'] != null) {
+            queryParameters['includes'] = requestParameters['includes'];
+        }
+
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (this.configuration && this.configuration.apiKey) {
@@ -309,6 +319,10 @@ export class MessageTemplatesApi extends runtime.BaseAPI implements MessageTempl
 
         if (requestParameters['direction'] != null) {
             queryParameters['direction'] = requestParameters['direction'];
+        }
+
+        if (requestParameters['includes'] != null) {
+            queryParameters['includes'] = requestParameters['includes'];
         }
 
         if (requestParameters['limit'] != null) {
@@ -376,6 +390,10 @@ export class MessageTemplatesApi extends runtime.BaseAPI implements MessageTempl
         }
 
         const queryParameters: any = {};
+
+        if (requestParameters['includes'] != null) {
+            queryParameters['includes'] = requestParameters['includes'];
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 

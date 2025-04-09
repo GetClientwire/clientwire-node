@@ -30,14 +30,13 @@ export interface WsAuthenticate {
      * @type {string}
      * @memberof WsAuthenticate
      */
-    token: string;
+    token?: string | null;
 }
 
 /**
  * Check if a given object implements the WsAuthenticate interface.
  */
 export function instanceOfWsAuthenticate(value: object): value is WsAuthenticate {
-    if (!('token' in value) || value['token'] === undefined) return false;
     return true;
 }
 
@@ -52,7 +51,7 @@ export function WsAuthenticateFromJSONTyped(json: any, ignoreDiscriminator: bool
     return {
         
         'type': json['type'] == null ? undefined : json['type'],
-        'token': json['token'],
+        'token': json['token'] == null ? undefined : json['token'],
     };
 }
 

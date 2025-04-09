@@ -20,13 +20,13 @@ import {
     ParticipantToJSON,
     ParticipantToJSONTyped,
 } from './participant';
-import type { CurrentUserReadStatus } from './current-user-read-status';
+import type { ReadStatusDto } from './read-status-dto';
 import {
-    CurrentUserReadStatusFromJSON,
-    CurrentUserReadStatusFromJSONTyped,
-    CurrentUserReadStatusToJSON,
-    CurrentUserReadStatusToJSONTyped,
-} from './current-user-read-status';
+    ReadStatusDtoFromJSON,
+    ReadStatusDtoFromJSONTyped,
+    ReadStatusDtoToJSON,
+    ReadStatusDtoToJSONTyped,
+} from './read-status-dto';
 import type { ConversationType } from './conversation-type';
 import {
     ConversationTypeFromJSON,
@@ -102,11 +102,11 @@ export interface Conversation {
      */
     participants?: Array<Participant> | null;
     /**
-     * The read status of the current user in the conversation.
-     * @type {CurrentUserReadStatus}
+     * The read status for the conversation. If the permission context is CLIENT we always return the read status of the client. If the permission context is API_KEY we return the shared_read_status. If the permission context is USER and the conversation_type has shared_read_status_for_user_participants=true we return the shared_read_status. If the permission context is USER but user is not part of the conversation we return the shared_read_status.
+     * @type {ReadStatusDto}
      * @memberof Conversation
      */
-    currentUserReadStatus?: CurrentUserReadStatus | null;
+    readStatus?: ReadStatusDto | null;
     /**
      * The date when the lock expires
      * @type {Date}
@@ -152,7 +152,7 @@ export function ConversationFromJSONTyped(json: any, ignoreDiscriminator: boolea
         'conversationData': json['conversation_data'] == null ? undefined : json['conversation_data'],
         'conversationDataUpdatedAt': json['conversation_data_updated_at'] == null ? undefined : (new Date(json['conversation_data_updated_at'])),
         'participants': json['participants'] == null ? undefined : ((json['participants'] as Array<any>).map(ParticipantFromJSON)),
-        'currentUserReadStatus': json['current_user_read_status'] == null ? undefined : CurrentUserReadStatusFromJSON(json['current_user_read_status']),
+        'readStatus': json['read_status'] == null ? undefined : ReadStatusDtoFromJSON(json['read_status']),
         'lockExpiresAt': json['lock_expires_at'] == null ? undefined : (new Date(json['lock_expires_at'])),
         'lockNote': json['lock_note'] == null ? undefined : json['lock_note'],
     };
@@ -179,7 +179,7 @@ export function ConversationToJSONTyped(value?: Conversation | null, ignoreDiscr
         'conversation_data': value['conversationData'],
         'conversation_data_updated_at': value['conversationDataUpdatedAt'] == null ? undefined : ((value['conversationDataUpdatedAt'] as any).toISOString()),
         'participants': value['participants'] == null ? undefined : ((value['participants'] as Array<any>).map(ParticipantToJSON)),
-        'current_user_read_status': CurrentUserReadStatusToJSON(value['currentUserReadStatus']),
+        'read_status': ReadStatusDtoToJSON(value['readStatus']),
         'lock_expires_at': value['lockExpiresAt'] == null ? undefined : ((value['lockExpiresAt'] as any).toISOString()),
         'lock_note': value['lockNote'],
     };

@@ -90,6 +90,10 @@ export interface UnlockConversationRequest {
     include?: any;
 }
 
+export interface UnlockConversationsFromUsersRequest {
+    userId: string;
+}
+
 export interface UpdateConversationRequest {
     conversationId: string;
     requestBody: { [key: string]: any; };
@@ -107,7 +111,7 @@ export interface ConversationsApiInterface {
      * Creates a conversation and optional participants.
      * @summary Create a new conversation for the specified tenant.
      * @param {ConversationPostRequest} conversationPostRequest 
-     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;, \&#39;CURRENT_USER_READ_STATUS\&#39;. If empty, no related resource is returned
+     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;. If empty, no related resource is returned
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ConversationsApiInterface
@@ -125,7 +129,7 @@ export interface ConversationsApiInterface {
      * @summary Create or update a conversation.
      * @param {string} conversationId 
      * @param {ConversationPutRequest} conversationPutRequest 
-     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;, \&#39;CURRENT_USER_READ_STATUS\&#39;. If empty, no related resource is returned
+     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;. If empty, no related resource is returned
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ConversationsApiInterface
@@ -158,7 +162,7 @@ export interface ConversationsApiInterface {
      * Retrieves conversation details by ID.
      * @summary Get a single conversation.
      * @param {string} conversationId 
-     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;, \&#39;CURRENT_USER_READ_STATUS\&#39;. If empty, no related resource is returned
+     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;. If empty, no related resource is returned
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ConversationsApiInterface
@@ -177,7 +181,7 @@ export interface ConversationsApiInterface {
      * @param {boolean} [archived] 
      * @param {any} [createdAfter] Only include messages created after this date-time
      * @param {any} [createdBefore] Only include messages created before this date-time
-     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;, \&#39;CURRENT_USER_READ_STATUS\&#39;. If empty, no related resource is returned
+     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;. If empty, no related resource is returned
      * @param {number} [limit] 
      * @param {number} [offset] 
      * @param {any} [order] Direction of the sort. Possible values: ASC, DESC. If not provided will fallback to DESC.
@@ -201,7 +205,7 @@ export interface ConversationsApiInterface {
      * Retrieves multiple conversations by their public IDs in a POST request body.
      * @summary Get a list of conversations by their ids.
      * @param {ConversationsByIdsRequest} conversationsByIdsRequest 
-     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;, \&#39;CURRENT_USER_READ_STATUS\&#39;. If empty, no related resource is returned
+     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;. If empty, no related resource is returned
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ConversationsApiInterface
@@ -219,7 +223,7 @@ export interface ConversationsApiInterface {
      * @summary Lock a conversation
      * @param {string} conversationId 
      * @param {ConversationLockRequest} conversationLockRequest 
-     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;, \&#39;CURRENT_USER_READ_STATUS\&#39;. If empty, no related resource is returned
+     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;. If empty, no related resource is returned
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ConversationsApiInterface
@@ -236,7 +240,7 @@ export interface ConversationsApiInterface {
      * Unlock a conversation
      * @summary Unlock a conversation
      * @param {string} conversationId 
-     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;, \&#39;CURRENT_USER_READ_STATUS\&#39;. If empty, no related resource is returned
+     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;. If empty, no related resource is returned
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ConversationsApiInterface
@@ -250,11 +254,27 @@ export interface ConversationsApiInterface {
     unlockConversation(requestParameters: UnlockConversationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Conversation>;
 
     /**
+     * Unlock all conversations locked by this user
+     * @summary Unlock conversations locked by user
+     * @param {string} userId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ConversationsApiInterface
+     */
+    unlockConversationsFromUsersRaw(requestParameters: UnlockConversationsFromUsersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+
+    /**
+     * Unlock all conversations locked by this user
+     * Unlock conversations locked by user
+     */
+    unlockConversationsFromUsers(requestParameters: UnlockConversationsFromUsersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+
+    /**
      * Allows patching id, archived, conversation_data, etc.
      * @summary Update partial fields of an existing conversation.
      * @param {string} conversationId 
      * @param {{ [key: string]: any; }} requestBody The patch body for updating conversation fields.
-     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;, \&#39;CURRENT_USER_READ_STATUS\&#39;. If empty, no related resource is returned
+     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;. If empty, no related resource is returned
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ConversationsApiInterface
@@ -659,7 +679,7 @@ export class ConversationsApi extends runtime.BaseAPI implements ConversationsAp
 
         if (this.configuration && this.configuration.accessToken) {
             const token = this.configuration.accessToken;
-            const tokenString = await token("BearerAuth", ["OWNER", "API_KEY"]);
+            const tokenString = await token("BearerAuth", ["USER", "OWNER", "API_KEY"]);
 
             if (tokenString) {
                 headerParameters["Authorization"] = `Bearer ${tokenString}`;
@@ -711,7 +731,7 @@ export class ConversationsApi extends runtime.BaseAPI implements ConversationsAp
 
         if (this.configuration && this.configuration.accessToken) {
             const token = this.configuration.accessToken;
-            const tokenString = await token("BearerAuth", ["OWNER", "API_KEY"]);
+            const tokenString = await token("BearerAuth", ["USER", "OWNER", "API_KEY"]);
 
             if (tokenString) {
                 headerParameters["Authorization"] = `Bearer ${tokenString}`;
@@ -734,6 +754,52 @@ export class ConversationsApi extends runtime.BaseAPI implements ConversationsAp
     async unlockConversation(requestParameters: UnlockConversationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Conversation> {
         const response = await this.unlockConversationRaw(requestParameters, initOverrides);
         return await response.value();
+    }
+
+    /**
+     * Unlock all conversations locked by this user
+     * Unlock conversations locked by user
+     */
+    async unlockConversationsFromUsersRaw(requestParameters: UnlockConversationsFromUsersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['userId'] == null) {
+            throw new runtime.RequiredError(
+                'userId',
+                'Required parameter "userId" was null or undefined when calling unlockConversationsFromUsers().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.apiKey) {
+            headerParameters["X-API-KEY"] = await this.configuration.apiKey("X-API-KEY"); // ApiKeyAuth authentication
+        }
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", ["USER", "OWNER", "API_KEY"]);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/api/v1/conversations/{user_id}/unlock`.replace(`{${"user_id"}}`, encodeURIComponent(String(requestParameters['userId']))),
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Unlock all conversations locked by this user
+     * Unlock conversations locked by user
+     */
+    async unlockConversationsFromUsers(requestParameters: UnlockConversationsFromUsersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.unlockConversationsFromUsersRaw(requestParameters, initOverrides);
     }
 
     /**

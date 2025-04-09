@@ -45,9 +45,9 @@ models/create-api-key-request.ts
 models/create-api-key-response.ts
 models/create-oidc-config-request.ts
 models/create-user-request.ts
-models/current-user-read-status.ts
 models/error-response.ts
 models/error-with-code.ts
+models/include-option.ts
 models/index.ts
 models/location-with-address.ts
 models/location.ts
@@ -66,11 +66,13 @@ models/oidc-config-list.ts
 models/oidc-config.ts
 models/parameter-kind.ts
 models/participant-activity-request.ts
+models/participant-client-url-dto.ts
 models/participant-kind.ts
 models/participant-list-response.ts
 models/participant-post-request.ts
 models/participant-put-request.ts
 models/participant.ts
+models/read-status-dto.ts
 models/reset-password-request.ts
 models/rotate-webhook-secret-request.ts
 models/set-password-request.ts
@@ -99,6 +101,7 @@ models/workflow-put-request.ts
 models/workflow-trigger.ts
 models/workflow.ts
 models/ws-authenticate.ts
+models/ws-conversation-archived.ts
 models/ws-conversation-read-status.ts
 models/ws-conversation-updated.ts
 models/ws-message-updated.ts
