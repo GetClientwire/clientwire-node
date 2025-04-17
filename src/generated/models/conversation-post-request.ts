@@ -40,6 +40,12 @@ export interface ConversationPostRequest {
      */
     conversationTypeId: string;
     /**
+     * A description field that can be used to store relevant information for the conversation. The stored data will be used in the default list item template.
+     * @type {string}
+     * @memberof ConversationPostRequest
+     */
+    description?: string | null;
+    /**
      * The data of a conversation corresponding to the conversation_data_schema of the conversation type.
      * @type {any}
      * @memberof ConversationPostRequest
@@ -74,6 +80,7 @@ export function ConversationPostRequestFromJSONTyped(json: any, ignoreDiscrimina
         
         'id': json['id'],
         'conversationTypeId': json['conversation_type_id'],
+        'description': json['description'] == null ? undefined : json['description'],
         'conversationData': json['conversation_data'] == null ? undefined : json['conversation_data'],
         'participants': json['participants'] == null ? undefined : ((json['participants'] as Array<any>).map(ParticipantPostRequestFromJSON)),
     };
@@ -92,6 +99,7 @@ export function ConversationPostRequestToJSONTyped(value?: ConversationPostReque
         
         'id': value['id'],
         'conversation_type_id': value['conversationTypeId'],
+        'description': value['description'],
         'conversation_data': value['conversationData'],
         'participants': value['participants'] == null ? undefined : ((value['participants'] as Array<any>).map(ParticipantPostRequestToJSON)),
     };

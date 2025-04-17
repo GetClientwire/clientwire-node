@@ -20,31 +20,31 @@ import { mapValues } from '../runtime';
  */
 export interface WsParticipantReadStatus {
     /**
-     * 
+     * Type of the message
      * @type {string}
      * @memberof WsParticipantReadStatus
      */
     type?: string | null;
     /**
-     * 
+     * Participant ID
      * @type {string}
      * @memberof WsParticipantReadStatus
      */
     participantId: string;
     /**
-     * 
+     * Conversation ID
      * @type {string}
      * @memberof WsParticipantReadStatus
      */
     conversationId: string;
     /**
-     * 
+     * Last message sequence seen by the participant in the conversation
      * @type {number}
      * @memberof WsParticipantReadStatus
      */
     lastMessageSequenceSeen?: number;
     /**
-     * 
+     * How many unread messages has the participant in the conversation
      * @type {number}
      * @memberof WsParticipantReadStatus
      */

@@ -31,26 +31,26 @@ import {
 export interface CreateConversationLabelsRequest {
     conversationId: string;
     conversationLabelPostRequest: ConversationLabelPostRequest;
-    include?: any;
+    includes?: any;
 }
 
 export interface DeleteConversationLabelRequest {
     conversationId: string;
     label: string;
-    include?: any;
+    includes?: any;
 }
 
 export interface UpdateConversationLabelRequest {
     conversationId: string;
     label: string;
     conversationLabelPutRequest: ConversationLabelPutRequest;
-    include?: any;
+    includes?: any;
 }
 
 export interface UpdateConversationLabelsRequest {
     conversationId: string;
     conversationLabelPutRequest: ConversationLabelPutRequest;
-    include?: any;
+    includes?: any;
 }
 
 /**
@@ -65,7 +65,7 @@ export interface ConversationLabelsApiInterface {
      * @summary Create new labels for the specified conversation
      * @param {string} conversationId 
      * @param {ConversationLabelPostRequest} conversationLabelPostRequest 
-     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;. If empty, no related resource is returned
+     * @param {any} [includes] Include the specified related resources in the response.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ConversationLabelsApiInterface
@@ -83,7 +83,7 @@ export interface ConversationLabelsApiInterface {
      * @summary Deletes a label for the specified conversation
      * @param {string} conversationId 
      * @param {string} label 
-     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;. If empty, no related resource is returned
+     * @param {any} [includes] Include the specified related resources in the response.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ConversationLabelsApiInterface
@@ -102,7 +102,7 @@ export interface ConversationLabelsApiInterface {
      * @param {string} conversationId 
      * @param {string} label 
      * @param {ConversationLabelPutRequest} conversationLabelPutRequest 
-     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;. If empty, no related resource is returned
+     * @param {any} [includes] Include the specified related resources in the response.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ConversationLabelsApiInterface
@@ -120,7 +120,7 @@ export interface ConversationLabelsApiInterface {
      * @summary Updates all labels for the specified conversation
      * @param {string} conversationId 
      * @param {ConversationLabelPutRequest} conversationLabelPutRequest 
-     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;. If empty, no related resource is returned
+     * @param {any} [includes] Include the specified related resources in the response.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ConversationLabelsApiInterface
@@ -161,8 +161,8 @@ export class ConversationLabelsApi extends runtime.BaseAPI implements Conversati
 
         const queryParameters: any = {};
 
-        if (requestParameters['include'] != null) {
-            queryParameters['include'] = requestParameters['include'];
+        if (requestParameters['includes'] != null) {
+            queryParameters['includes'] = requestParameters['includes'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -222,8 +222,8 @@ export class ConversationLabelsApi extends runtime.BaseAPI implements Conversati
 
         const queryParameters: any = {};
 
-        if (requestParameters['include'] != null) {
-            queryParameters['include'] = requestParameters['include'];
+        if (requestParameters['includes'] != null) {
+            queryParameters['includes'] = requestParameters['includes'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -287,8 +287,8 @@ export class ConversationLabelsApi extends runtime.BaseAPI implements Conversati
 
         const queryParameters: any = {};
 
-        if (requestParameters['include'] != null) {
-            queryParameters['include'] = requestParameters['include'];
+        if (requestParameters['includes'] != null) {
+            queryParameters['includes'] = requestParameters['includes'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -347,8 +347,8 @@ export class ConversationLabelsApi extends runtime.BaseAPI implements Conversati
 
         const queryParameters: any = {};
 
-        if (requestParameters['include'] != null) {
-            queryParameters['include'] = requestParameters['include'];
+        if (requestParameters['includes'] != null) {
+            queryParameters['includes'] = requestParameters['includes'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};

@@ -13,6 +13,13 @@
  */
 
 import { mapValues } from '../runtime';
+import type { TemplateData } from './template-data';
+import {
+    TemplateDataFromJSON,
+    TemplateDataFromJSONTyped,
+    TemplateDataToJSON,
+    TemplateDataToJSONTyped,
+} from './template-data';
 import type { Participant } from './participant';
 import {
     ParticipantFromJSON,
@@ -84,11 +91,29 @@ export interface Conversation {
      */
     updatedAt?: Date | null;
     /**
+     * A description field that can be used to store relevant information for the conversation. The stored data will be used in the default list item template.
+     * @type {string}
+     * @memberof Conversation
+     */
+    description?: string | null;
+    /**
      * The data of a conversation corresponding to the conversation_data_schema of the conversation type.
      * @type {any}
      * @memberof Conversation
      */
     conversationData?: any | null;
+    /**
+     * The labels of the conversation.
+     * @type {Array<string>}
+     * @memberof Conversation
+     */
+    labels?: Array<string> | null;
+    /**
+     * The conversation data used to render the UI templates
+     * @type {TemplateData}
+     * @memberof Conversation
+     */
+    templateData?: TemplateData | null;
     /**
      * Timestamp when the conversation data was last updated.
      * @type {Date}
@@ -149,7 +174,10 @@ export function ConversationFromJSONTyped(json: any, ignoreDiscriminator: boolea
         'conversationType': json['conversation_type'] == null ? undefined : ConversationTypeFromJSON(json['conversation_type']),
         'createdAt': json['created_at'] == null ? undefined : (new Date(json['created_at'])),
         'updatedAt': json['updated_at'] == null ? undefined : (new Date(json['updated_at'])),
+        'description': json['description'] == null ? undefined : json['description'],
         'conversationData': json['conversation_data'] == null ? undefined : json['conversation_data'],
+        'labels': json['labels'] == null ? undefined : json['labels'],
+        'templateData': json['template_data'] == null ? undefined : TemplateDataFromJSON(json['template_data']),
         'conversationDataUpdatedAt': json['conversation_data_updated_at'] == null ? undefined : (new Date(json['conversation_data_updated_at'])),
         'participants': json['participants'] == null ? undefined : ((json['participants'] as Array<any>).map(ParticipantFromJSON)),
         'readStatus': json['read_status'] == null ? undefined : ReadStatusDtoFromJSON(json['read_status']),
@@ -176,7 +204,10 @@ export function ConversationToJSONTyped(value?: Conversation | null, ignoreDiscr
         'conversation_type': ConversationTypeToJSON(value['conversationType']),
         'created_at': value['createdAt'] == null ? undefined : ((value['createdAt'] as any).toISOString()),
         'updated_at': value['updatedAt'] == null ? undefined : ((value['updatedAt'] as any).toISOString()),
+        'description': value['description'],
         'conversation_data': value['conversationData'],
+        'labels': value['labels'],
+        'template_data': TemplateDataToJSON(value['templateData']),
         'conversation_data_updated_at': value['conversationDataUpdatedAt'] == null ? undefined : ((value['conversationDataUpdatedAt'] as any).toISOString()),
         'participants': value['participants'] == null ? undefined : ((value['participants'] as Array<any>).map(ParticipantToJSON)),
         'read_status': ReadStatusDtoToJSON(value['readStatus']),

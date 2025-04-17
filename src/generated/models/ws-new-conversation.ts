@@ -20,13 +20,13 @@ import { mapValues } from '../runtime';
  */
 export interface WsNewConversation {
     /**
-     * 
+     * Type of the message
      * @type {string}
      * @memberof WsNewConversation
      */
     type?: string | null;
     /**
-     * 
+     * The conversation ID
      * @type {string}
      * @memberof WsNewConversation
      */

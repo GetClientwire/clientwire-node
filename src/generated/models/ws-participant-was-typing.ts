@@ -20,31 +20,31 @@ import { mapValues } from '../runtime';
  */
 export interface WsParticipantWasTyping {
     /**
-     * 
+     * Type of the message
      * @type {string}
      * @memberof WsParticipantWasTyping
      */
     type?: string | null;
     /**
-     * 
+     * Participant ID
      * @type {string}
      * @memberof WsParticipantWasTyping
      */
     participantId: string;
     /**
-     * 
+     * Conversation ID
      * @type {string}
      * @memberof WsParticipantWasTyping
      */
     conversationId: string;
     /**
-     * 
+     * The participant has been typing at this time
      * @type {Date}
      * @memberof WsParticipantWasTyping
      */
     wasTypingAt: Date;
     /**
-     * 
+     * The participant has been typing for this message_source_id
      * @type {string}
      * @memberof WsParticipantWasTyping
      */
@@ -75,8 +75,8 @@ export function WsParticipantWasTypingFromJSONTyped(json: any, ignoreDiscriminat
         'type': json['type'] == null ? undefined : json['type'],
         'participantId': json['participant_id'],
         'conversationId': json['conversation_id'],
-        'wasTypingAt': (new Date(json['was_typing_at'])),
-        'sourceId': json['source_id'],
+        'wasTypingAt': (new Date(json['wasTypingAt'])),
+        'sourceId': json['sourceId'],
     };
 }
 
@@ -94,8 +94,8 @@ export function WsParticipantWasTypingToJSONTyped(value?: WsParticipantWasTyping
         'type': value['type'],
         'participant_id': value['participantId'],
         'conversation_id': value['conversationId'],
-        'was_typing_at': ((value['wasTypingAt']).toISOString()),
-        'source_id': value['sourceId'],
+        'wasTypingAt': ((value['wasTypingAt']).toISOString()),
+        'sourceId': value['sourceId'],
     };
 }
 

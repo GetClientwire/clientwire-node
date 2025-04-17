@@ -42,13 +42,13 @@ import {
 
 export interface CreateConversationRequest {
     conversationPostRequest: ConversationPostRequest;
-    include?: any;
+    includes?: any;
 }
 
 export interface CreateOrUpdateConversationRequest {
     conversationId: string;
     conversationPutRequest: ConversationPutRequest;
-    include?: any;
+    includes?: any;
 }
 
 export interface DeleteConversationRequest {
@@ -57,14 +57,14 @@ export interface DeleteConversationRequest {
 
 export interface GetConversationRequest {
     conversationId: string;
-    include?: any;
+    includes?: any;
 }
 
 export interface GetConversationsRequest {
     archived?: boolean | null;
     createdAfter?: any;
     createdBefore?: any;
-    include?: any;
+    includes?: any;
     limit?: number;
     offset?: number;
     order?: any;
@@ -76,18 +76,18 @@ export interface GetConversationsRequest {
 
 export interface GetConversationsByIdsRequest {
     conversationsByIdsRequest: ConversationsByIdsRequest;
-    include?: any;
+    includes?: any;
 }
 
 export interface LockConversationRequest {
     conversationId: string;
     conversationLockRequest: ConversationLockRequest;
-    include?: any;
+    includes?: any;
 }
 
 export interface UnlockConversationRequest {
     conversationId: string;
-    include?: any;
+    includes?: any;
 }
 
 export interface UnlockConversationsFromUsersRequest {
@@ -97,7 +97,7 @@ export interface UnlockConversationsFromUsersRequest {
 export interface UpdateConversationRequest {
     conversationId: string;
     requestBody: { [key: string]: any; };
-    include?: any;
+    includes?: any;
 }
 
 /**
@@ -111,7 +111,7 @@ export interface ConversationsApiInterface {
      * Creates a conversation and optional participants.
      * @summary Create a new conversation for the specified tenant.
      * @param {ConversationPostRequest} conversationPostRequest 
-     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;. If empty, no related resource is returned
+     * @param {any} [includes] Include the specified related resources in the response.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ConversationsApiInterface
@@ -129,7 +129,7 @@ export interface ConversationsApiInterface {
      * @summary Create or update a conversation.
      * @param {string} conversationId 
      * @param {ConversationPutRequest} conversationPutRequest 
-     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;. If empty, no related resource is returned
+     * @param {any} [includes] Include the specified related resources in the response.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ConversationsApiInterface
@@ -162,7 +162,7 @@ export interface ConversationsApiInterface {
      * Retrieves conversation details by ID.
      * @summary Get a single conversation.
      * @param {string} conversationId 
-     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;. If empty, no related resource is returned
+     * @param {any} [includes] Include the specified related resources in the response.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ConversationsApiInterface
@@ -181,7 +181,7 @@ export interface ConversationsApiInterface {
      * @param {boolean} [archived] 
      * @param {any} [createdAfter] Only include messages created after this date-time
      * @param {any} [createdBefore] Only include messages created before this date-time
-     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;. If empty, no related resource is returned
+     * @param {any} [includes] Include the specified related resources in the response.
      * @param {number} [limit] 
      * @param {number} [offset] 
      * @param {any} [order] Direction of the sort. Possible values: ASC, DESC. If not provided will fallback to DESC.
@@ -205,7 +205,7 @@ export interface ConversationsApiInterface {
      * Retrieves multiple conversations by their public IDs in a POST request body.
      * @summary Get a list of conversations by their ids.
      * @param {ConversationsByIdsRequest} conversationsByIdsRequest 
-     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;. If empty, no related resource is returned
+     * @param {any} [includes] Include the specified related resources in the response.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ConversationsApiInterface
@@ -223,7 +223,7 @@ export interface ConversationsApiInterface {
      * @summary Lock a conversation
      * @param {string} conversationId 
      * @param {ConversationLockRequest} conversationLockRequest 
-     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;. If empty, no related resource is returned
+     * @param {any} [includes] Include the specified related resources in the response
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ConversationsApiInterface
@@ -240,7 +240,7 @@ export interface ConversationsApiInterface {
      * Unlock a conversation
      * @summary Unlock a conversation
      * @param {string} conversationId 
-     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;. If empty, no related resource is returned
+     * @param {any} [includes] Include the specified related resources in the response.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ConversationsApiInterface
@@ -274,7 +274,7 @@ export interface ConversationsApiInterface {
      * @summary Update partial fields of an existing conversation.
      * @param {string} conversationId 
      * @param {{ [key: string]: any; }} requestBody The patch body for updating conversation fields.
-     * @param {any} [include] Include the specified related resources in the response. Supported values: \&#39;PARTICIPANTS\&#39;, \&#39;CONVERSATION_TYPE\&#39;. If empty, no related resource is returned
+     * @param {any} [includes] Include the specified related resources in the response.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ConversationsApiInterface
@@ -308,8 +308,8 @@ export class ConversationsApi extends runtime.BaseAPI implements ConversationsAp
 
         const queryParameters: any = {};
 
-        if (requestParameters['include'] != null) {
-            queryParameters['include'] = requestParameters['include'];
+        if (requestParameters['includes'] != null) {
+            queryParameters['includes'] = requestParameters['includes'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -369,8 +369,8 @@ export class ConversationsApi extends runtime.BaseAPI implements ConversationsAp
 
         const queryParameters: any = {};
 
-        if (requestParameters['include'] != null) {
-            queryParameters['include'] = requestParameters['include'];
+        if (requestParameters['includes'] != null) {
+            queryParameters['includes'] = requestParameters['includes'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -469,8 +469,8 @@ export class ConversationsApi extends runtime.BaseAPI implements ConversationsAp
 
         const queryParameters: any = {};
 
-        if (requestParameters['include'] != null) {
-            queryParameters['include'] = requestParameters['include'];
+        if (requestParameters['includes'] != null) {
+            queryParameters['includes'] = requestParameters['includes'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -525,8 +525,8 @@ export class ConversationsApi extends runtime.BaseAPI implements ConversationsAp
             queryParameters['created_before'] = requestParameters['createdBefore'];
         }
 
-        if (requestParameters['include'] != null) {
-            queryParameters['include'] = requestParameters['include'];
+        if (requestParameters['includes'] != null) {
+            queryParameters['includes'] = requestParameters['includes'];
         }
 
         if (requestParameters['limit'] != null) {
@@ -604,8 +604,8 @@ export class ConversationsApi extends runtime.BaseAPI implements ConversationsAp
 
         const queryParameters: any = {};
 
-        if (requestParameters['include'] != null) {
-            queryParameters['include'] = requestParameters['include'];
+        if (requestParameters['includes'] != null) {
+            queryParameters['includes'] = requestParameters['includes'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -665,8 +665,8 @@ export class ConversationsApi extends runtime.BaseAPI implements ConversationsAp
 
         const queryParameters: any = {};
 
-        if (requestParameters['include'] != null) {
-            queryParameters['include'] = requestParameters['include'];
+        if (requestParameters['includes'] != null) {
+            queryParameters['includes'] = requestParameters['includes'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -719,8 +719,8 @@ export class ConversationsApi extends runtime.BaseAPI implements ConversationsAp
 
         const queryParameters: any = {};
 
-        if (requestParameters['include'] != null) {
-            queryParameters['include'] = requestParameters['include'];
+        if (requestParameters['includes'] != null) {
+            queryParameters['includes'] = requestParameters['includes'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -823,8 +823,8 @@ export class ConversationsApi extends runtime.BaseAPI implements ConversationsAp
 
         const queryParameters: any = {};
 
-        if (requestParameters['include'] != null) {
-            queryParameters['include'] = requestParameters['include'];
+        if (requestParameters['includes'] != null) {
+            queryParameters['includes'] = requestParameters['includes'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};

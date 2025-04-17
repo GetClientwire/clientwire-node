@@ -470,7 +470,8 @@ paths:
               description: "Allowed fields are: id, description, conversation_data_schema,\
                 \ conversation_data_list_item_template."
               type: object
-              additionalProperties: {}
+              additionalProperties:
+                type: string
               example:
                 description: new description
       responses:
@@ -581,7 +582,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ConversationTypePostRequest"
+              $ref: "#/components/schemas/ConversationTypePutRequest"
         required: true
       responses:
         "201":
@@ -635,13 +636,10 @@ paths:
           format: date-time
         name: created_before
         in: query
-      - description: |-
-          Include the specified related resources in the response.
-          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
-          If empty, no related resource is returned
+      - description: Include the specified related resources in the response.
+        name: includes
         schema:
           example: "PARTICIPANTS,CONVERSATION_TYPE"
-        name: include
         in: query
       - name: limit
         in: query
@@ -711,13 +709,10 @@ paths:
       tags:
       - Conversations
       parameters:
-      - description: |-
-          Include the specified related resources in the response.
-          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
-          If empty, no related resource is returned
+      - description: Include the specified related resources in the response.
+        name: includes
         schema:
           example: "PARTICIPANTS,CONVERSATION_TYPE"
-        name: include
         in: query
       requestBody:
         content:
@@ -757,13 +752,10 @@ paths:
       tags:
       - Conversations
       parameters:
-      - description: |-
-          Include the specified related resources in the response.
-          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
-          If empty, no related resource is returned
+      - description: Include the specified related resources in the response.
         schema:
           example: "PARTICIPANTS,CONVERSATION_TYPE"
-        name: include
+        name: includes
         in: query
       requestBody:
         content:
@@ -808,13 +800,10 @@ paths:
         required: true
         schema:
           type: string
-      - description: |-
-          Include the specified related resources in the response.
-          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
-          If empty, no related resource is returned
+      - description: Include the specified related resources in the response.
         schema:
           example: "PARTICIPANTS,CONVERSATION_TYPE"
-        name: include
+        name: includes
         in: query
       requestBody:
         description: The patch body for updating conversation fields.
@@ -822,8 +811,8 @@ paths:
         content:
           application/json:
             schema:
-              description: "The fields to update. Allowed fields are: id, archived\
-                \ and conversation_data."
+              description: "The fields to update. Allowed fields are: id, archived,\
+                \ description and conversation_data."
               type: object
               additionalProperties: {}
               example:
@@ -865,13 +854,10 @@ paths:
         required: true
         schema:
           type: string
-      - description: |-
-          Include the specified related resources in the response.
-          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
-          If empty, no related resource is returned
+      - description: Include the specified related resources in the response.
         schema:
           example: "PARTICIPANTS,CONVERSATION_TYPE"
-        name: include
+        name: includes
         in: query
       responses:
         "200":
@@ -941,13 +927,10 @@ paths:
         required: true
         schema:
           type: string
-      - description: |-
-          Include the specified related resources in the response.
-          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
-          If empty, no related resource is returned
+      - description: Include the specified related resources in the response.
+        name: includes
         schema:
           example: "PARTICIPANTS,CONVERSATION_TYPE"
-        name: include
         in: query
       requestBody:
         required: true
@@ -997,13 +980,10 @@ paths:
         required: true
         schema:
           type: string
-      - description: |-
-          Include the specified related resources in the response.
-          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
-          If empty, no related resource is returned
+      - description: Include the specified related resources in the response.
         schema:
           example: "PARTICIPANTS,CONVERSATION_TYPE"
-        name: include
+        name: includes
         in: query
       requestBody:
         content:
@@ -1046,13 +1026,10 @@ paths:
         required: true
         schema:
           type: string
-      - description: |-
-          Include the specified related resources in the response.
-          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
-          If empty, no related resource is returned
+      - description: Include the specified related resources in the response.
         schema:
           example: "PARTICIPANTS,CONVERSATION_TYPE"
-        name: include
+        name: includes
         in: query
       requestBody:
         content:
@@ -1101,13 +1078,10 @@ paths:
         required: true
         schema:
           type: string
-      - description: |-
-          Include the specified related resources in the response.
-          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
-          If empty, no related resource is returned
+      - description: Include the specified related resources in the response.
         schema:
           example: "PARTICIPANTS,CONVERSATION_TYPE"
-        name: include
+        name: includes
         in: query
       requestBody:
         content:
@@ -1151,13 +1125,10 @@ paths:
         required: true
         schema:
           type: string
-      - description: |-
-          Include the specified related resources in the response.
-          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
-          If empty, no related resource is returned
+      - description: Include the specified related resources in the response.
         schema:
           example: "PARTICIPANTS,CONVERSATION_TYPE"
-        name: include
+        name: includes
         in: query
       responses:
         "200":
@@ -1196,13 +1167,10 @@ paths:
         required: true
         schema:
           type: string
-      - description: |-
-          Include the specified related resources in the response.
-          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
-          If empty, no related resource is returned
+      - description: Include the specified related resources in the response
         schema:
           example: "PARTICIPANTS,CONVERSATION_TYPE"
-        name: include
+        name: includes
         in: query
       requestBody:
         required: true
@@ -1800,13 +1768,10 @@ paths:
         required: true
         schema:
           type: string
-      - description: |-
-          Include the specified related resources in the response.
-          Supported values: 'PARTICIPANTS', 'CONVERSATION_TYPE'.
-          If empty, no related resource is returned
+      - description: Include the specified related resources in the response.
         schema:
           example: "PARTICIPANTS,CONVERSATION_TYPE"
-        name: include
+        name: includes
         in: query
       responses:
         "200":
@@ -3389,6 +3354,13 @@ components:
           - $ref: "#/components/schemas/Instant"
           example: 2022-11-03T20:26:10.344522Z
           nullable: true
+        description:
+          description: A description field that can be used to store relevant information
+            for the conversation. The stored data will be used in the default list
+            item template.
+          type: string
+          example: This is a description!
+          nullable: true
         conversation_data:
           description: The data of a conversation corresponding to the conversation_data_schema
             of the conversation type.
@@ -3396,6 +3368,24 @@ components:
           example:
             status: in_progress
             details: Car breakdown on highway.
+        labels:
+          description: The labels of the conversation.
+          type: array
+          items:
+            type: string
+          nullable: true
+        template_data:
+          description: The conversation data used to render the UI templates
+          type: object
+          allOf:
+          - $ref: "#/components/schemas/TemplateData"
+          example:
+            list_item_template:
+              conversation.id: Abc123
+            client_header_template:
+              conversation.id: Abc123
+              conversation.description: This is a description!
+          nullable: true
         conversation_data_updated_at:
           description: Timestamp when the conversation data was last updated.
           type: string
@@ -3475,6 +3465,15 @@ components:
         old_value:
           type: string
           nullable: true
+    ConversationIncludeOption:
+      enum:
+      - PARTICIPANTS
+      - CONVERSATION_TYPE
+      - LIST_ITEM_TEMPLATE_DATA
+      - CLIENT_HEADER_TEMPLATE_DATA
+      - CONVERSATION_DATA
+      - CURRENT_USER_READ_STATUS
+      type: string
     ConversationLabelPostRequest:
       required:
       - labels
@@ -3593,6 +3592,13 @@ components:
           pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
           type: string
           example: breakdowncase
+        description:
+          description: A description field that can be used to store relevant information
+            for the conversation. The stored data will be used in the default list
+            item template.
+          type: string
+          example: This is a description!
+          nullable: true
         conversation_data:
           description: The data of a conversation corresponding to the conversation_data_schema
             of the conversation type.
@@ -3625,6 +3631,13 @@ components:
           pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
           type: string
           example: breakdowncase
+        description:
+          description: A description field that can be used to store relevant information
+            for the conversation. The stored data will be used in the default list
+            item template.
+          type: string
+          example: This is a description!
+          nullable: true
         conversation_data:
           description: The data of a conversation corresponding to the conversation_data_schema
             of the conversation type.
@@ -3687,6 +3700,12 @@ components:
             \ in the conversation to client participants."
           type: string
           example: "true"
+          nullable: true
+        displayNameForWorkflowParticipants:
+          description: "If set, all workflow participants will appear with this name\
+            \ in the conversation to client participants."
+          type: string
+          example: Workflow
           nullable: true
         conversation_data_schema:
           description: A JSON Schema describing the data expected in the conversation.
@@ -3755,6 +3774,12 @@ components:
           type: string
           example: "true"
           nullable: true
+        displayNameForWorkflowParticipants:
+          description: "If set, all workflow participants will appear with this name\
+            \ in the conversation to client participants."
+          type: string
+          example: Workflow
+          nullable: true
         conversation_data_schema:
           description: A JSON Schema describing the data expected in the conversation.
           maxLength: 1073741824
@@ -3764,12 +3789,13 @@ components:
               status:
                 type: string
         conversation_data_list_item_template:
-          description: A handlebars template string used to render the conversation
-            data in a list view. The template can contain placeholders for data in
-            the conversation data schema.
+          description: "A handlebars template string used to render the conversation\
+            \ data in a list view. The template can contain placeholders for data\
+            \ in the conversation data schema, or one of the allowed values: conversation_id,\
+            \ conversation_description, conversation_unread_count."
           maxLength: 1073741824
           type: string
-          example: "{{status}} - {{created_at}}"
+          example: "{{conversation_id}} - {{conversation_data.title}}"
           nullable: true
         client_app_header_template:
           description: An HTML template to reader the header in the client app which
@@ -3779,6 +3805,8 @@ components:
           example: "<div>{{client}}</div>"
           nullable: true
     ConversationTypePutRequest:
+      required:
+      - id
       type: object
       properties:
         id:
@@ -3787,7 +3815,6 @@ components:
           pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
           type: string
           example: breakdowncase
-          nullable: true
         description:
           description: A description of what this conversation type is used for.
           type: string
@@ -3798,6 +3825,12 @@ components:
             \ in the conversation to client participants."
           type: string
           example: "true"
+          nullable: true
+        displayNameForWorkflowParticipants:
+          description: "If set, all workflow participants will appear with this name\
+            \ in the conversation to client participants."
+          type: string
+          example: Workflow
           nullable: true
         conversation_data_schema:
           description: A JSON Schema describing the data expected in the conversation.
@@ -4865,6 +4898,27 @@ components:
       - UPLOAD_FAILED
       - UNKNOWN
       type: string
+    TemplateData:
+      required:
+      - list_item
+      - client_header
+      type: object
+      properties:
+        list_item:
+          description: 'The data required to render the list item UI template '
+          type: object
+          additionalProperties: {}
+          example:
+            conversation.id: Abc123
+          nullable: true
+        client_header:
+          description: 'The data required to render the client header UI template '
+          type: object
+          additionalProperties: {}
+          example:
+            conversation.id: Abc123
+            conversation.description: This is a description!
+          nullable: true
     Tenant:
       description: "Represents a tenant with a unique ID, subdomain, and metadata."
       required:
@@ -5373,30 +5427,45 @@ components:
       type: object
       properties:
         type:
+          description: Type of the message
+          default: AUTHENTICATE
           type: string
+          example: AUTHENTICATE
           nullable: true
         token:
+          description: Access Token
           type: string
           nullable: true
     WsConversationArchived:
       required:
+      - type
       - conversation_id
+      - archived
       type: object
       properties:
         type:
+          description: Type of the message
+          default: CONVERSATION_ARCHIVED
           type: string
-          nullable: true
+          example: CONVERSATION_ARCHIVED
         conversation_id:
+          description: The conversation ID
           type: string
+          example: ccc00000-ccc0000-ccc00-ccc00-ccc000000
         archived:
+          description: Indicates whether the conversation is archived.
           type: boolean
+          example: true
     WsConversationReadStatus:
       required:
       - conversation_id
       type: object
       properties:
         type:
+          description: Type of the message
+          default: CONVERSATION_READ_STATUS
           type: string
+          example: CONVERSATION_READ_STATUS
           nullable: true
         conversation_id:
           description: The id of the conversation.
@@ -5406,6 +5475,7 @@ components:
           example: Abc123
         last_message_sequence_seen:
           format: int32
+          description: Last message sequence seen by any of the user participants
           type: integer
         unread_messages_count:
           format: int32
@@ -5419,7 +5489,10 @@ components:
       type: object
       properties:
         type:
+          description: Type of the message
+          default: CONVERSATION_UPDATED
           type: string
+          example: CONVERSATION_UPDATED
           nullable: true
         conversation:
           $ref: "#/components/schemas/Conversation"
@@ -5429,7 +5502,10 @@ components:
       type: object
       properties:
         type:
+          description: Type of the message
+          default: MESSAGE_UPDATED
           type: string
+          example: MESSAGE_UPDATED
           nullable: true
         message:
           $ref: "#/components/schemas/Message"
@@ -5439,17 +5515,25 @@ components:
       type: object
       properties:
         type:
+          description: Type of the message
+          default: NEW_CONVERSATION
           type: string
+          example: NEW_CONVERSATION
           nullable: true
         conversation_id:
+          description: The conversation ID
           type: string
+          example: ccc00000-ccc0000-ccc00-ccc00-ccc000000
     WsNewMessage:
       required:
       - message
       type: object
       properties:
         type:
+          description: Type of the message
+          default: NEW_MESSAGE
           type: string
+          example: NEW_MESSAGE
           nullable: true
         message:
           $ref: "#/components/schemas/Message"
@@ -5461,14 +5545,23 @@ components:
       type: object
       properties:
         type:
+          description: Type of the message
+          default: PARTICIPANT_HAD_CONVERSATION_OPEN
           type: string
+          example: PARTICIPANT_HAD_CONVERSATION_OPEN
           nullable: true
         participant_id:
+          description: Participant ID
           type: string
         conversation_id:
+          description: Conversation ID
           type: string
         had_conversation_open_at:
-          $ref: "#/components/schemas/Instant"
+          description: The participant had the conversation open at this time
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/Instant"
+          example: 2022-03-10T16:15:50Z
     WsParticipantReadStatus:
       required:
       - participant_id
@@ -5476,48 +5569,71 @@ components:
       type: object
       properties:
         type:
+          description: Type of the message
+          default: PARTICIPANT_READ_STATUS
           type: string
+          example: PARTICIPANT_READ_STATUS
           nullable: true
         participant_id:
+          description: Participant ID
           type: string
         conversation_id:
+          description: Conversation ID
           type: string
         last_message_sequence_seen:
           format: int32
+          description: Last message sequence seen by the participant in the conversation
           type: integer
         unread_messages_count:
           format: int32
+          description: How many unread messages has the participant in the conversation
           type: integer
     WsParticipantWasTyping:
       required:
       - participant_id
       - conversation_id
-      - was_typing_at
-      - source_id
+      - wasTypingAt
+      - sourceId
       type: object
       properties:
         type:
+          description: Type of the message
+          default: PARTICIPANT_WAS_TYPING
           type: string
+          example: PARTICIPANT_WAS_TYPING
           nullable: true
         participant_id:
+          description: Participant ID
           type: string
         conversation_id:
+          description: Conversation ID
           type: string
-        was_typing_at:
-          $ref: "#/components/schemas/Instant"
-        source_id:
+        wasTypingAt:
+          description: The participant has been typing at this time
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/Instant"
+          example: 2022-03-10T16:15:50Z
+        sourceId:
+          description: The participant has been typing for this message_source_id
           type: string
     WsPing:
       type: object
       properties:
         type:
+          description: Type of the message
+          default: PING
           type: string
+          example: PING
           nullable: true
     WsPong:
       type: object
       properties:
         type:
+          description: Type of the message
+          default: PONG
           type: string
+          example: PONG
           nullable: true
     WsSubscribe:
       required:
@@ -5525,7 +5641,10 @@ components:
       type: object
       properties:
         type:
+          description: Type of the message
+          default: SUBSCRIBE
           type: string
+          example: SUBSCRIBE
           nullable: true
         address:
           type: string
@@ -5535,7 +5654,10 @@ components:
       type: object
       properties:
         type:
+          description: Type of the message
+          default: UNSUBSCRIBE
           type: string
+          example: UNSUBSCRIBE
           nullable: true
         address:
           type: string

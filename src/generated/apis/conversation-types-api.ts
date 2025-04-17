@@ -18,6 +18,7 @@ import type {
   ConversationType,
   ConversationTypeListResponse,
   ConversationTypePostRequest,
+  ConversationTypePutRequest,
 } from '../models/index';
 import {
     ConversationTypeFromJSON,
@@ -26,6 +27,8 @@ import {
     ConversationTypeListResponseToJSON,
     ConversationTypePostRequestFromJSON,
     ConversationTypePostRequestToJSON,
+    ConversationTypePutRequestFromJSON,
+    ConversationTypePutRequestToJSON,
 } from '../models/index';
 
 export interface CreateConversationTypeRequest {
@@ -34,7 +37,7 @@ export interface CreateConversationTypeRequest {
 
 export interface CreateOrUpdateConversationTypeRequest {
     conversationTypeId: string;
-    conversationTypePostRequest: ConversationTypePostRequest;
+    conversationTypePutRequest: ConversationTypePutRequest;
 }
 
 export interface DeleteConversationTypeRequest {
@@ -47,7 +50,7 @@ export interface GetConversationTypeRequest {
 
 export interface UpdateConversationTypeRequest {
     conversationTypeId: string;
-    requestBody: { [key: string]: any; };
+    requestBody: { [key: string]: string; };
 }
 
 /**
@@ -77,7 +80,7 @@ export interface ConversationTypesApiInterface {
      * If not found, conversation type is created; otherwise it is updated.
      * @summary Create or update a conversation type.
      * @param {string} conversationTypeId 
-     * @param {ConversationTypePostRequest} conversationTypePostRequest 
+     * @param {ConversationTypePutRequest} conversationTypePutRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ConversationTypesApiInterface
@@ -141,7 +144,7 @@ export interface ConversationTypesApiInterface {
      * Allows patching only specific fields of a conversation type.
      * @summary Update partial fields of an existing conversation type.
      * @param {string} conversationTypeId 
-     * @param {{ [key: string]: any; }} requestBody The patch body for updating conversation type fields.
+     * @param {{ [key: string]: string; }} requestBody The patch body for updating conversation type fields.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ConversationTypesApiInterface
@@ -223,10 +226,10 @@ export class ConversationTypesApi extends runtime.BaseAPI implements Conversatio
             );
         }
 
-        if (requestParameters['conversationTypePostRequest'] == null) {
+        if (requestParameters['conversationTypePutRequest'] == null) {
             throw new runtime.RequiredError(
-                'conversationTypePostRequest',
-                'Required parameter "conversationTypePostRequest" was null or undefined when calling createOrUpdateConversationType().'
+                'conversationTypePutRequest',
+                'Required parameter "conversationTypePutRequest" was null or undefined when calling createOrUpdateConversationType().'
             );
         }
 
@@ -253,7 +256,7 @@ export class ConversationTypesApi extends runtime.BaseAPI implements Conversatio
             method: 'PUT',
             headers: headerParameters,
             query: queryParameters,
-            body: ConversationTypePostRequestToJSON(requestParameters['conversationTypePostRequest']),
+            body: ConversationTypePutRequestToJSON(requestParameters['conversationTypePutRequest']),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => ConversationTypeFromJSON(jsonValue));

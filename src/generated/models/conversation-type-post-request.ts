@@ -38,13 +38,19 @@ export interface ConversationTypePostRequest {
      */
     displayNameSharedByUsers?: string | null;
     /**
+     * If set, all workflow participants will appear with this name in the conversation to client participants.
+     * @type {string}
+     * @memberof ConversationTypePostRequest
+     */
+    displayNameForWorkflowParticipants?: string | null;
+    /**
      * A JSON Schema describing the data expected in the conversation.
      * @type {any}
      * @memberof ConversationTypePostRequest
      */
     conversationDataSchema?: any | null;
     /**
-     * A handlebars template string used to render the conversation data in a list view. The template can contain placeholders for data in the conversation data schema.
+     * A handlebars template string used to render the conversation data in a list view. The template can contain placeholders for data in the conversation data schema, or one of the allowed values: conversation_id, conversation_description, conversation_unread_count.
      * @type {string}
      * @memberof ConversationTypePostRequest
      */
@@ -78,6 +84,7 @@ export function ConversationTypePostRequestFromJSONTyped(json: any, ignoreDiscri
         'id': json['id'],
         'description': json['description'] == null ? undefined : json['description'],
         'displayNameSharedByUsers': json['displayNameSharedByUsers'] == null ? undefined : json['displayNameSharedByUsers'],
+        'displayNameForWorkflowParticipants': json['displayNameForWorkflowParticipants'] == null ? undefined : json['displayNameForWorkflowParticipants'],
         'conversationDataSchema': json['conversation_data_schema'] == null ? undefined : json['conversation_data_schema'],
         'conversationDataListItemTemplate': json['conversation_data_list_item_template'] == null ? undefined : json['conversation_data_list_item_template'],
         'clientAppHeaderTemplate': json['client_app_header_template'] == null ? undefined : json['client_app_header_template'],
@@ -98,6 +105,7 @@ export function ConversationTypePostRequestToJSONTyped(value?: ConversationTypeP
         'id': value['id'],
         'description': value['description'],
         'displayNameSharedByUsers': value['displayNameSharedByUsers'],
+        'displayNameForWorkflowParticipants': value['displayNameForWorkflowParticipants'],
         'conversation_data_schema': value['conversationDataSchema'],
         'conversation_data_list_item_template': value['conversationDataListItemTemplate'],
         'client_app_header_template': value['clientAppHeaderTemplate'],

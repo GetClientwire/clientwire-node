@@ -24,7 +24,7 @@ export interface ConversationTypePutRequest {
      * @type {string}
      * @memberof ConversationTypePutRequest
      */
-    id?: string | null;
+    id: string;
     /**
      * A description of what this conversation type is used for.
      * @type {string}
@@ -37,6 +37,12 @@ export interface ConversationTypePutRequest {
      * @memberof ConversationTypePutRequest
      */
     displayNameSharedByUsers?: string | null;
+    /**
+     * If set, all workflow participants will appear with this name in the conversation to client participants.
+     * @type {string}
+     * @memberof ConversationTypePutRequest
+     */
+    displayNameForWorkflowParticipants?: string | null;
     /**
      * A JSON Schema describing the data expected in the conversation.
      * @type {any}
@@ -61,6 +67,7 @@ export interface ConversationTypePutRequest {
  * Check if a given object implements the ConversationTypePutRequest interface.
  */
 export function instanceOfConversationTypePutRequest(value: object): value is ConversationTypePutRequest {
+    if (!('id' in value) || value['id'] === undefined) return false;
     return true;
 }
 
@@ -74,9 +81,10 @@ export function ConversationTypePutRequestFromJSONTyped(json: any, ignoreDiscrim
     }
     return {
         
-        'id': json['id'] == null ? undefined : json['id'],
+        'id': json['id'],
         'description': json['description'] == null ? undefined : json['description'],
         'displayNameSharedByUsers': json['displayNameSharedByUsers'] == null ? undefined : json['displayNameSharedByUsers'],
+        'displayNameForWorkflowParticipants': json['displayNameForWorkflowParticipants'] == null ? undefined : json['displayNameForWorkflowParticipants'],
         'conversationDataSchema': json['conversation_data_schema'] == null ? undefined : json['conversation_data_schema'],
         'conversationDataListItemTemplate': json['conversation_data_list_item_template'] == null ? undefined : json['conversation_data_list_item_template'],
         'clientAppHeaderTemplate': json['client_app_header_template'] == null ? undefined : json['client_app_header_template'],
@@ -97,6 +105,7 @@ export function ConversationTypePutRequestToJSONTyped(value?: ConversationTypePu
         'id': value['id'],
         'description': value['description'],
         'displayNameSharedByUsers': value['displayNameSharedByUsers'],
+        'displayNameForWorkflowParticipants': value['displayNameForWorkflowParticipants'],
         'conversation_data_schema': value['conversationDataSchema'],
         'conversation_data_list_item_template': value['conversationDataListItemTemplate'],
         'client_app_header_template': value['clientAppHeaderTemplate'],

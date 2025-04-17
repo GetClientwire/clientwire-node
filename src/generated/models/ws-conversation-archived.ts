@@ -20,30 +20,32 @@ import { mapValues } from '../runtime';
  */
 export interface WsConversationArchived {
     /**
-     * 
+     * Type of the message
      * @type {string}
      * @memberof WsConversationArchived
      */
-    type?: string | null;
+    type: string;
     /**
-     * 
+     * The conversation ID
      * @type {string}
      * @memberof WsConversationArchived
      */
     conversationId: string;
     /**
-     * 
+     * Indicates whether the conversation is archived.
      * @type {boolean}
      * @memberof WsConversationArchived
      */
-    archived?: boolean;
+    archived: boolean;
 }
 
 /**
  * Check if a given object implements the WsConversationArchived interface.
  */
 export function instanceOfWsConversationArchived(value: object): value is WsConversationArchived {
+    if (!('type' in value) || value['type'] === undefined) return false;
     if (!('conversationId' in value) || value['conversationId'] === undefined) return false;
+    if (!('archived' in value) || value['archived'] === undefined) return false;
     return true;
 }
 
@@ -57,9 +59,9 @@ export function WsConversationArchivedFromJSONTyped(json: any, ignoreDiscriminat
     }
     return {
         
-        'type': json['type'] == null ? undefined : json['type'],
+        'type': json['type'],
         'conversationId': json['conversation_id'],
-        'archived': json['archived'] == null ? undefined : json['archived'],
+        'archived': json['archived'],
     };
 }
 

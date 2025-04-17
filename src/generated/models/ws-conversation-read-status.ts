@@ -20,7 +20,7 @@ import { mapValues } from '../runtime';
  */
 export interface WsConversationReadStatus {
     /**
-     * 
+     * Type of the message
      * @type {string}
      * @memberof WsConversationReadStatus
      */
@@ -32,7 +32,7 @@ export interface WsConversationReadStatus {
      */
     conversationId: string;
     /**
-     * 
+     * Last message sequence seen by any of the user participants
      * @type {number}
      * @memberof WsConversationReadStatus
      */

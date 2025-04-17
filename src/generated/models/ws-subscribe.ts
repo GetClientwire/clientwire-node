@@ -20,7 +20,7 @@ import { mapValues } from '../runtime';
  */
 export interface WsSubscribe {
     /**
-     * 
+     * Type of the message
      * @type {string}
      * @memberof WsSubscribe
      */

@@ -40,6 +40,12 @@ export interface ConversationPutRequest {
      */
     conversationTypeId: string;
     /**
+     * A description field that can be used to store relevant information for the conversation. The stored data will be used in the default list item template.
+     * @type {string}
+     * @memberof ConversationPutRequest
+     */
+    description?: string | null;
+    /**
      * The data of a conversation corresponding to the conversation_data_schema of the conversation type.
      * @type {any}
      * @memberof ConversationPutRequest
@@ -80,6 +86,7 @@ export function ConversationPutRequestFromJSONTyped(json: any, ignoreDiscriminat
         
         'id': json['id'],
         'conversationTypeId': json['conversation_type_id'],
+        'description': json['description'] == null ? undefined : json['description'],
         'conversationData': json['conversation_data'] == null ? undefined : json['conversation_data'],
         'archived': json['archived'] == null ? undefined : json['archived'],
         'participants': json['participants'] == null ? undefined : ((json['participants'] as Array<any>).map(ParticipantPostRequestFromJSON)),
@@ -99,6 +106,7 @@ export function ConversationPutRequestToJSONTyped(value?: ConversationPutRequest
         
         'id': value['id'],
         'conversation_type_id': value['conversationTypeId'],
+        'description': value['description'],
         'conversation_data': value['conversationData'],
         'archived': value['archived'],
         'participants': value['participants'] == null ? undefined : ((value['participants'] as Array<any>).map(ParticipantPostRequestToJSON)),

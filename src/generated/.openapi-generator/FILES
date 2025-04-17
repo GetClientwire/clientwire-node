@@ -28,6 +28,7 @@ models/authentication-options.ts
 models/condition-operator.ts
 models/conversation-created-trigger.ts
 models/conversation-data-changed-trigger.ts
+models/conversation-include-option.ts
 models/conversation-label-post-request.ts
 models/conversation-label-put-request.ts
 models/conversation-list-response.ts
@@ -81,6 +82,7 @@ models/signup-machine-response.ts
 models/signup-request.ts
 models/signup-response.ts
 models/status.ts
+models/template-data.ts
 models/tenant-config.ts
 models/tenant-webhook-settings.ts
 models/tenant.ts

@@ -20,13 +20,13 @@ import { mapValues } from '../runtime';
  */
 export interface WsAuthenticate {
     /**
-     * 
+     * Type of the message
      * @type {string}
      * @memberof WsAuthenticate
      */
     type?: string | null;
     /**
-     * 
+     * Access Token
      * @type {string}
      * @memberof WsAuthenticate
      */

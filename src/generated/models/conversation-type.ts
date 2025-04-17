@@ -56,6 +56,12 @@ export interface ConversationType {
      */
     displayNameSharedByUsers?: string | null;
     /**
+     * If set, all workflow participants will appear with this name in the conversation to client participants.
+     * @type {string}
+     * @memberof ConversationType
+     */
+    displayNameForWorkflowParticipants?: string | null;
+    /**
      * A JSON Schema describing the data expected in the conversation.
      * @type {any}
      * @memberof ConversationType
@@ -102,6 +108,7 @@ export function ConversationTypeFromJSONTyped(json: any, ignoreDiscriminator: bo
         'updatedAt': (new Date(json['updated_at'])),
         'description': json['description'] == null ? undefined : json['description'],
         'displayNameSharedByUsers': json['displayNameSharedByUsers'] == null ? undefined : json['displayNameSharedByUsers'],
+        'displayNameForWorkflowParticipants': json['displayNameForWorkflowParticipants'] == null ? undefined : json['displayNameForWorkflowParticipants'],
         'conversationDataSchema': json['conversation_data_schema'] == null ? undefined : json['conversation_data_schema'],
         'conversationDataListItemTemplate': json['conversation_data_list_item_template'] == null ? undefined : json['conversation_data_list_item_template'],
         'clientAppHeaderTemplate': json['client_app_header_template'] == null ? undefined : json['client_app_header_template'],
@@ -125,6 +132,7 @@ export function ConversationTypeToJSONTyped(value?: ConversationType | null, ign
         'updated_at': ((value['updatedAt']).toISOString()),
         'description': value['description'],
         'displayNameSharedByUsers': value['displayNameSharedByUsers'],
+        'displayNameForWorkflowParticipants': value['displayNameForWorkflowParticipants'],
         'conversation_data_schema': value['conversationDataSchema'],
         'conversation_data_list_item_template': value['conversationDataListItemTemplate'],
         'client_app_header_template': value['clientAppHeaderTemplate'],

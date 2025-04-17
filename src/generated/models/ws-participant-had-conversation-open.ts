@@ -20,25 +20,25 @@ import { mapValues } from '../runtime';
  */
 export interface WsParticipantHadConversationOpen {
     /**
-     * 
+     * Type of the message
      * @type {string}
      * @memberof WsParticipantHadConversationOpen
      */
     type?: string | null;
     /**
-     * 
+     * Participant ID
      * @type {string}
      * @memberof WsParticipantHadConversationOpen
      */
     participantId: string;
     /**
-     * 
+     * Conversation ID
      * @type {string}
      * @memberof WsParticipantHadConversationOpen
      */
     conversationId: string;
     /**
-     * 
+     * The participant had the conversation open at this time
      * @type {Date}
      * @memberof WsParticipantHadConversationOpen
      */

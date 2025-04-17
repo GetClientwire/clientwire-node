@@ -28,7 +28,7 @@ import {
  */
 export interface WsNewMessage {
     /**
-     * 
+     * Type of the message
      * @type {string}
      * @memberof WsNewMessage
      */
