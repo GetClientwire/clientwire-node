@@ -18,6 +18,7 @@ import type {
   ApiKeyList,
   ApiKeyListItem,
   CreateApiKeyRequest,
+  CreateApiKeyResponse,
 } from '../models/index';
 import {
     ApiKeyListFromJSON,
@@ -26,6 +27,8 @@ import {
     ApiKeyListItemToJSON,
     CreateApiKeyRequestFromJSON,
     CreateApiKeyRequestToJSON,
+    CreateApiKeyResponseFromJSON,
+    CreateApiKeyResponseToJSON,
 } from '../models/index';
 
 export interface CreateApiKeyOperationRequest {
@@ -56,12 +59,12 @@ export interface APIKeysApiInterface {
      * @throws {RequiredError}
      * @memberof APIKeysApiInterface
      */
-    createApiKeyRaw(requestParameters: CreateApiKeyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
+    createApiKeyRaw(requestParameters: CreateApiKeyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateApiKeyResponse>>;
 
     /**
      * Create a new API key for this tenant.
      */
-    createApiKey(requestParameters: CreateApiKeyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
+    createApiKey(requestParameters: CreateApiKeyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateApiKeyResponse>;
 
     /**
      * 
@@ -119,7 +122,7 @@ export class APIKeysApi extends runtime.BaseAPI implements APIKeysApiInterface {
     /**
      * Create a new API key for this tenant.
      */
-    async createApiKeyRaw(requestParameters: CreateApiKeyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async createApiKeyRaw(requestParameters: CreateApiKeyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateApiKeyResponse>> {
         if (requestParameters['createApiKeyRequest'] == null) {
             throw new runtime.RequiredError(
                 'createApiKeyRequest',
@@ -153,14 +156,15 @@ export class APIKeysApi extends runtime.BaseAPI implements APIKeysApiInterface {
             body: CreateApiKeyRequestToJSON(requestParameters['createApiKeyRequest']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse(response, (jsonValue) => CreateApiKeyResponseFromJSON(jsonValue));
     }
 
     /**
      * Create a new API key for this tenant.
      */
-    async createApiKey(requestParameters: CreateApiKeyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.createApiKeyRaw(requestParameters, initOverrides);
+    async createApiKey(requestParameters: CreateApiKeyOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateApiKeyResponse> {
+        const response = await this.createApiKeyRaw(requestParameters, initOverrides);
+        return await response.value();
     }
 
     /**

@@ -13,6 +13,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { LocationSource } from './location-source';
+import {
+    LocationSourceFromJSON,
+    LocationSourceFromJSONTyped,
+    LocationSourceToJSON,
+    LocationSourceToJSONTyped,
+} from './location-source';
+
 /**
  * 
  * @export
@@ -43,7 +51,15 @@ export interface Location {
      * @memberof Location
      */
     positionedAt?: Date | null;
+    /**
+     * The location source, if it was from the phone it's GPS, if the user moves it's MANUAL
+     * @type {LocationSource}
+     * @memberof Location
+     */
+    source?: LocationSource | null;
 }
+
+
 
 /**
  * Check if a given object implements the Location interface.
@@ -68,6 +84,7 @@ export function LocationFromJSONTyped(json: any, ignoreDiscriminator: boolean): 
         'longitude': json['longitude'],
         'accuracy': json['accuracy'] == null ? undefined : json['accuracy'],
         'positionedAt': json['positioned_at'] == null ? undefined : (new Date(json['positioned_at'])),
+        'source': json['source'] == null ? undefined : LocationSourceFromJSON(json['source']),
     };
 }
 
@@ -86,6 +103,7 @@ export function LocationToJSONTyped(value?: Location | null, ignoreDiscriminator
         'longitude': value['longitude'],
         'accuracy': value['accuracy'],
         'positioned_at': value['positionedAt'] == null ? undefined : ((value['positionedAt'] as any).toISOString()),
+        'source': LocationSourceToJSON(value['source']),
     };
 }
 

@@ -17,7 +17,9 @@ import * as runtime from '../runtime';
 import type {
   Participant,
   ParticipantActivityRequest,
+  ParticipantClientUrlDto,
   ParticipantListResponse,
+  ParticipantPatchRequest,
   ParticipantPostRequest,
   ParticipantPutRequest,
 } from '../models/index';
@@ -26,8 +28,12 @@ import {
     ParticipantToJSON,
     ParticipantActivityRequestFromJSON,
     ParticipantActivityRequestToJSON,
+    ParticipantClientUrlDtoFromJSON,
+    ParticipantClientUrlDtoToJSON,
     ParticipantListResponseFromJSON,
     ParticipantListResponseToJSON,
+    ParticipantPatchRequestFromJSON,
+    ParticipantPatchRequestToJSON,
     ParticipantPostRequestFromJSON,
     ParticipantPostRequestToJSON,
     ParticipantPutRequestFromJSON,
@@ -71,7 +77,7 @@ export interface NotifyClientParticipantsRequest {
 export interface UpdateParticipantRequest {
     conversationId: string;
     participantId: string;
-    requestBody: { [key: string]: any; };
+    participantPatchRequest: ParticipantPatchRequest;
 }
 
 export interface UpdateParticipantActivityRequest {
@@ -148,13 +154,13 @@ export interface ParticipantsApiInterface {
      * @throws {RequiredError}
      * @memberof ParticipantsApiInterface
      */
-    getClientParticipantAuthUrlRaw(requestParameters: GetClientParticipantAuthUrlRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Participant>>;
+    getClientParticipantAuthUrlRaw(requestParameters: GetClientParticipantAuthUrlRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ParticipantClientUrlDto>>;
 
     /**
      * Retrieves the URL for the client participant
      * Get the client participant URL
      */
-    getClientParticipantAuthUrl(requestParameters: GetClientParticipantAuthUrlRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Participant>;
+    getClientParticipantAuthUrl(requestParameters: GetClientParticipantAuthUrlRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ParticipantClientUrlDto>;
 
     /**
      * Retrieves the participant details for the calling CLIENT_PARTICIPANT token.
@@ -225,7 +231,7 @@ export interface ParticipantsApiInterface {
      * @summary Patch partial fields of a participant.
      * @param {string} conversationId 
      * @param {string} participantId 
-     * @param {{ [key: string]: any; }} requestBody 
+     * @param {ParticipantPatchRequest} participantPatchRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ParticipantsApiInterface
@@ -441,7 +447,7 @@ export class ParticipantsApi extends runtime.BaseAPI implements ParticipantsApiI
      * Retrieves the URL for the client participant
      * Get the client participant URL
      */
-    async getClientParticipantAuthUrlRaw(requestParameters: GetClientParticipantAuthUrlRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Participant>> {
+    async getClientParticipantAuthUrlRaw(requestParameters: GetClientParticipantAuthUrlRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ParticipantClientUrlDto>> {
         if (requestParameters['conversationId'] == null) {
             throw new runtime.RequiredError(
                 'conversationId',
@@ -479,14 +485,14 @@ export class ParticipantsApi extends runtime.BaseAPI implements ParticipantsApiI
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ParticipantFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => ParticipantClientUrlDtoFromJSON(jsonValue));
     }
 
     /**
      * Retrieves the URL for the client participant
      * Get the client participant URL
      */
-    async getClientParticipantAuthUrl(requestParameters: GetClientParticipantAuthUrlRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Participant> {
+    async getClientParticipantAuthUrl(requestParameters: GetClientParticipantAuthUrlRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ParticipantClientUrlDto> {
         const response = await this.getClientParticipantAuthUrlRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -693,10 +699,10 @@ export class ParticipantsApi extends runtime.BaseAPI implements ParticipantsApiI
             );
         }
 
-        if (requestParameters['requestBody'] == null) {
+        if (requestParameters['participantPatchRequest'] == null) {
             throw new runtime.RequiredError(
-                'requestBody',
-                'Required parameter "requestBody" was null or undefined when calling updateParticipant().'
+                'participantPatchRequest',
+                'Required parameter "participantPatchRequest" was null or undefined when calling updateParticipant().'
             );
         }
 
@@ -723,7 +729,7 @@ export class ParticipantsApi extends runtime.BaseAPI implements ParticipantsApiI
             method: 'PATCH',
             headers: headerParameters,
             query: queryParameters,
-            body: requestParameters['requestBody'],
+            body: ParticipantPatchRequestToJSON(requestParameters['participantPatchRequest']),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => ParticipantFromJSON(jsonValue));

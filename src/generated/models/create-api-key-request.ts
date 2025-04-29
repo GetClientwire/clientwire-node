@@ -27,10 +27,10 @@ export interface CreateApiKeyRequest {
     name?: string | null;
     /**
      * Optional expiration time in ISO-8601 format
-     * @type {string}
+     * @type {Date}
      * @memberof CreateApiKeyRequest
      */
-    expiresAt?: string | null;
+    expiresAt?: Date | null;
 }
 
 /**
@@ -51,7 +51,7 @@ export function CreateApiKeyRequestFromJSONTyped(json: any, ignoreDiscriminator:
     return {
         
         'name': json['name'] == null ? undefined : json['name'],
-        'expiresAt': json['expires_at'] == null ? undefined : json['expires_at'],
+        'expiresAt': json['expires_at'] == null ? undefined : (new Date(json['expires_at'])),
     };
 }
 
@@ -67,7 +67,7 @@ export function CreateApiKeyRequestToJSONTyped(value?: CreateApiKeyRequest | nul
     return {
         
         'name': value['name'],
-        'expires_at': value['expiresAt'],
+        'expires_at': value['expiresAt'] == null ? undefined : ((value['expiresAt'] as any).toISOString()),
     };
 }
 

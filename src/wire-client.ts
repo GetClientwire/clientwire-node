@@ -19,6 +19,8 @@ import {
   WebhooksApi,
   MessageTemplatesApi,
   WorkflowsApi,
+  UserPreferenceApi,
+  TenantColorConfigApi,
 } from './generated/apis';
 import { AuthenticationOptions, TenantConfig } from './generated/models';
 import { WireWebsocketConnection } from './wire-websocket-connection';
@@ -56,7 +58,9 @@ export class ClientWireApiClient extends EventTarget {
   public oidcConfigsApi: OIDCConfigsApi;
   public smsSettingsApi: SMSSettingsApi;
   public usersApi: UsersApi;
+  public userPreferenceApi: UserPreferenceApi;
   public tenantsApi: TenantsApi;
+  public tenantColorConfigApi: TenantColorConfigApi;
   public messageTemplateApi: MessageTemplatesApi;
   public wokrflowsApi: WorkflowsApi;
 
@@ -111,6 +115,7 @@ export class ClientWireApiClient extends EventTarget {
 
     // Apis gets re-initialized later with appropriate headers
     this.usersApi = new UsersApi(this.apiConfig);
+    this.userPreferenceApi = new UserPreferenceApi(this.apiConfig);
     this.tenantsApi = new TenantsApi(this.apiConfig);
     this.webhooksApi = new WebhooksApi(this.apiConfig);
     this.conversationsApi = new ConversationsApi(this.apiConfig);
@@ -124,6 +129,7 @@ export class ClientWireApiClient extends EventTarget {
     this.conversationLabelsApi = new ConversationLabelsApi(this.apiConfig);
     this.messageTemplateApi = new MessageTemplatesApi(this.apiConfig);
     this.wokrflowsApi = new WorkflowsApi(this.apiConfig);
+    this.tenantColorConfigApi = new TenantColorConfigApi(this.apiConfig);
     logger.debug('[ClientWireApi] New instance created: ', this.instanceId);
   }
 

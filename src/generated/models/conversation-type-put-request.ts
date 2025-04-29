@@ -38,6 +38,12 @@ export interface ConversationTypePutRequest {
      */
     displayNameSharedByUsers?: string | null;
     /**
+     * If set, all user participants share the read status
+     * @type {boolean}
+     * @memberof ConversationTypePutRequest
+     */
+    sharedReadStatusForUserParticipants?: boolean | null;
+    /**
      * If set, all workflow participants will appear with this name in the conversation to client participants.
      * @type {string}
      * @memberof ConversationTypePutRequest
@@ -61,6 +67,24 @@ export interface ConversationTypePutRequest {
      * @memberof ConversationTypePutRequest
      */
     clientAppHeaderTemplate?: string | null;
+    /**
+     * If set, the SMS messages will have this value as sender
+     * @type {string}
+     * @memberof ConversationTypePutRequest
+     */
+    smsSenderId?: string | null;
+    /**
+     * The name of the message template that should be used to render the sms text used to notify the client participants.
+     * @type {string}
+     * @memberof ConversationTypePutRequest
+     */
+    smsTemplateName?: string | null;
+    /**
+     * The name of the message template that should be used to render the email body used to notify the client participants.
+     * @type {string}
+     * @memberof ConversationTypePutRequest
+     */
+    emailTemplateName?: string | null;
 }
 
 /**
@@ -83,11 +107,15 @@ export function ConversationTypePutRequestFromJSONTyped(json: any, ignoreDiscrim
         
         'id': json['id'],
         'description': json['description'] == null ? undefined : json['description'],
-        'displayNameSharedByUsers': json['displayNameSharedByUsers'] == null ? undefined : json['displayNameSharedByUsers'],
-        'displayNameForWorkflowParticipants': json['displayNameForWorkflowParticipants'] == null ? undefined : json['displayNameForWorkflowParticipants'],
+        'displayNameSharedByUsers': json['display_name_shared_by_users'] == null ? undefined : json['display_name_shared_by_users'],
+        'sharedReadStatusForUserParticipants': json['shared_read_status_for_user_participants'] == null ? undefined : json['shared_read_status_for_user_participants'],
+        'displayNameForWorkflowParticipants': json['display_name_for_workflow_participants'] == null ? undefined : json['display_name_for_workflow_participants'],
         'conversationDataSchema': json['conversation_data_schema'] == null ? undefined : json['conversation_data_schema'],
         'conversationDataListItemTemplate': json['conversation_data_list_item_template'] == null ? undefined : json['conversation_data_list_item_template'],
         'clientAppHeaderTemplate': json['client_app_header_template'] == null ? undefined : json['client_app_header_template'],
+        'smsSenderId': json['sms_sender_id'] == null ? undefined : json['sms_sender_id'],
+        'smsTemplateName': json['sms_template_name'] == null ? undefined : json['sms_template_name'],
+        'emailTemplateName': json['email_template_name'] == null ? undefined : json['email_template_name'],
     };
 }
 
@@ -104,11 +132,15 @@ export function ConversationTypePutRequestToJSONTyped(value?: ConversationTypePu
         
         'id': value['id'],
         'description': value['description'],
-        'displayNameSharedByUsers': value['displayNameSharedByUsers'],
-        'displayNameForWorkflowParticipants': value['displayNameForWorkflowParticipants'],
+        'display_name_shared_by_users': value['displayNameSharedByUsers'],
+        'shared_read_status_for_user_participants': value['sharedReadStatusForUserParticipants'],
+        'display_name_for_workflow_participants': value['displayNameForWorkflowParticipants'],
         'conversation_data_schema': value['conversationDataSchema'],
         'conversation_data_list_item_template': value['conversationDataListItemTemplate'],
         'client_app_header_template': value['clientAppHeaderTemplate'],
+        'sms_sender_id': value['smsSenderId'],
+        'sms_template_name': value['smsTemplateName'],
+        'email_template_name': value['emailTemplateName'],
     };
 }
 

@@ -46,6 +46,9 @@ tags:
   description: Operations for conversation-level labels
 - name: Message Templates
   description: Operation for message templates
+- name: Tenant Color Config
+- name: UserPreference
+  description: Operations for user preferences.
 - name: Webhooks
 - name: Workflows
   description: Operation for workflows
@@ -91,6 +94,10 @@ paths:
       responses:
         "201":
           description: API key created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateApiKeyResponse"
         "400":
           description: Bad request. Usually means that the input data was invalid
             or misformed.
@@ -467,8 +474,10 @@ paths:
         content:
           application/json:
             schema:
-              description: "Allowed fields are: id, description, conversation_data_schema,\
-                \ conversation_data_list_item_template."
+              description: "Allowed fields are: id, description, display_name_shared_by_users,\
+                \ display_name_for_workflow_participants ,conversation_data_schema,\
+                \ conversation_data_list_item_template, sms_template_name, email_template_name,\
+                \ sms_sender_id"
               type: object
               additionalProperties:
                 type: string
@@ -842,6 +851,7 @@ paths:
       - BearerAuth:
         - OWNER
         - API_KEY
+        - USER
     get:
       summary: Get a single conversation.
       description: Retrieves conversation details by ID.
@@ -967,6 +977,7 @@ paths:
       - BearerAuth:
         - OWNER
         - API_KEY
+        - USER
   /api/v1/conversations/{conversation_id}/labels:
     put:
       summary: Updates all labels for the specified conversation
@@ -1507,8 +1518,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              additionalProperties: {}
+              $ref: "#/components/schemas/ParticipantPatchRequest"
         required: true
       responses:
         "200":
@@ -1737,7 +1747,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Participant"
+                $ref: "#/components/schemas/ParticipantClientUrlDto"
         "400":
           description: Bad request. Usually means that the input data was invalid
             or misformed.
@@ -2580,6 +2590,48 @@ paths:
       - BearerAuth:
         - API_KEY
         - OWNER
+  /api/v1/tenant/color/config:
+    put:
+      summary: Create or update tenant color config.
+      description: "If it doesn't exist, creates it; otherwise updates it."
+      operationId: createOrUpdateTenantColorConfig
+      tags:
+      - Tenant Color Config
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TenantColorConfig"
+      responses:
+        "201":
+          description: Tenant color config created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+        "200":
+          description: Tenant color config updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
   /api/v1/tenant/config:
     get:
       summary: Get the current config for the tenant specified via query parameters.
@@ -2824,6 +2876,127 @@ paths:
       - BearerAuth:
         - API_KEY
         - OWNER
+  /api/v1/users/{user_id}/preferences:
+    put:
+      summary: Update user preferences.
+      description: Updates user preferences.
+      operationId: createOrUpdateUserPreference
+      tags:
+      - UserPreference
+      parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserPreferencePostRequest1"
+        required: true
+      responses:
+        "200":
+          description: User preferences updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPreference"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - USER
+        - OWNER
+        - API_KEY
+    get:
+      summary: Get user preferences.
+      description: Retrieves user preferences by user ID.
+      operationId: getUserPreference
+      tags:
+      - UserPreference
+      parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: User preference found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPreference"
+        "404":
+          description: Not found.
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - USER
+        - OWNER
+        - API_KEY
+    post:
+      summary: Create user preferences.
+      description: Creates user preferences.
+      operationId: createUserPreference
+      tags:
+      - UserPreference
+      parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserPreferencePostRequest"
+        required: true
+      responses:
+        "201":
+          description: User preferences created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPreference"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "401":
+          description: Missing or invalid credentials.
+        "403":
+          description: Forbidden.
+        "409":
+          description: Conflict. A resource with the same id/name already exists.
+        "415":
+          description: Unsupported Content Type.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - USER
+        - OWNER
+        - API_KEY
   /api/v1/webhook-settings:
     put:
       summary: Update or create webhook settings (endpoint URL only).
@@ -3695,13 +3868,18 @@ components:
           type: string
           example: A conversation type for handling breakdown cases.
           nullable: true
-        displayNameSharedByUsers:
+        display_name_shared_by_users:
           description: "If set, all user participants will appear as the same user\
             \ in the conversation to client participants."
           type: string
           example: "true"
           nullable: true
-        displayNameForWorkflowParticipants:
+        shared_read_status_for_user_participants:
+          description: "If set, all user participants share the read status"
+          type: boolean
+          example: true
+          nullable: true
+        display_name_for_workflow_participants:
           description: "If set, all workflow participants will appear with this name\
             \ in the conversation to client participants."
           type: string
@@ -3729,6 +3907,23 @@ components:
           maxLength: 1073741824
           type: string
           example: "<div>{{client}}</div>"
+          nullable: true
+        sms_sender_id:
+          description: "If set, the SMS messages will have this value as sender"
+          type: string
+          example: Customer Support
+          nullable: true
+        sms_template_name:
+          description: The name of the message template that should be used to render
+            the sms text used to notify the client participants.
+          type: string
+          example: MyTemplate
+          nullable: true
+        email_template_name:
+          description: The name of the message template that should be used to render
+            the email body used to notify the client participants.
+          type: string
+          example: MyTemplate
           nullable: true
     ConversationTypeListResponse:
       required:
@@ -3804,6 +3999,24 @@ components:
           type: string
           example: "<div>{{client}}</div>"
           nullable: true
+        sms_sender_id:
+          description: "If set, the SMS messages will have this value as sender"
+          pattern: "^(?=.*[a-zA-Z])[a-zA-Z0-9 ]{1,11}$"
+          type: string
+          example: Customer Support
+          nullable: true
+        sms_template_name:
+          description: The name of the message template that should be used to render
+            the sms text used to notify the client participants.
+          type: string
+          example: MyTemplate
+          nullable: true
+        email_template_name:
+          description: The name of the message template that should be used to render
+            the email body used to notify the client participants.
+          type: string
+          example: MyTemplate
+          nullable: true
     ConversationTypePutRequest:
       required:
       - id
@@ -3820,13 +4033,18 @@ components:
           type: string
           example: A conversation type for handling breakdown cases.
           nullable: true
-        displayNameSharedByUsers:
+        display_name_shared_by_users:
           description: "If set, all user participants will appear as the same user\
             \ in the conversation to client participants."
           type: string
-          example: "true"
+          example: Dispatcher
           nullable: true
-        displayNameForWorkflowParticipants:
+        shared_read_status_for_user_participants:
+          description: "If set, all user participants share the read status"
+          type: boolean
+          example: true
+          nullable: true
+        display_name_for_workflow_participants:
           description: "If set, all workflow participants will appear with this name\
             \ in the conversation to client participants."
           type: string
@@ -3855,6 +4073,24 @@ components:
           type: string
           example: "<div>{{client}}</div>"
           nullable: true
+        sms_sender_id:
+          description: "If set, the SMS messages will have this value as sender"
+          pattern: "^(?=.*[a-zA-Z])[a-zA-Z0-9 ]{1,11}$"
+          type: string
+          example: Customer Support
+          nullable: true
+        sms_template_name:
+          description: The name of the message template that should be used to render
+            the sms text used to notify the client participants.
+          type: string
+          example: MyTemplate
+          nullable: true
+        email_template_name:
+          description: The name of the message template that should be used to render
+            the email body used to notify the client participants.
+          type: string
+          example: MyTemplate
+          nullable: true
     ConversationsByIdsRequest:
       required:
       - ids
@@ -3878,6 +4114,8 @@ components:
         expires_at:
           description: Optional expiration time in ISO-8601 format
           type: string
+          allOf:
+          - $ref: "#/components/schemas/Instant"
           example: 2025-01-01T00:00:00Z
           nullable: true
     CreateApiKeyResponse:
@@ -4017,6 +4255,11 @@ components:
     Instant:
       format: date-time
       type: string
+    Language:
+      enum:
+      - EN
+      - DE
+      type: string
     Location:
       required:
       - latitude
@@ -4044,6 +4287,19 @@ components:
           - $ref: "#/components/schemas/Instant"
           example: 2024-09-01T23:59:59.999Z
           nullable: true
+        source:
+          description: "The location source, if it was from the phone it's GPS, if\
+            \ the user moves it's MANUAL"
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/LocationSource"
+          example: MANUAL
+          nullable: true
+    LocationSource:
+      enum:
+      - MANUAL
+      - GPS
+      type: string
     LocationWithAddress:
       type: object
       properties:
@@ -4455,6 +4711,12 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/OidcConfig"
+    OptionalInput:
+      type: string
+      nullable: true
+    OptionalInputString:
+      type: string
+      nullable: true
     ParameterKind:
       enum:
       - CURRENT_TIMESTAMP
@@ -4625,6 +4887,44 @@ components:
             updated_at: 2022-11-03T20:26:10.344522Z
             kind: USER
             display_name: John Doe
+    ParticipantPatchRequest:
+      type: object
+      properties:
+        display_name:
+          description: The display name of the participant. The display name can not
+            be empty or null.
+          maxLength: 50
+          minLength: 1
+          type: object
+          allOf:
+          - $ref: "#/components/schemas/OptionalInputString"
+          example: John Doe
+          nullable: true
+        preferred_language:
+          description: The preferred language of the participant. The preferred language
+            can not be empty or null.
+          type: object
+          allOf:
+          - $ref: "#/components/schemas/OptionalInputString"
+          example: en
+          nullable: true
+        phone_number:
+          description: The phone number of a participant if he is a CLIENT; otherwise
+            always null.
+          type: object
+          allOf:
+          - $ref: "#/components/schemas/OptionalInputString"
+          example: "+4369912345678"
+          nullable: true
+        email:
+          format: email
+          description: The email of a participant if he is a CLIENT; otherwise always
+            null.
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/OptionalInputString"
+          example: user@example.com
+          nullable: true
     ParticipantPostRequest:
       required:
       - id
@@ -4973,6 +5273,10 @@ components:
           example:
           - autoclubmars.com
           nullable: true
+    TenantColorConfig:
+      description: Tenant color config
+      type: object
+      properties:
         header_color:
           description: The header color of the main app
           type: string
@@ -4990,6 +5294,67 @@ components:
           nullable: true
         button_label_color:
           description: The button hover color of the main app.
+          type: string
+          example: "#00000"
+          nullable: true
+        client_button_color:
+          description: The button color of the client app.
+          type: string
+          example: "#00000"
+          nullable: true
+        client_button_hover_color:
+          description: The button hover color of the client app.
+          type: string
+          example: "#00000"
+          nullable: true
+        client_button_label_color:
+          description: The button label color of the client app.
+          type: string
+          example: "#00000"
+          nullable: true
+        sender_chat_bubble_color:
+          description: The color of the chat bubble of the sender in the main app.
+          type: string
+          example: "#00000"
+          nullable: true
+        participant_chat_bubble_color:
+          description: The color of the chat bubble of the participant in the main
+            app.
+          type: string
+          example: "#00000"
+          nullable: true
+        sender_chat_bubble_text_color:
+          description: The color of the text in chat bubble of the sender in the main
+            app.
+          type: string
+          example: "#00000"
+          nullable: true
+        participant_chat_bubble_text_color:
+          description: The color of the text in chat bubble of the participant in
+            the main app.
+          type: string
+          example: "#00000"
+          nullable: true
+        client_sender_chat_bubble_color:
+          description: The color of the chat bubble of the sender in the client app.
+          type: string
+          example: "#00000"
+          nullable: true
+        client_participant_chat_bubble_color:
+          description: The color of the chat bubble of the participant in the client
+            app.
+          type: string
+          example: "#00000"
+          nullable: true
+        client_sender_chat_bubble_text_color:
+          description: The color of the text in chat bubble of the sender in the client
+            app.
+          type: string
+          example: "#00000"
+          nullable: true
+        client_participant_chat_bubble_text_color:
+          description: The color of the text in chat bubble of the participant in
+            the client app.
           type: string
           example: "#00000"
           nullable: true
@@ -5037,25 +5402,11 @@ components:
           description: Indicates whether the tenant is enabled.
           type: boolean
           example: true
-        header_color:
-          description: The header color of the main app
-          type: string
-          example: "#00000"
-          nullable: true
-        button_color:
-          description: The button color of the main app.
-          type: string
-          example: "#00000"
-          nullable: true
-        button_hover_color:
-          description: The button hover color of the main app.
-          type: string
-          example: "#00000"
-          nullable: true
-        button_label_color:
-          description: The button label color of the main app.
-          type: string
-          example: "#00000"
+        color_config:
+          description: The color configuration for the tenant.
+          type: object
+          allOf:
+          - $ref: "#/components/schemas/TenantColorConfig"
           nullable: true
     TenantWebhookSettings:
       description: Represents the webhook settings for a tenant.
@@ -5204,6 +5555,82 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/User"
+    UserPreference:
+      required:
+      - user_id
+      type: object
+      properties:
+        user_id:
+          description: Unique identifier for the user.
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/UUID"
+          example: ace00000-ace0-ace0-ace0-ace000000000
+          nullable: true
+        preferred_conversation_type_id:
+          description: Unique identifier for the preferred conversation type.
+          maxLength: 50
+          pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
+          type: string
+          example: breakdowncase
+          nullable: true
+        preferred_language:
+          description: "Identifier for the preferred language. Possible values: en,\
+            \ de"
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/Language"
+          example: EN
+          nullable: true
+        created_at:
+          description: Timestamp when the user preferences were created.
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/Instant"
+          example: 2022-11-03T20:26:10.344522Z
+          nullable: true
+        updated_at:
+          description: Timestamp when the user preferences were last updated. Initially
+            the same as created_at.
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/Instant"
+          example: 2022-11-03T20:26:10.344522Z
+          nullable: true
+    UserPreferencePostRequest:
+      type: object
+      properties:
+        preferred_conversation_type_id:
+          description: Unique identifier for the preferred conversation type.
+          maxLength: 50
+          pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
+          type: string
+          example: breakdowncase
+          nullable: true
+        preferred_language:
+          description: "Unique identifier for the language. Possible values: en, de"
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/Language"
+          example: en
+          nullable: true
+    UserPreferencePostRequest1:
+      type: object
+      properties:
+        preferred_conversation_type_id:
+          description: Unique identifier for the preferred conversation type.
+          maxLength: 50
+          pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
+          type: string
+          example: breakdowncase
+          nullable: true
+        preferred_language:
+          description: "Unique identifier for the language. Possible values: en, de"
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/Language"
+          example: en
+          nullable: true
     UserRole:
       enum:
       - OWNER

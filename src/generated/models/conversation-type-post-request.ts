@@ -61,6 +61,24 @@ export interface ConversationTypePostRequest {
      * @memberof ConversationTypePostRequest
      */
     clientAppHeaderTemplate?: string | null;
+    /**
+     * If set, the SMS messages will have this value as sender
+     * @type {string}
+     * @memberof ConversationTypePostRequest
+     */
+    smsSenderId?: string | null;
+    /**
+     * The name of the message template that should be used to render the sms text used to notify the client participants.
+     * @type {string}
+     * @memberof ConversationTypePostRequest
+     */
+    smsTemplateName?: string | null;
+    /**
+     * The name of the message template that should be used to render the email body used to notify the client participants.
+     * @type {string}
+     * @memberof ConversationTypePostRequest
+     */
+    emailTemplateName?: string | null;
 }
 
 /**
@@ -88,6 +106,9 @@ export function ConversationTypePostRequestFromJSONTyped(json: any, ignoreDiscri
         'conversationDataSchema': json['conversation_data_schema'] == null ? undefined : json['conversation_data_schema'],
         'conversationDataListItemTemplate': json['conversation_data_list_item_template'] == null ? undefined : json['conversation_data_list_item_template'],
         'clientAppHeaderTemplate': json['client_app_header_template'] == null ? undefined : json['client_app_header_template'],
+        'smsSenderId': json['sms_sender_id'] == null ? undefined : json['sms_sender_id'],
+        'smsTemplateName': json['sms_template_name'] == null ? undefined : json['sms_template_name'],
+        'emailTemplateName': json['email_template_name'] == null ? undefined : json['email_template_name'],
     };
 }
 
@@ -109,6 +130,9 @@ export function ConversationTypePostRequestToJSONTyped(value?: ConversationTypeP
         'conversation_data_schema': value['conversationDataSchema'],
         'conversation_data_list_item_template': value['conversationDataListItemTemplate'],
         'client_app_header_template': value['clientAppHeaderTemplate'],
+        'sms_sender_id': value['smsSenderId'],
+        'sms_template_name': value['smsTemplateName'],
+        'email_template_name': value['emailTemplateName'],
     };
 }
 

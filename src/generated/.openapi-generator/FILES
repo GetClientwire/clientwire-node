@@ -13,8 +13,10 @@ apis/password-reset-api.ts
 apis/signin-api.ts
 apis/signup-api.ts
 apis/sms-settings-api.ts
+apis/tenant-color-config-api.ts
 apis/tenant-config-api.ts
 apis/tenants-api.ts
+apis/user-preference-api.ts
 apis/users-api.ts
 apis/webhooks-api.ts
 apis/workflows-api.ts
@@ -50,6 +52,8 @@ models/error-response.ts
 models/error-with-code.ts
 models/include-option.ts
 models/index.ts
+models/language.ts
+models/location-source.ts
 models/location-with-address.ts
 models/location.ts
 models/login-options-oidc-provider.ts
@@ -70,6 +74,7 @@ models/participant-activity-request.ts
 models/participant-client-url-dto.ts
 models/participant-kind.ts
 models/participant-list-response.ts
+models/participant-patch-request.ts
 models/participant-post-request.ts
 models/participant-put-request.ts
 models/participant.ts
@@ -83,6 +88,7 @@ models/signup-request.ts
 models/signup-response.ts
 models/status.ts
 models/template-data.ts
+models/tenant-color-config.ts
 models/tenant-config.ts
 models/tenant-webhook-settings.ts
 models/tenant.ts
@@ -91,6 +97,9 @@ models/trigger-kind.ts
 models/twilio-settings.ts
 models/update-webhook-settings-request.ts
 models/user-list-response.ts
+models/user-preference-post-request.ts
+models/user-preference-post-request1.ts
+models/user-preference.ts
 models/user-role.ts
 models/user.ts
 models/webhook-conversation-shared-user-participant-read-status.ts
