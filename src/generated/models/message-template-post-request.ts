@@ -20,6 +20,13 @@ import {
     MessageTemplateParameterToJSON,
     MessageTemplateParameterToJSONTyped,
 } from './message-template-parameter';
+import type { MessageTemplateKind } from './message-template-kind';
+import {
+    MessageTemplateKindFromJSON,
+    MessageTemplateKindFromJSONTyped,
+    MessageTemplateKindToJSON,
+    MessageTemplateKindToJSONTyped,
+} from './message-template-kind';
 
 /**
  * 
@@ -41,6 +48,12 @@ export interface MessageTemplatePostRequest {
     description?: string | null;
     /**
      * 
+     * @type {MessageTemplateKind}
+     * @memberof MessageTemplatePostRequest
+     */
+    kind: MessageTemplateKind;
+    /**
+     * 
      * @type {{ [key: string]: string; }}
      * @memberof MessageTemplatePostRequest
      */
@@ -53,11 +66,14 @@ export interface MessageTemplatePostRequest {
     parameters: Array<MessageTemplateParameter>;
 }
 
+
+
 /**
  * Check if a given object implements the MessageTemplatePostRequest interface.
  */
 export function instanceOfMessageTemplatePostRequest(value: object): value is MessageTemplatePostRequest {
     if (!('name' in value) || value['name'] === undefined) return false;
+    if (!('kind' in value) || value['kind'] === undefined) return false;
     if (!('texts' in value) || value['texts'] === undefined) return false;
     if (!('parameters' in value) || value['parameters'] === undefined) return false;
     return true;
@@ -75,6 +91,7 @@ export function MessageTemplatePostRequestFromJSONTyped(json: any, ignoreDiscrim
         
         'name': json['name'],
         'description': json['description'] == null ? undefined : json['description'],
+        'kind': MessageTemplateKindFromJSON(json['kind']),
         'texts': json['texts'],
         'parameters': ((json['parameters'] as Array<any>).map(MessageTemplateParameterFromJSON)),
     };
@@ -93,6 +110,7 @@ export function MessageTemplatePostRequestToJSONTyped(value?: MessageTemplatePos
         
         'name': value['name'],
         'description': value['description'],
+        'kind': MessageTemplateKindToJSON(value['kind']),
         'texts': value['texts'],
         'parameters': ((value['parameters'] as Array<any>).map(MessageTemplateParameterToJSON)),
     };

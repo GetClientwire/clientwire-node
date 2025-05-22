@@ -60,7 +60,7 @@ export interface ConversationTypePutRequest {
      * @type {string}
      * @memberof ConversationTypePutRequest
      */
-    conversationDataListItemTemplate?: string | null;
+    conversationDataListItemTemplate: string;
     /**
      * An HTML template to reader the header in the client app which has dynamic values based on the conversation_data
      * @type {string}
@@ -92,6 +92,7 @@ export interface ConversationTypePutRequest {
  */
 export function instanceOfConversationTypePutRequest(value: object): value is ConversationTypePutRequest {
     if (!('id' in value) || value['id'] === undefined) return false;
+    if (!('conversationDataListItemTemplate' in value) || value['conversationDataListItemTemplate'] === undefined) return false;
     return true;
 }
 
@@ -111,7 +112,7 @@ export function ConversationTypePutRequestFromJSONTyped(json: any, ignoreDiscrim
         'sharedReadStatusForUserParticipants': json['shared_read_status_for_user_participants'] == null ? undefined : json['shared_read_status_for_user_participants'],
         'displayNameForWorkflowParticipants': json['display_name_for_workflow_participants'] == null ? undefined : json['display_name_for_workflow_participants'],
         'conversationDataSchema': json['conversation_data_schema'] == null ? undefined : json['conversation_data_schema'],
-        'conversationDataListItemTemplate': json['conversation_data_list_item_template'] == null ? undefined : json['conversation_data_list_item_template'],
+        'conversationDataListItemTemplate': json['conversation_data_list_item_template'],
         'clientAppHeaderTemplate': json['client_app_header_template'] == null ? undefined : json['client_app_header_template'],
         'smsSenderId': json['sms_sender_id'] == null ? undefined : json['sms_sender_id'],
         'smsTemplateName': json['sms_template_name'] == null ? undefined : json['sms_template_name'],

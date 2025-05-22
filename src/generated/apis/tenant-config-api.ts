@@ -23,8 +23,8 @@ import {
 } from '../models/index';
 
 export interface GetTenantConfigRequest {
+    domain?: string | null;
     tenantId?: string | null;
-    tenantSubdomain?: string | null;
 }
 
 /**
@@ -35,10 +35,10 @@ export interface GetTenantConfigRequest {
  */
 export interface TenantConfigApiInterface {
     /**
-     * Either tenant_subdomain or tenant_id must be provided
+     * At least one of tenant_subdomain, tenant_id, or domain must be provided
      * @summary Get the current config for the tenant specified via query parameters.
+     * @param {string} [domain] Get tenant config for the specified domain.
      * @param {string} [tenantId] Get tenant config for the specified ID.
-     * @param {string} [tenantSubdomain] Get tenant config for the specified subdomain.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof TenantConfigApiInterface
@@ -46,7 +46,7 @@ export interface TenantConfigApiInterface {
     getTenantConfigRaw(requestParameters: GetTenantConfigRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TenantConfig>>;
 
     /**
-     * Either tenant_subdomain or tenant_id must be provided
+     * At least one of tenant_subdomain, tenant_id, or domain must be provided
      * Get the current config for the tenant specified via query parameters.
      */
     getTenantConfig(requestParameters: GetTenantConfigRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TenantConfig>;
@@ -59,18 +59,18 @@ export interface TenantConfigApiInterface {
 export class TenantConfigApi extends runtime.BaseAPI implements TenantConfigApiInterface {
 
     /**
-     * Either tenant_subdomain or tenant_id must be provided
+     * At least one of tenant_subdomain, tenant_id, or domain must be provided
      * Get the current config for the tenant specified via query parameters.
      */
     async getTenantConfigRaw(requestParameters: GetTenantConfigRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TenantConfig>> {
         const queryParameters: any = {};
 
-        if (requestParameters['tenantId'] != null) {
-            queryParameters['tenant_id'] = requestParameters['tenantId'];
+        if (requestParameters['domain'] != null) {
+            queryParameters['domain'] = requestParameters['domain'];
         }
 
-        if (requestParameters['tenantSubdomain'] != null) {
-            queryParameters['tenant_subdomain'] = requestParameters['tenantSubdomain'];
+        if (requestParameters['tenantId'] != null) {
+            queryParameters['tenant_id'] = requestParameters['tenantId'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -86,7 +86,7 @@ export class TenantConfigApi extends runtime.BaseAPI implements TenantConfigApiI
     }
 
     /**
-     * Either tenant_subdomain or tenant_id must be provided
+     * At least one of tenant_subdomain, tenant_id, or domain must be provided
      * Get the current config for the tenant specified via query parameters.
      */
     async getTenantConfig(requestParameters: GetTenantConfigRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TenantConfig> {

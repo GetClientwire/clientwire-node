@@ -20,7 +20,7 @@ import {
   MessageTemplatesApi,
   WorkflowsApi,
   UserPreferenceApi,
-  TenantColorConfigApi,
+  TenantColorConfigApi, WebhookFeaturesApi, TenantDomainsApi,
 } from './generated/apis';
 import { AuthenticationOptions, TenantConfig } from './generated/models';
 import { WireWebsocketConnection } from './wire-websocket-connection';
@@ -62,7 +62,9 @@ export class ClientWireApiClient extends EventTarget {
   public tenantsApi: TenantsApi;
   public tenantColorConfigApi: TenantColorConfigApi;
   public messageTemplateApi: MessageTemplatesApi;
-  public wokrflowsApi: WorkflowsApi;
+  public workflowsApi: WorkflowsApi;
+  public webhookFeaturesApi: WebhookFeaturesApi;
+  public tenantDomainsApi: TenantDomainsApi;
 
   public tenantConfig?: TenantConfig;
   private websocketConnection?: WireWebsocketConnection;
@@ -128,8 +130,10 @@ export class ClientWireApiClient extends EventTarget {
     this.smsSettingsApi = new SMSSettingsApi(this.apiConfig);
     this.conversationLabelsApi = new ConversationLabelsApi(this.apiConfig);
     this.messageTemplateApi = new MessageTemplatesApi(this.apiConfig);
-    this.wokrflowsApi = new WorkflowsApi(this.apiConfig);
     this.tenantColorConfigApi = new TenantColorConfigApi(this.apiConfig);
+    this.workflowsApi = new WorkflowsApi(this.apiConfig);
+    this.webhookFeaturesApi = new WebhookFeaturesApi(this.apiConfig);
+    this.tenantDomainsApi = new TenantDomainsApi(this.apiConfig);
     logger.debug('[ClientWireApi] New instance created: ', this.instanceId);
   }
 
@@ -139,8 +143,8 @@ export class ClientWireApiClient extends EventTarget {
 
   //#region Tenant Config
 
-  public async getTenantConfigForSubdomain(subdomain: string) {
-    return this.tenantConfigApi.getTenantConfig({ tenantSubdomain: subdomain });
+  public async getTenantConfigForDomain(domain: string) {
+    return this.tenantConfigApi.getTenantConfig({ domain: domain });
   }
 
   public async getTenantConfigForTenantId(id: string) {

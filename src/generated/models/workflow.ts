@@ -13,13 +13,6 @@
  */
 
 import { mapValues } from '../runtime';
-import type { WorkflowAction } from './workflow-action';
-import {
-    WorkflowActionFromJSON,
-    WorkflowActionFromJSONTyped,
-    WorkflowActionToJSON,
-    WorkflowActionToJSONTyped,
-} from './workflow-action';
 import type { WorkflowTrigger } from './workflow-trigger';
 import {
     WorkflowTriggerFromJSON,
@@ -53,12 +46,6 @@ export interface Workflow {
      */
     trigger: WorkflowTrigger;
     /**
-     * Action to be executed when trigger happens.
-     * @type {WorkflowAction}
-     * @memberof Workflow
-     */
-    action: WorkflowAction;
-    /**
      * 
      * @type {Date}
      * @memberof Workflow
@@ -84,7 +71,6 @@ export interface Workflow {
 export function instanceOfWorkflow(value: object): value is Workflow {
     if (!('id' in value) || value['id'] === undefined) return false;
     if (!('trigger' in value) || value['trigger'] === undefined) return false;
-    if (!('action' in value) || value['action'] === undefined) return false;
     if (!('createdAt' in value) || value['createdAt'] === undefined) return false;
     if (!('updatedAt' in value) || value['updatedAt'] === undefined) return false;
     return true;
@@ -103,7 +89,6 @@ export function WorkflowFromJSONTyped(json: any, ignoreDiscriminator: boolean): 
         'id': json['id'],
         'conversationTypeId': json['conversation_type_id'] == null ? undefined : json['conversation_type_id'],
         'trigger': WorkflowTriggerFromJSON(json['trigger']),
-        'action': WorkflowActionFromJSON(json['action']),
         'createdAt': (json['createdAt'] == null ? null : new Date(json['createdAt'])),
         'updatedAt': (json['updatedAt'] == null ? null : new Date(json['updatedAt'])),
         'enabled': json['enabled'] == null ? undefined : json['enabled'],
@@ -124,7 +109,6 @@ export function WorkflowToJSONTyped(value?: Workflow | null, ignoreDiscriminator
         'id': value['id'],
         'conversation_type_id': value['conversationTypeId'],
         'trigger': WorkflowTriggerToJSON(value['trigger']),
-        'action': WorkflowActionToJSON(value['action']),
         'createdAt': (value['createdAt'] == null ? null : (value['createdAt'] as any).toISOString()),
         'updatedAt': (value['updatedAt'] == null ? null : (value['updatedAt'] as any).toISOString()),
         'enabled': value['enabled'],

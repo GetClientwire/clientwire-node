@@ -54,7 +54,7 @@ export interface ConversationTypePostRequest {
      * @type {string}
      * @memberof ConversationTypePostRequest
      */
-    conversationDataListItemTemplate?: string | null;
+    conversationDataListItemTemplate: string;
     /**
      * An HTML template to reader the header in the client app which has dynamic values based on the conversation_data
      * @type {string}
@@ -86,6 +86,7 @@ export interface ConversationTypePostRequest {
  */
 export function instanceOfConversationTypePostRequest(value: object): value is ConversationTypePostRequest {
     if (!('id' in value) || value['id'] === undefined) return false;
+    if (!('conversationDataListItemTemplate' in value) || value['conversationDataListItemTemplate'] === undefined) return false;
     return true;
 }
 
@@ -104,7 +105,7 @@ export function ConversationTypePostRequestFromJSONTyped(json: any, ignoreDiscri
         'displayNameSharedByUsers': json['displayNameSharedByUsers'] == null ? undefined : json['displayNameSharedByUsers'],
         'displayNameForWorkflowParticipants': json['displayNameForWorkflowParticipants'] == null ? undefined : json['displayNameForWorkflowParticipants'],
         'conversationDataSchema': json['conversation_data_schema'] == null ? undefined : json['conversation_data_schema'],
-        'conversationDataListItemTemplate': json['conversation_data_list_item_template'] == null ? undefined : json['conversation_data_list_item_template'],
+        'conversationDataListItemTemplate': json['conversation_data_list_item_template'],
         'clientAppHeaderTemplate': json['client_app_header_template'] == null ? undefined : json['client_app_header_template'],
         'smsSenderId': json['sms_sender_id'] == null ? undefined : json['sms_sender_id'],
         'smsTemplateName': json['sms_template_name'] == null ? undefined : json['sms_template_name'],

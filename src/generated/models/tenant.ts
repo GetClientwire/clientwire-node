@@ -42,7 +42,7 @@ export interface Tenant {
      * @type {string}
      * @memberof Tenant
      */
-    subdomain: string;
+    domain: string;
     /**
      * Is your tenant allowed to create new tenants via the API?
      * @type {boolean}
@@ -70,7 +70,7 @@ export function instanceOfTenant(value: object): value is Tenant {
     if (!('id' in value) || value['id'] === undefined) return false;
     if (!('name' in value) || value['name'] === undefined) return false;
     if (!('preferredLanguage' in value) || value['preferredLanguage'] === undefined) return false;
-    if (!('subdomain' in value) || value['subdomain'] === undefined) return false;
+    if (!('domain' in value) || value['domain'] === undefined) return false;
     return true;
 }
 
@@ -87,7 +87,7 @@ export function TenantFromJSONTyped(json: any, ignoreDiscriminator: boolean): Te
         'id': json['id'],
         'name': json['name'],
         'preferredLanguage': json['preferred_language'],
-        'subdomain': json['subdomain'],
+        'domain': json['domain'],
         'tenantCreationAllowed': json['tenant_creation_allowed'] == null ? undefined : json['tenant_creation_allowed'],
         'tokenExchangeUserinfoUrl': json['token_exchange_userinfo_url'] == null ? undefined : json['token_exchange_userinfo_url'],
         'userAutoProvisioningDomains': json['user_auto_provisioning_domains'] == null ? undefined : json['user_auto_provisioning_domains'],
@@ -108,7 +108,7 @@ export function TenantToJSONTyped(value?: Tenant | null, ignoreDiscriminator: bo
         'id': value['id'],
         'name': value['name'],
         'preferred_language': value['preferredLanguage'],
-        'subdomain': value['subdomain'],
+        'domain': value['domain'],
         'tenant_creation_allowed': value['tenantCreationAllowed'],
         'token_exchange_userinfo_url': value['tokenExchangeUserinfoUrl'],
         'user_auto_provisioning_domains': value['userAutoProvisioningDomains'],

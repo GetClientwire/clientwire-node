@@ -23,7 +23,8 @@ export const ConversationIncludeOption = {
     ListItemTemplateData: 'LIST_ITEM_TEMPLATE_DATA',
     ClientHeaderTemplateData: 'CLIENT_HEADER_TEMPLATE_DATA',
     ConversationData: 'CONVERSATION_DATA',
-    CurrentUserReadStatus: 'CURRENT_USER_READ_STATUS'
+    CurrentUserReadStatus: 'CURRENT_USER_READ_STATUS',
+    ClientParticipantFrontendUrl: 'CLIENT_PARTICIPANT_FRONTEND_URL'
 } as const;
 export type ConversationIncludeOption = typeof ConversationIncludeOption[keyof typeof ConversationIncludeOption];
 

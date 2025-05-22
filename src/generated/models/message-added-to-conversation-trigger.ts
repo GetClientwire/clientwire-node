@@ -20,6 +20,13 @@ import {
     TriggerKindToJSON,
     TriggerKindToJSONTyped,
 } from './trigger-kind';
+import type { WorkflowAction } from './workflow-action';
+import {
+    WorkflowActionFromJSON,
+    WorkflowActionFromJSONTyped,
+    WorkflowActionToJSON,
+    WorkflowActionToJSONTyped,
+} from './workflow-action';
 
 /**
  * 
@@ -33,6 +40,12 @@ export interface MessageAddedToConversationTrigger {
      * @memberof MessageAddedToConversationTrigger
      */
     kind: TriggerKind;
+    /**
+     * Action to be executed when trigger happens.
+     * @type {WorkflowAction}
+     * @memberof MessageAddedToConversationTrigger
+     */
+    action: WorkflowAction | null;
     /**
      * The sequence of the message in the conversation that should trigger the workflow.
      * @type {number}
@@ -54,6 +67,7 @@ export interface MessageAddedToConversationTrigger {
  */
 export function instanceOfMessageAddedToConversationTrigger(value: object): value is MessageAddedToConversationTrigger {
     if (!('kind' in value) || value['kind'] === undefined) return false;
+    if (!('action' in value) || value['action'] === undefined) return false;
     if (!('messageSequence' in value) || value['messageSequence'] === undefined) return false;
     return true;
 }
@@ -69,6 +83,7 @@ export function MessageAddedToConversationTriggerFromJSONTyped(json: any, ignore
     return {
         
         'kind': TriggerKindFromJSON(json['kind']),
+        'action': WorkflowActionFromJSON(json['action']),
         'messageSequence': json['message_sequence'],
         'participantKind': json['participant_kind'] == null ? undefined : json['participant_kind'],
     };
@@ -86,6 +101,7 @@ export function MessageAddedToConversationTriggerToJSONTyped(value?: MessageAdde
     return {
         
         'kind': TriggerKindToJSON(value['kind']),
+        'action': WorkflowActionToJSON(value['action']),
         'message_sequence': value['messageSequence'],
         'participant_kind': value['participantKind'],
     };

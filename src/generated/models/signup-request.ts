@@ -26,7 +26,7 @@ export interface SignupRequest {
      */
     tenantName: string;
     /**
-     * The subdomain of the tenant to create. Used as the subdomain in the URL.
+     * The domain of the tenant to create.
      * @type {string}
      * @memberof SignupRequest
      */

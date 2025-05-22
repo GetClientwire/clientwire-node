@@ -13,13 +13,6 @@
  */
 
 import { mapValues } from '../runtime';
-import type { ConditionOperator } from './condition-operator';
-import {
-    ConditionOperatorFromJSON,
-    ConditionOperatorFromJSONTyped,
-    ConditionOperatorToJSON,
-    ConditionOperatorToJSONTyped,
-} from './condition-operator';
 import type { TriggerKind } from './trigger-kind';
 import {
     TriggerKindFromJSON,
@@ -27,6 +20,20 @@ import {
     TriggerKindToJSON,
     TriggerKindToJSONTyped,
 } from './trigger-kind';
+import type { WorkflowAction } from './workflow-action';
+import {
+    WorkflowActionFromJSON,
+    WorkflowActionFromJSONTyped,
+    WorkflowActionToJSON,
+    WorkflowActionToJSONTyped,
+} from './workflow-action';
+import type { ConditionalBranch } from './conditional-branch';
+import {
+    ConditionalBranchFromJSON,
+    ConditionalBranchFromJSONTyped,
+    ConditionalBranchToJSON,
+    ConditionalBranchToJSONTyped,
+} from './conditional-branch';
 
 /**
  * Trigger fired when conversation data changes
@@ -41,29 +48,17 @@ export interface ConversationDataChangedTrigger {
      */
     kind: TriggerKind;
     /**
-     * 
-     * @type {string}
+     * Action to be executed when trigger happens.
+     * @type {WorkflowAction}
      * @memberof ConversationDataChangedTrigger
      */
-    jsonPath: string;
+    action: WorkflowAction | null;
     /**
      * 
-     * @type {ConditionOperator}
+     * @type {Array<ConditionalBranch>}
      * @memberof ConversationDataChangedTrigger
      */
-    operator: ConditionOperator;
-    /**
-     * 
-     * @type {string}
-     * @memberof ConversationDataChangedTrigger
-     */
-    newValue?: string | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof ConversationDataChangedTrigger
-     */
-    oldValue?: string | null;
+    branches: Array<ConditionalBranch>;
 }
 
 
@@ -73,8 +68,8 @@ export interface ConversationDataChangedTrigger {
  */
 export function instanceOfConversationDataChangedTrigger(value: object): value is ConversationDataChangedTrigger {
     if (!('kind' in value) || value['kind'] === undefined) return false;
-    if (!('jsonPath' in value) || value['jsonPath'] === undefined) return false;
-    if (!('operator' in value) || value['operator'] === undefined) return false;
+    if (!('action' in value) || value['action'] === undefined) return false;
+    if (!('branches' in value) || value['branches'] === undefined) return false;
     return true;
 }
 
@@ -89,10 +84,8 @@ export function ConversationDataChangedTriggerFromJSONTyped(json: any, ignoreDis
     return {
         
         'kind': TriggerKindFromJSON(json['kind']),
-        'jsonPath': json['json_path'],
-        'operator': ConditionOperatorFromJSON(json['operator']),
-        'newValue': json['new_value'] == null ? undefined : json['new_value'],
-        'oldValue': json['old_value'] == null ? undefined : json['old_value'],
+        'action': WorkflowActionFromJSON(json['action']),
+        'branches': ((json['branches'] as Array<any>).map(ConditionalBranchFromJSON)),
     };
 }
 
@@ -108,10 +101,8 @@ export function ConversationDataChangedTriggerToJSONTyped(value?: ConversationDa
     return {
         
         'kind': TriggerKindToJSON(value['kind']),
-        'json_path': value['jsonPath'],
-        'operator': ConditionOperatorToJSON(value['operator']),
-        'new_value': value['newValue'],
-        'old_value': value['oldValue'],
+        'action': WorkflowActionToJSON(value['action']),
+        'branches': ((value['branches'] as Array<any>).map(ConditionalBranchToJSON)),
     };
 }
 

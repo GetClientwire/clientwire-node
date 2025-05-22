@@ -34,6 +34,13 @@ import {
     ReadStatusDtoToJSON,
     ReadStatusDtoToJSONTyped,
 } from './read-status-dto';
+import type { ClientFrontendUrl } from './client-frontend-url';
+import {
+    ClientFrontendUrlFromJSON,
+    ClientFrontendUrlFromJSONTyped,
+    ClientFrontendUrlToJSON,
+    ClientFrontendUrlToJSONTyped,
+} from './client-frontend-url';
 import type { ConversationType } from './conversation-type';
 import {
     ConversationTypeFromJSON,
@@ -144,6 +151,12 @@ export interface Conversation {
      * @memberof Conversation
      */
     lockNote?: string | null;
+    /**
+     * The list of participants in the conversation.
+     * @type {Array<ClientFrontendUrl>}
+     * @memberof Conversation
+     */
+    clientFrontendUrls?: Array<ClientFrontendUrl> | null;
 }
 
 /**
@@ -183,6 +196,7 @@ export function ConversationFromJSONTyped(json: any, ignoreDiscriminator: boolea
         'readStatus': json['read_status'] == null ? undefined : ReadStatusDtoFromJSON(json['read_status']),
         'lockExpiresAt': json['lock_expires_at'] == null ? undefined : (new Date(json['lock_expires_at'])),
         'lockNote': json['lock_note'] == null ? undefined : json['lock_note'],
+        'clientFrontendUrls': json['client_frontend_urls'] == null ? undefined : ((json['client_frontend_urls'] as Array<any>).map(ClientFrontendUrlFromJSON)),
     };
 }
 
@@ -213,6 +227,7 @@ export function ConversationToJSONTyped(value?: Conversation | null, ignoreDiscr
         'read_status': ReadStatusDtoToJSON(value['readStatus']),
         'lock_expires_at': value['lockExpiresAt'] == null ? undefined : ((value['lockExpiresAt'] as any).toISOString()),
         'lock_note': value['lockNote'],
+        'client_frontend_urls': value['clientFrontendUrls'] == null ? undefined : ((value['clientFrontendUrls'] as Array<any>).map(ClientFrontendUrlToJSON)),
     };
 }
 

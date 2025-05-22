@@ -295,7 +295,7 @@ export class WorkflowsApi extends runtime.BaseAPI implements WorkflowsApiInterfa
 
         if (this.configuration && this.configuration.accessToken) {
             const token = this.configuration.accessToken;
-            const tokenString = await token("BearerAuth", ["USER", "OWNER", "API_KEY", "CLIENT_PARTICIPANT"]);
+            const tokenString = await token("BearerAuth", ["OWNER", "API_KEY"]);
 
             if (tokenString) {
                 headerParameters["Authorization"] = `Bearer ${tokenString}`;
@@ -355,7 +355,7 @@ export class WorkflowsApi extends runtime.BaseAPI implements WorkflowsApiInterfa
 
         if (this.configuration && this.configuration.accessToken) {
             const token = this.configuration.accessToken;
-            const tokenString = await token("BearerAuth", ["USER", "OWNER", "API_KEY"]);
+            const tokenString = await token("BearerAuth", ["OWNER", "API_KEY"]);
 
             if (tokenString) {
                 headerParameters["Authorization"] = `Bearer ${tokenString}`;

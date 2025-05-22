@@ -13,13 +13,6 @@
  */
 
 import { mapValues } from '../runtime';
-import type { WorkflowAction } from './workflow-action';
-import {
-    WorkflowActionFromJSON,
-    WorkflowActionFromJSONTyped,
-    WorkflowActionToJSON,
-    WorkflowActionToJSONTyped,
-} from './workflow-action';
 import type { WorkflowTrigger } from './workflow-trigger';
 import {
     WorkflowTriggerFromJSON,
@@ -46,12 +39,6 @@ export interface WorkflowPostRequest {
      * @memberof WorkflowPostRequest
      */
     trigger: WorkflowTrigger;
-    /**
-     * Action for this workflow.
-     * @type {WorkflowAction}
-     * @memberof WorkflowPostRequest
-     */
-    action: WorkflowAction;
 }
 
 /**
@@ -59,7 +46,6 @@ export interface WorkflowPostRequest {
  */
 export function instanceOfWorkflowPostRequest(value: object): value is WorkflowPostRequest {
     if (!('trigger' in value) || value['trigger'] === undefined) return false;
-    if (!('action' in value) || value['action'] === undefined) return false;
     return true;
 }
 
@@ -75,7 +61,6 @@ export function WorkflowPostRequestFromJSONTyped(json: any, ignoreDiscriminator:
         
         'conversationTypeId': json['conversation_type_id'] == null ? undefined : json['conversation_type_id'],
         'trigger': WorkflowTriggerFromJSON(json['trigger']),
-        'action': WorkflowActionFromJSON(json['action']),
     };
 }
 
@@ -92,7 +77,6 @@ export function WorkflowPostRequestToJSONTyped(value?: WorkflowPostRequest | nul
         
         'conversation_type_id': value['conversationTypeId'],
         'trigger': WorkflowTriggerToJSON(value['trigger']),
-        'action': WorkflowActionToJSON(value['action']),
     };
 }
 

@@ -47,8 +47,11 @@ tags:
 - name: Message Templates
   description: Operation for message templates
 - name: Tenant Color Config
+- name: Tenant Domains
 - name: UserPreference
   description: Operations for user preferences.
+- name: Webhook Features
+  description: API to manage webhook feature settings
 - name: Webhooks
 - name: Workflows
   description: Operation for workflows
@@ -752,6 +755,7 @@ paths:
       - BearerAuth:
         - OWNER
         - API_KEY
+        - USER
   /api/v1/conversations/by_ids:
     post:
       summary: Get a list of conversations by their ids.
@@ -1025,6 +1029,7 @@ paths:
       - BearerAuth:
         - OWNER
         - API_KEY
+        - USER
     post:
       summary: Create new labels for the specified conversation
       description: Creates labels for conversations
@@ -1071,6 +1076,7 @@ paths:
       - BearerAuth:
         - OWNER
         - API_KEY
+        - USER
   /api/v1/conversations/{conversation_id}/labels/{label}:
     put:
       summary: Updates a specific label with a new one
@@ -1119,6 +1125,7 @@ paths:
       - BearerAuth:
         - OWNER
         - API_KEY
+        - USER
     delete:
       summary: Deletes a label for the specified conversation
       description: Deletes label for a conversation
@@ -1164,6 +1171,7 @@ paths:
       - BearerAuth:
         - OWNER
         - API_KEY
+        - USER
   /api/v1/conversations/{conversation_id}/lock:
     post:
       summary: Lock a conversation
@@ -1837,7 +1845,6 @@ paths:
       security:
       - ApiKeyAuth: []
       - BearerAuth:
-        - USER
         - OWNER
         - API_KEY
   /api/v1/geocoder/reverse:
@@ -2531,7 +2538,7 @@ paths:
           application/json:
             schema:
               description: "The patch body for updating tenant fields. Allowed fields\
-                \ are: name, subdomain, token_exchange_userinfo_url and user_auto_provisioning_domains."
+                \ are: name, token_exchange_userinfo_url and user_auto_provisioning_domains."
               type: object
               additionalProperties: {}
               example:
@@ -2635,21 +2642,22 @@ paths:
   /api/v1/tenant/config:
     get:
       summary: Get the current config for the tenant specified via query parameters.
-      description: Either tenant_subdomain or tenant_id must be provided
+      description: "At least one of tenant_subdomain, tenant_id, or domain must be\
+        \ provided"
       operationId: getTenantConfig
       tags:
       - Tenant Config
       parameters:
-      - description: Get tenant config for the specified ID.
+      - description: Get tenant config for the specified domain.
         required: false
-        name: tenant_id
+        name: domain
         in: query
         schema:
           type: string
           nullable: true
-      - description: Get tenant config for the specified subdomain.
+      - description: Get tenant config for the specified ID.
         required: false
-        name: tenant_subdomain
+        name: tenant_id
         in: query
         schema:
           type: string
@@ -2668,6 +2676,167 @@ paths:
             or misformed.
         "415":
           description: Unsupported Content Type.
+  /api/v1/tenants/{tenant_id}/domains:
+    get:
+      summary: Get all domains for a tenant
+      description: List all domains (custom and system) associated with a tenant
+      operationId: getDomains
+      tags:
+      - Tenant Domains
+      parameters:
+      - description: The tenant ID
+        name: tenant_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - description: Filter domains by type (system or custom)
+        required: false
+        name: type
+        in: query
+        schema:
+          type: string
+          nullable: true
+      responses:
+        "200":
+          description: List of domains for the tenant
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TenantDomain"
+        "404":
+          description: Not found.
+        "403":
+          description: Forbidden.
+        "401":
+          description: Not Authorized
+      security:
+      - BearerAuth:
+        - OWNER
+        - API_KEY
+    post:
+      summary: Create a custom domain
+      description: Create a new custom domain for a tenant. Only one custom domain
+        is allowed per tenant per type (client/main).
+      operationId: createDomain
+      tags:
+      - Tenant Domains
+      parameters:
+      - description: The tenant ID
+        name: tenant_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TenantDomainCreate"
+        required: true
+      responses:
+        "201":
+          description: Custom domain created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TenantDomain"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "403":
+          description: Forbidden.
+        "409":
+          description: Domain already exists or custom domain limit reached
+        "401":
+          description: Not Authorized
+      security:
+      - BearerAuth:
+        - OWNER
+        - API_KEY
+  /api/v1/tenants/{tenant_id}/domains/{domain_id}:
+    put:
+      summary: Update a custom domain
+      description: Update an existing custom domain for a tenant. System domains cannot
+        be updated.
+      operationId: updateDomain
+      tags:
+      - Tenant Domains
+      parameters:
+      - description: The domain ID to update
+        name: domain_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - description: The tenant ID
+        name: tenant_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TenantDomainUpdate"
+        required: true
+      responses:
+        "200":
+          description: Domain updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TenantDomain"
+        "400":
+          description: Bad request. Usually means that the input data was invalid
+            or misformed.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Domain not found
+        "409":
+          description: Domain already exists
+        "401":
+          description: Not Authorized
+      security:
+      - BearerAuth:
+        - OWNER
+    delete:
+      summary: Delete a custom domain
+      description: Delete a custom domain for a tenant. System domains cannot be deleted.
+      operationId: deleteDomain
+      tags:
+      - Tenant Domains
+      parameters:
+      - description: The domain ID to delete
+        name: domain_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - description: The tenant ID
+        name: tenant_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: Domain deleted successfully
+        "400":
+          description: Cannot delete system domain
+        "403":
+          description: Forbidden.
+        "404":
+          description: Domain not found
+        "401":
+          description: Not Authorized
+      security:
+      - BearerAuth:
+        - OWNER
   /api/v1/users:
     get:
       summary: List all users for a tenant.
@@ -3126,6 +3295,118 @@ paths:
       - BearerAuth:
         - OWNER
         - API_KEY
+  /api/v1/webhooks/features:
+    post:
+      summary: Update a webhook feature setting
+      description: Updates or creates a webhook feature setting for the specified
+        tenant
+      operationId: updateWebhookFeature
+      tags:
+      - Webhook Features
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTenantWebhookFeature"
+        required: true
+      responses:
+        "200":
+          description: Webhook feature setting updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TenantWebhookFeature"
+        "400":
+          description: Invalid webhook type
+        "404":
+          description: Tenant not found
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
+    get:
+      summary: Get webhook feature settings for a tenant
+      description: Returns all webhook feature settings for the specified tenant
+      operationId: getWebhookFeatures
+      tags:
+      - Webhook Features
+      responses:
+        "200":
+          description: List of webhook feature settings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TenantWebhookFeature"
+        "404":
+          description: Tenant not found
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
+  /api/v1/webhooks/features/available:
+    get:
+      summary: Get available webhook types
+      description: Returns all available webhook types from the catalog
+      operationId: listAvailableWebhookTypes
+      tags:
+      - Webhook Features
+      responses:
+        "200":
+          description: List of available webhook types
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
+  /api/v1/webhooks/features/{webhookType}:
+    delete:
+      summary: Delete a webhook feature setting
+      description: Deletes a webhook feature setting for the specified tenant
+      operationId: deleteWebhookFeature
+      tags:
+      - Webhook Features
+      parameters:
+      - name: webhookType
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: Webhook feature setting deleted successfully
+        "404":
+          description: Webhook feature setting not found
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth:
+        - OWNER
+        - API_KEY
   /api/v1/workflows:
     get:
       summary: List all workflows for the specified tenant.
@@ -3180,7 +3461,6 @@ paths:
       security:
       - ApiKeyAuth: []
       - BearerAuth:
-        - USER
         - OWNER
         - API_KEY
     post:
@@ -3339,10 +3619,8 @@ paths:
       security:
       - ApiKeyAuth: []
       - BearerAuth:
-        - USER
         - OWNER
         - API_KEY
-        - CLIENT_PARTICIPANT
     delete:
       summary: Delete a workflow.
       description: Removes a workflow by ID.
@@ -3445,7 +3723,7 @@ components:
           description: The status of the asset.
           type: string
           allOf:
-          - $ref: "#/components/schemas/Status"
+          - $ref: "#/components/schemas/Status1"
           example: UPLOAD_COMPLETED
           nullable: true
     AuthenticationOptions:
@@ -3468,13 +3746,74 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/LoginOptionsOidcProvider"
+    ClientFrontendUrl:
+      required:
+      - client_id
+      - url
+      type: object
+      properties:
+        client_id:
+          description: The if of the client participant.
+          type: string
+          example: client
+        url:
+          description: The url for the client to access the frontend.
+          type: string
+          example: wire.com/client
+          nullable: true
+    CompoundConditionNode:
+      required:
+      - kind
+      - operator
+      - children
+      type: object
+      properties:
+        kind:
+          description: Discriminator property to identify the node kind
+          enum:
+          - COMPOUND
+          - LEAF
+          type: string
+        operator:
+          $ref: "#/components/schemas/LogicalOperatorDto"
+        children:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConditionNode"
+    ConditionNode:
+      required:
+      - kind
+      type: object
+      properties:
+        kind:
+          description: Discriminator property to identify the node kind
+          enum:
+          - COMPOUND
+          - LEAF
+          type: string
+      discriminator:
+        propertyName: kind
+        mapping:
+          LEAF: "#/components/schemas/LeafConditionNode"
+          COMPOUND: "#/components/schemas/CompoundConditionNode"
     ConditionOperator:
       enum:
       - EQUALS
       - CHANGED_FROM_TO
+      - CHANGED
       - EXISTS
       - NOT_EXISTS
       type: string
+    ConditionalBranch:
+      required:
+      - condition_node
+      - action
+      type: object
+      properties:
+        condition_node:
+          $ref: "#/components/schemas/ConditionNode"
+        action:
+          $ref: "#/components/schemas/WorkflowAction"
     Conversation:
       required:
       - id
@@ -3596,10 +3935,18 @@ components:
           type: string
           example: Locked until consulted with the mechanic
           nullable: true
+        client_frontend_urls:
+          description: The list of participants in the conversation.
+          type: array
+          items:
+            $ref: "#/components/schemas/ClientFrontendUrl"
+          example: "null"
+          nullable: true
     ConversationCreatedTrigger:
       description: Trigger fired when a conversation is created
       required:
       - kind
+      - action
       type: object
       properties:
         kind:
@@ -3611,12 +3958,19 @@ components:
           type: string
           allOf:
           - $ref: "#/components/schemas/TriggerKind"
+        action:
+          description: Action to be executed when trigger happens.
+          type: object
+          allOf:
+          - $ref: "#/components/schemas/WorkflowAction"
+          example: NOTIFY_PARTICIPANTS
+          nullable: true
     ConversationDataChangedTrigger:
       description: Trigger fired when conversation data changes
       required:
       - kind
-      - json_path
-      - operator
+      - action
+      - branches
       type: object
       properties:
         kind:
@@ -3628,16 +3982,17 @@ components:
           type: string
           allOf:
           - $ref: "#/components/schemas/TriggerKind"
-        json_path:
-          type: string
-        operator:
-          $ref: "#/components/schemas/ConditionOperator"
-        new_value:
-          type: string
+        action:
+          description: Action to be executed when trigger happens.
+          type: object
+          allOf:
+          - $ref: "#/components/schemas/WorkflowAction"
+          example: NOTIFY_PARTICIPANTS
           nullable: true
-        old_value:
-          type: string
-          nullable: true
+        branches:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConditionalBranch"
     ConversationIncludeOption:
       enum:
       - PARTICIPANTS
@@ -3646,6 +4001,7 @@ components:
       - CLIENT_HEADER_TEMPLATE_DATA
       - CONVERSATION_DATA
       - CURRENT_USER_READ_STATUS
+      - CLIENT_PARTICIPANT_FRONTEND_URL
       type: string
     ConversationLabelPostRequest:
       required:
@@ -3950,6 +4306,7 @@ components:
     ConversationTypePostRequest:
       required:
       - id
+      - conversation_data_list_item_template
       type: object
       properties:
         id:
@@ -3991,7 +4348,6 @@ components:
           maxLength: 1073741824
           type: string
           example: "{{conversation_id}} - {{conversation_data.title}}"
-          nullable: true
         client_app_header_template:
           description: An HTML template to reader the header in the client app which
             has dynamic values based on the conversation_data
@@ -4020,6 +4376,7 @@ components:
     ConversationTypePutRequest:
       required:
       - id
+      - conversation_data_list_item_template
       type: object
       properties:
         id:
@@ -4065,7 +4422,6 @@ components:
           maxLength: 1073741824
           type: string
           example: "{{status}} - {{created_at}}"
-          nullable: true
         client_app_header_template:
           description: An HTML template to reader the header in the client app which
             has dynamic values based on the conversation_data
@@ -4260,6 +4616,29 @@ components:
       - EN
       - DE
       type: string
+    LeafConditionNode:
+      required:
+      - kind
+      - target_identifier
+      - operator
+      type: object
+      properties:
+        kind:
+          description: Discriminator property to identify the node kind
+          enum:
+          - COMPOUND
+          - LEAF
+          type: string
+        target_identifier:
+          type: string
+        operator:
+          $ref: "#/components/schemas/ConditionOperator"
+        compare_value:
+          type: string
+          nullable: true
+        old_value:
+          type: string
+          nullable: true
     Location:
       required:
       - latitude
@@ -4315,6 +4694,12 @@ components:
           - $ref: "#/components/schemas/Location"
           example: "null"
           nullable: true
+    LogicalOperatorDto:
+      enum:
+      - AND
+      - OR
+      - NOT
+      type: string
     LoginOptionsOidcProvider:
       required:
       - provider_name
@@ -4426,6 +4811,7 @@ components:
     MessageAddedToConversationTrigger:
       required:
       - kind
+      - action
       - message_sequence
       type: object
       properties:
@@ -4438,6 +4824,13 @@ components:
           type: string
           allOf:
           - $ref: "#/components/schemas/TriggerKind"
+        action:
+          description: Action to be executed when trigger happens.
+          type: object
+          allOf:
+          - $ref: "#/components/schemas/WorkflowAction"
+          example: NOTIFY_PARTICIPANTS
+          nullable: true
         message_sequence:
           format: int32
           description: The sequence of the message in the conversation that should
@@ -4553,6 +4946,7 @@ components:
     MessageTemplate:
       required:
       - name
+      - kind
       - texts
       - is_system_template
       - parameters
@@ -4563,6 +4957,8 @@ components:
         description:
           type: string
           nullable: true
+        kind:
+          $ref: "#/components/schemas/MessageTemplateKind"
         texts:
           type: object
           additionalProperties:
@@ -4581,6 +4977,11 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/MessageTemplateParameter"
+    MessageTemplateKind:
+      enum:
+      - TEXT
+      - REQUEST_LOCATION
+      type: string
     MessageTemplatePaginatedResponse:
       required:
       - has_more
@@ -4640,6 +5041,7 @@ components:
     MessageTemplatePostRequest:
       required:
       - name
+      - kind
       - texts
       - parameters
       type: object
@@ -4649,6 +5051,8 @@ components:
         description:
           type: string
           nullable: true
+        kind:
+          $ref: "#/components/schemas/MessageTemplateKind"
         texts:
           type: object
           additionalProperties:
@@ -4659,6 +5063,7 @@ components:
             $ref: "#/components/schemas/MessageTemplateParameter"
     MessageTemplatePutRequest:
       required:
+      - kind
       - texts
       - parameters
       type: object
@@ -4666,6 +5071,8 @@ components:
         description:
           type: string
           nullable: true
+        kind:
+          $ref: "#/components/schemas/MessageTemplateKind"
         texts:
           type: object
           additionalProperties:
@@ -5144,8 +5551,7 @@ components:
           type: string
           example: Autoclub of Mars
         tenant_subdomain:
-          description: The subdomain of the tenant to create. Used as the subdomain
-            in the URL.
+          description: The domain of the tenant to create.
           maxLength: 20
           minLength: 3
           pattern: "^[a-z0-9][a-z0-9_-]+[a-z0-9]?$"
@@ -5198,6 +5604,14 @@ components:
       - UPLOAD_FAILED
       - UNKNOWN
       type: string
+    Status1:
+      enum:
+      - UPLOAD_PENDING
+      - UPLOAD_COMPLETED
+      - UPLOAD_COMPLETED_MISSING
+      - UPLOAD_FAILED
+      - UNKNOWN
+      type: string
     TemplateData:
       required:
       - list_item
@@ -5226,6 +5640,7 @@ components:
       - name
       - subdomain
       - preferred_language
+      - domain
       type: object
       properties:
         id:
@@ -5245,13 +5660,10 @@ components:
           description: The preferred language of the tenant.
           type: string
           example: en
-        subdomain:
+        domain:
           description: The subdomain of the tenant. Used as the subdomain in the URL.
-          maxLength: 20
-          minLength: 3
-          pattern: "^[a-z0-9][a-z0-9_-]+[a-z0-9]?$"
           type: string
-          example: autoclubmars
+          example: autoclubmars.com
         tenant_creation_allowed:
           description: Is your tenant allowed to create new tenants via the API?
           type: boolean
@@ -5376,13 +5788,6 @@ components:
           allOf:
           - $ref: "#/components/schemas/UUID"
           example: ace00000-ace0-ace0-ace0-ace000000000
-        subdomain:
-          description: The subdomain of the tenant.
-          maxLength: 20
-          minLength: 3
-          pattern: "^[a-z0-9][a-z0-9_-]+[a-z0-9]?$"
-          type: string
-          example: autoclubmars
         frontend_url:
           description: The URL of the frontend application.
           type: string
@@ -5408,6 +5813,86 @@ components:
           allOf:
           - $ref: "#/components/schemas/TenantColorConfig"
           nullable: true
+    TenantDomain:
+      description: Domain information for a tenant
+      required:
+      - id
+      - tenantId
+      - domain
+      - status
+      type: object
+      properties:
+        id:
+          description: Unique identifier for the domain record
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/UUID"
+          example: ace00000-ace0-ace0-ace0-ace000000000
+        tenantId:
+          description: The tenant ID associated with this domain
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/UUID"
+          example: ace00000-ace0-ace0-ace0-ace000000000
+        domain:
+          description: The full domain name
+          type: string
+          example: autoclubmars.wire.com or custom-domain.example.com
+        is_client_app:
+          description: Whether this domain is for the client app (true) or main app
+            (false)
+          type: boolean
+          example: true
+        is_system_domain:
+          description: Whether this is a system-provided domain (true) or a custom
+            domain (false)
+          type: boolean
+          example: true
+        status:
+          description: Whether the domain is created or requested
+          type: string
+          example: CREATED
+    TenantDomainCreate:
+      description: Request to create a custom domain for a tenant
+      required:
+      - domain
+      type: object
+      properties:
+        domain:
+          description: The full domain name
+          pattern: "^([a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,}$"
+          type: string
+          example: custom-domain.example.com
+        is_client_app:
+          description: Whether this domain is for the client app (true) or main app
+            (false)
+          type: boolean
+          example: false
+    TenantDomainUpdate:
+      description: Request to update a custom domain for a tenant
+      required:
+      - domain
+      type: object
+      properties:
+        domain:
+          description: The full domain name
+          pattern: "^([a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,}$"
+          type: string
+          example: custom-domain.example.com
+    TenantWebhookFeature:
+      description: Represents a webhook feature configuration for a tenant
+      required:
+      - webhook_type
+      type: object
+      properties:
+        webhook_type:
+          description: The webhook type identifier
+          type: string
+          example: conversation.created
+        enabled:
+          description: Whether this webhook type is enabled for the tenant
+          type: boolean
+          example: true
     TenantWebhookSettings:
       description: Represents the webhook settings for a tenant.
       required:
@@ -5499,6 +5984,21 @@ components:
       format: uuid
       pattern: "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
       type: string
+    UpdateTenantWebhookFeature:
+      description: Request body for updating a webhook feature configuration
+      required:
+      - webhook_type
+      - enabled
+      type: object
+      properties:
+        webhook_type:
+          description: The webhook type identifier
+          type: string
+          example: conversation.created
+        enabled:
+          description: Whether this webhook type is enabled for the tenant
+          type: boolean
+          example: true
     UpdateWebhookSettingsRequest:
       description: Request for updating only the endpoint URL.
       required:
@@ -5507,6 +6007,7 @@ components:
       properties:
         endpoint_url:
           description: The new endpoint URL for receiving webhooks
+          pattern: "^(https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]"
           type: string
           example: https://myapp.com/webhooks
     User:
@@ -5636,6 +6137,26 @@ components:
       - OWNER
       - USER
       type: string
+    WebhookAssetResponse:
+      type: object
+      properties:
+        download_url:
+          description: URL to download the created asset
+          type: string
+          example: "null"
+          nullable: true
+        upload_url:
+          description: URL to upload a asset
+          type: string
+          example: "null"
+          nullable: true
+        status:
+          description: The status of the asset.
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/Status"
+          example: UPLOAD_COMPLETED
+          nullable: true
     WebhookConversation:
       required:
       - id
@@ -5676,6 +6197,104 @@ components:
           description: The unread message count for all user participants in the conversation.
           type: integer
           example: 0
+    WebhookMessage:
+      required:
+      - id
+      - tenant_id
+      - created_at
+      - updated_at
+      - conversation_id
+      - participant_id
+      - sequence
+      - kind
+      type: object
+      properties:
+        id:
+          description: Unique identifier for a message.
+          type: string
+          example: eee00000-eee0000-eee00-eee00-eee000000
+        tenant_id:
+          format: uuid
+          description: Unique identifier for the tenant.
+          type: string
+          example: ace00000-ace0-ace0-ace0-ace000000000
+        created_at:
+          description: Timestamp when the conversation was created.
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/Instant"
+          example: 2022-11-03T20:26:10.344522Z
+        updated_at:
+          description: Timestamp when the conversation was last updated. Initially
+            the same as created_at.
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/Instant"
+          example: 2022-11-03T20:26:10.344522Z
+        conversation_id:
+          description: Unique identifier for a conversation type.
+          maxLength: 50
+          pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
+          type: string
+          example: Abc123
+        participant_id:
+          description: The id of the participant this messages is posted by.
+          maxLength: 50
+          pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
+          type: string
+          example: client123
+        sequence:
+          format: int32
+          description: The sequence of the message in the conversation. This will
+            be null if the message has not been processed yet.
+          type: integer
+          example: 0
+          nullable: true
+        kind:
+          description: The kind of message.
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/WebhookMessageKind"
+          example: TEXT
+        text:
+          description: "The text of the message. If kind is TEXT or REQUEST_LOCATION,\
+            \ this field is required."
+          maxLength: 4096
+          minLength: 1
+          type: string
+          example: "Hello, how can I help you?"
+          nullable: true
+        location:
+          description: ""
+          type: object
+          allOf:
+          - $ref: "#/components/schemas/Location"
+          nullable: true
+        formatted_address:
+          description: The formatted address of the location.
+          type: string
+          example: "Biberstraße 9, 1010 Vienna, Austria"
+          nullable: true
+        asset:
+          description: ""
+          type: object
+          allOf:
+          - $ref: "#/components/schemas/WebhookAssetResponse"
+          nullable: true
+        source_id:
+          description: Source id of the message.
+          type: string
+          example: 0193df26-54b2-7142-ab2b-faba1babd679
+          nullable: true
+    WebhookMessageKind:
+      enum:
+      - TEXT
+      - LOCATION
+      - IMAGE
+      - VIDEO
+      - AUDIO
+      - REQUEST_LOCATION
+      type: string
     WebhookSignatureScheme:
       description: Schemes for signing webhooks. Currently only `v1` is supported.
       enum:
@@ -5685,7 +6304,6 @@ components:
       required:
       - id
       - trigger
-      - action
       - createdAt
       - updatedAt
       type: object
@@ -5705,12 +6323,6 @@ components:
           nullable: true
         trigger:
           $ref: "#/components/schemas/WorkflowTrigger"
-        action:
-          description: Action to be executed when trigger happens.
-          type: object
-          allOf:
-          - $ref: "#/components/schemas/WorkflowAction"
-          example: NOTIFY_PARTICIPANTS
         createdAt:
           type: string
           allOf:
@@ -5789,7 +6401,6 @@ components:
     WorkflowPostRequest:
       required:
       - trigger
-      - action
       type: object
       properties:
         conversation_type_id:
@@ -5801,15 +6412,9 @@ components:
           nullable: true
         trigger:
           $ref: "#/components/schemas/WorkflowTrigger"
-        action:
-          description: Action for this workflow.
-          type: object
-          allOf:
-          - $ref: "#/components/schemas/WorkflowAction"
     WorkflowPutRequest:
       required:
       - trigger
-      - action
       type: object
       properties:
         conversation_type_id:
@@ -5821,11 +6426,6 @@ components:
           nullable: true
         trigger:
           $ref: "#/components/schemas/WorkflowTrigger"
-        action:
-          description: Action for this workflow.
-          type: object
-          allOf:
-          - $ref: "#/components/schemas/WorkflowAction"
         enabled:
           description: The workflow status. The workflow will run only if it is enabled.
           type: boolean
@@ -5833,6 +6433,7 @@ components:
       description: Base interface for workflow triggers
       required:
       - kind
+      - action
       type: object
       properties:
         kind:
@@ -5844,6 +6445,13 @@ components:
           type: string
           allOf:
           - $ref: "#/components/schemas/TriggerKind"
+        action:
+          description: Action to be executed when trigger happens.
+          type: object
+          allOf:
+          - $ref: "#/components/schemas/WorkflowAction"
+          example: NOTIFY_PARTICIPANTS
+          nullable: true
       discriminator:
         propertyName: kind
         mapping:

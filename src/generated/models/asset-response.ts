@@ -13,13 +13,13 @@
  */
 
 import { mapValues } from '../runtime';
-import type { Status } from './status';
+import type { Status1 } from './status1';
 import {
-    StatusFromJSON,
-    StatusFromJSONTyped,
-    StatusToJSON,
-    StatusToJSONTyped,
-} from './status';
+    Status1FromJSON,
+    Status1FromJSONTyped,
+    Status1ToJSON,
+    Status1ToJSONTyped,
+} from './status1';
 
 /**
  * 
@@ -41,10 +41,10 @@ export interface AssetResponse {
     uploadUrl?: string | null;
     /**
      * The status of the asset.
-     * @type {Status}
+     * @type {Status1}
      * @memberof AssetResponse
      */
-    status?: Status | null;
+    status?: Status1 | null;
 }
 
 
@@ -68,7 +68,7 @@ export function AssetResponseFromJSONTyped(json: any, ignoreDiscriminator: boole
         
         'downloadUrl': json['download_url'] == null ? undefined : json['download_url'],
         'uploadUrl': json['upload_url'] == null ? undefined : json['upload_url'],
-        'status': json['status'] == null ? undefined : StatusFromJSON(json['status']),
+        'status': json['status'] == null ? undefined : Status1FromJSON(json['status']),
     };
 }
 
@@ -85,7 +85,7 @@ export function AssetResponseToJSONTyped(value?: AssetResponse | null, ignoreDis
         
         'download_url': value['downloadUrl'],
         'upload_url': value['uploadUrl'],
-        'status': StatusToJSON(value['status']),
+        'status': Status1ToJSON(value['status']),
     };
 }
 

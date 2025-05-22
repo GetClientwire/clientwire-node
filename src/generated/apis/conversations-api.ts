@@ -322,7 +322,7 @@ export class ConversationsApi extends runtime.BaseAPI implements ConversationsAp
 
         if (this.configuration && this.configuration.accessToken) {
             const token = this.configuration.accessToken;
-            const tokenString = await token("BearerAuth", ["OWNER", "API_KEY"]);
+            const tokenString = await token("BearerAuth", ["OWNER", "API_KEY", "USER"]);
 
             if (tokenString) {
                 headerParameters["Authorization"] = `Bearer ${tokenString}`;
@@ -778,7 +778,7 @@ export class ConversationsApi extends runtime.BaseAPI implements ConversationsAp
 
         if (this.configuration && this.configuration.accessToken) {
             const token = this.configuration.accessToken;
-            const tokenString = await token("BearerAuth", ["USER", "OWNER", "API_KEY"]);
+            const tokenString = await token("BearerAuth", ["OWNER", "API_KEY"]);
 
             if (tokenString) {
                 headerParameters["Authorization"] = `Bearer ${tokenString}`;

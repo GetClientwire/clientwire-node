@@ -175,7 +175,7 @@ export class ConversationLabelsApi extends runtime.BaseAPI implements Conversati
 
         if (this.configuration && this.configuration.accessToken) {
             const token = this.configuration.accessToken;
-            const tokenString = await token("BearerAuth", ["OWNER", "API_KEY"]);
+            const tokenString = await token("BearerAuth", ["OWNER", "API_KEY", "USER"]);
 
             if (tokenString) {
                 headerParameters["Authorization"] = `Bearer ${tokenString}`;
@@ -234,7 +234,7 @@ export class ConversationLabelsApi extends runtime.BaseAPI implements Conversati
 
         if (this.configuration && this.configuration.accessToken) {
             const token = this.configuration.accessToken;
-            const tokenString = await token("BearerAuth", ["OWNER", "API_KEY"]);
+            const tokenString = await token("BearerAuth", ["OWNER", "API_KEY", "USER"]);
 
             if (tokenString) {
                 headerParameters["Authorization"] = `Bearer ${tokenString}`;
@@ -301,7 +301,7 @@ export class ConversationLabelsApi extends runtime.BaseAPI implements Conversati
 
         if (this.configuration && this.configuration.accessToken) {
             const token = this.configuration.accessToken;
-            const tokenString = await token("BearerAuth", ["OWNER", "API_KEY"]);
+            const tokenString = await token("BearerAuth", ["OWNER", "API_KEY", "USER"]);
 
             if (tokenString) {
                 headerParameters["Authorization"] = `Bearer ${tokenString}`;
@@ -361,7 +361,7 @@ export class ConversationLabelsApi extends runtime.BaseAPI implements Conversati
 
         if (this.configuration && this.configuration.accessToken) {
             const token = this.configuration.accessToken;
-            const tokenString = await token("BearerAuth", ["OWNER", "API_KEY"]);
+            const tokenString = await token("BearerAuth", ["OWNER", "API_KEY", "USER"]);
 
             if (tokenString) {
                 headerParameters["Authorization"] = `Bearer ${tokenString}`;

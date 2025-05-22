@@ -34,12 +34,6 @@ export interface TenantConfig {
      */
     id: string;
     /**
-     * The subdomain of the tenant.
-     * @type {string}
-     * @memberof TenantConfig
-     */
-    subdomain: string;
-    /**
      * The URL of the frontend application.
      * @type {string}
      * @memberof TenantConfig
@@ -76,7 +70,6 @@ export interface TenantConfig {
  */
 export function instanceOfTenantConfig(value: object): value is TenantConfig {
     if (!('id' in value) || value['id'] === undefined) return false;
-    if (!('subdomain' in value) || value['subdomain'] === undefined) return false;
     if (!('frontendUrl' in value) || value['frontendUrl'] === undefined) return false;
     if (!('name' in value) || value['name'] === undefined) return false;
     if (!('preferredLanguage' in value) || value['preferredLanguage'] === undefined) return false;
@@ -95,7 +88,6 @@ export function TenantConfigFromJSONTyped(json: any, ignoreDiscriminator: boolea
     return {
         
         'id': json['id'],
-        'subdomain': json['subdomain'],
         'frontendUrl': json['frontend_url'],
         'name': json['name'],
         'preferredLanguage': json['preferred_language'],
@@ -116,7 +108,6 @@ export function TenantConfigToJSONTyped(value?: TenantConfig | null, ignoreDiscr
     return {
         
         'id': value['id'],
-        'subdomain': value['subdomain'],
         'frontend_url': value['frontendUrl'],
         'name': value['name'],
         'preferred_language': value['preferredLanguage'],

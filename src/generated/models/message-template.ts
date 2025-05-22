@@ -20,6 +20,13 @@ import {
     MessageTemplateParameterToJSON,
     MessageTemplateParameterToJSONTyped,
 } from './message-template-parameter';
+import type { MessageTemplateKind } from './message-template-kind';
+import {
+    MessageTemplateKindFromJSON,
+    MessageTemplateKindFromJSONTyped,
+    MessageTemplateKindToJSON,
+    MessageTemplateKindToJSONTyped,
+} from './message-template-kind';
 
 /**
  * 
@@ -39,6 +46,12 @@ export interface MessageTemplate {
      * @memberof MessageTemplate
      */
     description?: string | null;
+    /**
+     * 
+     * @type {MessageTemplateKind}
+     * @memberof MessageTemplate
+     */
+    kind: MessageTemplateKind;
     /**
      * 
      * @type {{ [key: string]: string; }}
@@ -71,11 +84,14 @@ export interface MessageTemplate {
     parameters: Array<MessageTemplateParameter>;
 }
 
+
+
 /**
  * Check if a given object implements the MessageTemplate interface.
  */
 export function instanceOfMessageTemplate(value: object): value is MessageTemplate {
     if (!('name' in value) || value['name'] === undefined) return false;
+    if (!('kind' in value) || value['kind'] === undefined) return false;
     if (!('texts' in value) || value['texts'] === undefined) return false;
     if (!('isSystemTemplate' in value) || value['isSystemTemplate'] === undefined) return false;
     if (!('parameters' in value) || value['parameters'] === undefined) return false;
@@ -94,6 +110,7 @@ export function MessageTemplateFromJSONTyped(json: any, ignoreDiscriminator: boo
         
         'name': json['name'],
         'description': json['description'] == null ? undefined : json['description'],
+        'kind': MessageTemplateKindFromJSON(json['kind']),
         'texts': json['texts'],
         'isSystemTemplate': json['is_system_template'],
         'createdAt': json['created_at'] == null ? undefined : (new Date(json['created_at'])),
@@ -115,6 +132,7 @@ export function MessageTemplateToJSONTyped(value?: MessageTemplate | null, ignor
         
         'name': value['name'],
         'description': value['description'],
+        'kind': MessageTemplateKindToJSON(value['kind']),
         'texts': value['texts'],
         'is_system_template': value['isSystemTemplate'],
         'created_at': value['createdAt'] == null ? undefined : ((value['createdAt'] as any).toISOString()),

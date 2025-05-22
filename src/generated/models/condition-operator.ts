@@ -20,6 +20,7 @@
 export const ConditionOperator = {
     Equals: 'EQUALS',
     ChangedFromTo: 'CHANGED_FROM_TO',
+    Changed: 'CHANGED',
     Exists: 'EXISTS',
     NotExists: 'NOT_EXISTS'
 } as const;

@@ -20,6 +20,13 @@ import {
     TriggerKindToJSON,
     TriggerKindToJSONTyped,
 } from './trigger-kind';
+import type { WorkflowAction } from './workflow-action';
+import {
+    WorkflowActionFromJSON,
+    WorkflowActionFromJSONTyped,
+    WorkflowActionToJSON,
+    WorkflowActionToJSONTyped,
+} from './workflow-action';
 
 import { ConversationCreatedTrigger, ConversationCreatedTriggerFromJSONTyped, ConversationCreatedTriggerToJSON, ConversationCreatedTriggerToJSONTyped } from './conversation-created-trigger';
 import { ConversationDataChangedTrigger, ConversationDataChangedTriggerFromJSONTyped, ConversationDataChangedTriggerToJSON, ConversationDataChangedTriggerToJSONTyped } from './conversation-data-changed-trigger';
@@ -36,6 +43,12 @@ export interface WorkflowTrigger {
      * @memberof WorkflowTrigger
      */
     kind: TriggerKind;
+    /**
+     * Action to be executed when trigger happens.
+     * @type {WorkflowAction}
+     * @memberof WorkflowTrigger
+     */
+    action: WorkflowAction | null;
 }
 
 
@@ -45,6 +58,7 @@ export interface WorkflowTrigger {
  */
 export function instanceOfWorkflowTrigger(value: object): value is WorkflowTrigger {
     if (!('kind' in value) || value['kind'] === undefined) return false;
+    if (!('action' in value) || value['action'] === undefined) return false;
     return true;
 }
 
@@ -70,6 +84,7 @@ export function WorkflowTriggerFromJSONTyped(json: any, ignoreDiscriminator: boo
     return {
         
         'kind': TriggerKindFromJSON(json['kind']),
+        'action': WorkflowActionFromJSON(json['action']),
     };
 }
 
@@ -98,6 +113,7 @@ export function WorkflowTriggerToJSONTyped(value?: WorkflowTrigger | null, ignor
     return {
         
         'kind': TriggerKindToJSON(value['kind']),
+        'action': WorkflowActionToJSON(value['action']),
     };
 }
 

@@ -13,13 +13,6 @@
  */
 
 import { mapValues } from '../runtime';
-import type { WorkflowAction } from './workflow-action';
-import {
-    WorkflowActionFromJSON,
-    WorkflowActionFromJSONTyped,
-    WorkflowActionToJSON,
-    WorkflowActionToJSONTyped,
-} from './workflow-action';
 import type { WorkflowTrigger } from './workflow-trigger';
 import {
     WorkflowTriggerFromJSON,
@@ -47,12 +40,6 @@ export interface WorkflowPutRequest {
      */
     trigger: WorkflowTrigger;
     /**
-     * Action for this workflow.
-     * @type {WorkflowAction}
-     * @memberof WorkflowPutRequest
-     */
-    action: WorkflowAction;
-    /**
      * The workflow status. The workflow will run only if it is enabled.
      * @type {boolean}
      * @memberof WorkflowPutRequest
@@ -65,7 +52,6 @@ export interface WorkflowPutRequest {
  */
 export function instanceOfWorkflowPutRequest(value: object): value is WorkflowPutRequest {
     if (!('trigger' in value) || value['trigger'] === undefined) return false;
-    if (!('action' in value) || value['action'] === undefined) return false;
     return true;
 }
 
@@ -81,7 +67,6 @@ export function WorkflowPutRequestFromJSONTyped(json: any, ignoreDiscriminator: 
         
         'conversationTypeId': json['conversation_type_id'] == null ? undefined : json['conversation_type_id'],
         'trigger': WorkflowTriggerFromJSON(json['trigger']),
-        'action': WorkflowActionFromJSON(json['action']),
         'enabled': json['enabled'] == null ? undefined : json['enabled'],
     };
 }
@@ -99,7 +84,6 @@ export function WorkflowPutRequestToJSONTyped(value?: WorkflowPutRequest | null,
         
         'conversation_type_id': value['conversationTypeId'],
         'trigger': WorkflowTriggerToJSON(value['trigger']),
-        'action': WorkflowActionToJSON(value['action']),
         'enabled': value['enabled'],
     };
 }
