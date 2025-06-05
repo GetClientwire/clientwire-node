@@ -6186,13 +6186,13 @@ components:
           description: Unique identifier for a conversation.
           type: string
           example: Abc123
-        lastMessageSeen:
+        last_message_seen:
           format: int32
           description: The last seen message sequence number for all user participants
             in the conversation.
           type: integer
           example: 0
-        unreadMessageCount:
+        unread_message_count:
           format: int32
           description: The unread message count for all user participants in the conversation.
           type: integer

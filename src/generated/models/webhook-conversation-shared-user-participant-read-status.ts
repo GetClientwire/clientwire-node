@@ -58,8 +58,8 @@ export function WebhookConversationSharedUserParticipantReadStatusFromJSONTyped(
     return {
         
         'id': json['id'],
-        'lastMessageSeen': json['lastMessageSeen'] == null ? undefined : json['lastMessageSeen'],
-        'unreadMessageCount': json['unreadMessageCount'] == null ? undefined : json['unreadMessageCount'],
+        'lastMessageSeen': json['last_message_seen'] == null ? undefined : json['last_message_seen'],
+        'unreadMessageCount': json['unread_message_count'] == null ? undefined : json['unread_message_count'],
     };
 }
 
@@ -75,8 +75,8 @@ export function WebhookConversationSharedUserParticipantReadStatusToJSONTyped(va
     return {
         
         'id': value['id'],
-        'lastMessageSeen': value['lastMessageSeen'],
-        'unreadMessageCount': value['unreadMessageCount'],
+        'last_message_seen': value['lastMessageSeen'],
+        'unread_message_count': value['unreadMessageCount'],
     };
 }
 
