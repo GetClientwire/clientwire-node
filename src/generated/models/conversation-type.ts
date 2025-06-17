@@ -103,7 +103,30 @@ export interface ConversationType {
      * @memberof ConversationType
      */
     emailTemplateName?: string | null;
+    /**
+     * The scope of data retention policy applied to this conversation type. Values: ARCHIVED (only archived conversations), ALL (all conversations).
+     * @type {string}
+     * @memberof ConversationType
+     */
+    retentionPolicyScope?: ConversationTypeRetentionPolicyScopeEnum | null;
+    /**
+     * The number of days archived conversations will be retained before automatic deletion.
+     * @type {number}
+     * @memberof ConversationType
+     */
+    retentionPolicyDays?: number | null;
 }
+
+
+/**
+ * @export
+ */
+export const ConversationTypeRetentionPolicyScopeEnum = {
+    Archived: 'ARCHIVED',
+    All: 'ALL'
+} as const;
+export type ConversationTypeRetentionPolicyScopeEnum = typeof ConversationTypeRetentionPolicyScopeEnum[keyof typeof ConversationTypeRetentionPolicyScopeEnum];
+
 
 /**
  * Check if a given object implements the ConversationType interface.
@@ -140,6 +163,8 @@ export function ConversationTypeFromJSONTyped(json: any, ignoreDiscriminator: bo
         'smsSenderId': json['sms_sender_id'] == null ? undefined : json['sms_sender_id'],
         'smsTemplateName': json['sms_template_name'] == null ? undefined : json['sms_template_name'],
         'emailTemplateName': json['email_template_name'] == null ? undefined : json['email_template_name'],
+        'retentionPolicyScope': json['retention_policy_scope'] == null ? undefined : json['retention_policy_scope'],
+        'retentionPolicyDays': json['retention_policy_days'] == null ? undefined : json['retention_policy_days'],
     };
 }
 
@@ -168,6 +193,8 @@ export function ConversationTypeToJSONTyped(value?: ConversationType | null, ign
         'sms_sender_id': value['smsSenderId'],
         'sms_template_name': value['smsTemplateName'],
         'email_template_name': value['emailTemplateName'],
+        'retention_policy_scope': value['retentionPolicyScope'],
+        'retention_policy_days': value['retentionPolicyDays'],
     };
 }
 

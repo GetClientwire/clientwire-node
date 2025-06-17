@@ -19,6 +19,7 @@ import type {
   ConversationListResponse,
   ConversationLockRequest,
   ConversationPaginatedResponse,
+  ConversationPatchRequest,
   ConversationPostRequest,
   ConversationPutRequest,
   ConversationsByIdsRequest,
@@ -32,6 +33,8 @@ import {
     ConversationLockRequestToJSON,
     ConversationPaginatedResponseFromJSON,
     ConversationPaginatedResponseToJSON,
+    ConversationPatchRequestFromJSON,
+    ConversationPatchRequestToJSON,
     ConversationPostRequestFromJSON,
     ConversationPostRequestToJSON,
     ConversationPutRequestFromJSON,
@@ -96,7 +99,7 @@ export interface UnlockConversationsFromUsersRequest {
 
 export interface UpdateConversationRequest {
     conversationId: string;
-    requestBody: { [key: string]: any; };
+    conversationPatchRequest: ConversationPatchRequest;
     includes?: any;
 }
 
@@ -273,7 +276,7 @@ export interface ConversationsApiInterface {
      * Allows patching id, archived, conversation_data, etc.
      * @summary Update partial fields of an existing conversation.
      * @param {string} conversationId 
-     * @param {{ [key: string]: any; }} requestBody The patch body for updating conversation fields.
+     * @param {ConversationPatchRequest} conversationPatchRequest The patch body for updating conversation fields.
      * @param {any} [includes] Include the specified related resources in the response.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -814,10 +817,10 @@ export class ConversationsApi extends runtime.BaseAPI implements ConversationsAp
             );
         }
 
-        if (requestParameters['requestBody'] == null) {
+        if (requestParameters['conversationPatchRequest'] == null) {
             throw new runtime.RequiredError(
-                'requestBody',
-                'Required parameter "requestBody" was null or undefined when calling updateConversation().'
+                'conversationPatchRequest',
+                'Required parameter "conversationPatchRequest" was null or undefined when calling updateConversation().'
             );
         }
 
@@ -848,7 +851,7 @@ export class ConversationsApi extends runtime.BaseAPI implements ConversationsAp
             method: 'PATCH',
             headers: headerParameters,
             query: queryParameters,
-            body: requestParameters['requestBody'],
+            body: ConversationPatchRequestToJSON(requestParameters['conversationPatchRequest']),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => ConversationFromJSON(jsonValue));

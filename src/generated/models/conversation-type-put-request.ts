@@ -85,6 +85,12 @@ export interface ConversationTypePutRequest {
      * @memberof ConversationTypePutRequest
      */
     emailTemplateName?: string | null;
+    /**
+     * The number of days conversations of this type will be retained before automatic deletion.
+     * @type {number}
+     * @memberof ConversationTypePutRequest
+     */
+    retentionPolicyDays?: number | null;
 }
 
 /**
@@ -117,6 +123,7 @@ export function ConversationTypePutRequestFromJSONTyped(json: any, ignoreDiscrim
         'smsSenderId': json['sms_sender_id'] == null ? undefined : json['sms_sender_id'],
         'smsTemplateName': json['sms_template_name'] == null ? undefined : json['sms_template_name'],
         'emailTemplateName': json['email_template_name'] == null ? undefined : json['email_template_name'],
+        'retentionPolicyDays': json['retention_policy_days'] == null ? undefined : json['retention_policy_days'],
     };
 }
 
@@ -142,6 +149,7 @@ export function ConversationTypePutRequestToJSONTyped(value?: ConversationTypePu
         'sms_sender_id': value['smsSenderId'],
         'sms_template_name': value['smsTemplateName'],
         'email_template_name': value['emailTemplateName'],
+        'retention_policy_days': value['retentionPolicyDays'],
     };
 }
 

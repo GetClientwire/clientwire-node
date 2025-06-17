@@ -17,6 +17,7 @@ import * as runtime from '../runtime';
 import type {
   ConversationType,
   ConversationTypeListResponse,
+  ConversationTypePatchRequest,
   ConversationTypePostRequest,
   ConversationTypePutRequest,
 } from '../models/index';
@@ -25,6 +26,8 @@ import {
     ConversationTypeToJSON,
     ConversationTypeListResponseFromJSON,
     ConversationTypeListResponseToJSON,
+    ConversationTypePatchRequestFromJSON,
+    ConversationTypePatchRequestToJSON,
     ConversationTypePostRequestFromJSON,
     ConversationTypePostRequestToJSON,
     ConversationTypePutRequestFromJSON,
@@ -50,7 +53,7 @@ export interface GetConversationTypeRequest {
 
 export interface UpdateConversationTypeRequest {
     conversationTypeId: string;
-    requestBody: { [key: string]: string; };
+    conversationTypePatchRequest: ConversationTypePatchRequest;
 }
 
 /**
@@ -144,7 +147,7 @@ export interface ConversationTypesApiInterface {
      * Allows patching only specific fields of a conversation type.
      * @summary Update partial fields of an existing conversation type.
      * @param {string} conversationTypeId 
-     * @param {{ [key: string]: string; }} requestBody The patch body for updating conversation type fields.
+     * @param {ConversationTypePatchRequest} conversationTypePatchRequest The patch body for updating conversation type fields.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ConversationTypesApiInterface
@@ -416,10 +419,10 @@ export class ConversationTypesApi extends runtime.BaseAPI implements Conversatio
             );
         }
 
-        if (requestParameters['requestBody'] == null) {
+        if (requestParameters['conversationTypePatchRequest'] == null) {
             throw new runtime.RequiredError(
-                'requestBody',
-                'Required parameter "requestBody" was null or undefined when calling updateConversationType().'
+                'conversationTypePatchRequest',
+                'Required parameter "conversationTypePatchRequest" was null or undefined when calling updateConversationType().'
             );
         }
 
@@ -446,7 +449,7 @@ export class ConversationTypesApi extends runtime.BaseAPI implements Conversatio
             method: 'PATCH',
             headers: headerParameters,
             query: queryParameters,
-            body: requestParameters['requestBody'],
+            body: ConversationTypePatchRequestToJSON(requestParameters['conversationTypePatchRequest']),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => ConversationTypeFromJSON(jsonValue));

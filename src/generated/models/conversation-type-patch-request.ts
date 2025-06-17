@@ -16,100 +16,106 @@ import { mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface ConversationTypePostRequest
+ * @interface ConversationTypePatchRequest
  */
-export interface ConversationTypePostRequest {
+export interface ConversationTypePatchRequest {
     /**
      * Unique identifier for a conversation type.
      * @type {string}
-     * @memberof ConversationTypePostRequest
+     * @memberof ConversationTypePatchRequest
      */
-    id: string;
+    id?: string | null;
     /**
      * A description of what this conversation type is used for.
      * @type {string}
-     * @memberof ConversationTypePostRequest
+     * @memberof ConversationTypePatchRequest
      */
     description?: string | null;
     /**
      * If set, all user participants will appear as the same user in the conversation to client participants.
      * @type {string}
-     * @memberof ConversationTypePostRequest
+     * @memberof ConversationTypePatchRequest
      */
     displayNameSharedByUsers?: string | null;
     /**
+     * If set, all user participants share the read status
+     * @type {boolean}
+     * @memberof ConversationTypePatchRequest
+     */
+    sharedReadStatusForUserParticipants?: boolean | null;
+    /**
      * If set, all workflow participants will appear with this name in the conversation to client participants.
      * @type {string}
-     * @memberof ConversationTypePostRequest
+     * @memberof ConversationTypePatchRequest
      */
     displayNameForWorkflowParticipants?: string | null;
     /**
      * A JSON Schema describing the data expected in the conversation.
-     * @type {any}
-     * @memberof ConversationTypePostRequest
+     * @type {string}
+     * @memberof ConversationTypePatchRequest
      */
-    conversationDataSchema?: any | null;
+    conversationDataSchema?: string | null;
     /**
      * A handlebars template string used to render the conversation data in a list view. The template can contain placeholders for data in the conversation data schema, or one of the allowed values: conversation_id, conversation_description, conversation_unread_count.
      * @type {string}
-     * @memberof ConversationTypePostRequest
+     * @memberof ConversationTypePatchRequest
      */
-    conversationDataListItemTemplate: string;
+    conversationDataListItemTemplate: string | null;
     /**
      * An HTML template to reader the header in the client app which has dynamic values based on the conversation_data
      * @type {string}
-     * @memberof ConversationTypePostRequest
+     * @memberof ConversationTypePatchRequest
      */
     clientAppHeaderTemplate?: string | null;
     /**
      * If set, the SMS messages will have this value as sender
      * @type {string}
-     * @memberof ConversationTypePostRequest
+     * @memberof ConversationTypePatchRequest
      */
     smsSenderId?: string | null;
     /**
      * The name of the message template that should be used to render the sms text used to notify the client participants.
      * @type {string}
-     * @memberof ConversationTypePostRequest
+     * @memberof ConversationTypePatchRequest
      */
     smsTemplateName?: string | null;
     /**
      * The name of the message template that should be used to render the email body used to notify the client participants.
      * @type {string}
-     * @memberof ConversationTypePostRequest
+     * @memberof ConversationTypePatchRequest
      */
     emailTemplateName?: string | null;
     /**
      * The number of days conversations of this type will be retained before automatic deletion.
      * @type {number}
-     * @memberof ConversationTypePostRequest
+     * @memberof ConversationTypePatchRequest
      */
     retentionPolicyDays?: number | null;
 }
 
 /**
- * Check if a given object implements the ConversationTypePostRequest interface.
+ * Check if a given object implements the ConversationTypePatchRequest interface.
  */
-export function instanceOfConversationTypePostRequest(value: object): value is ConversationTypePostRequest {
-    if (!('id' in value) || value['id'] === undefined) return false;
+export function instanceOfConversationTypePatchRequest(value: object): value is ConversationTypePatchRequest {
     if (!('conversationDataListItemTemplate' in value) || value['conversationDataListItemTemplate'] === undefined) return false;
     return true;
 }
 
-export function ConversationTypePostRequestFromJSON(json: any): ConversationTypePostRequest {
-    return ConversationTypePostRequestFromJSONTyped(json, false);
+export function ConversationTypePatchRequestFromJSON(json: any): ConversationTypePatchRequest {
+    return ConversationTypePatchRequestFromJSONTyped(json, false);
 }
 
-export function ConversationTypePostRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): ConversationTypePostRequest {
+export function ConversationTypePatchRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): ConversationTypePatchRequest {
     if (json == null) {
         return json;
     }
     return {
         
-        'id': json['id'],
+        'id': json['id'] == null ? undefined : json['id'],
         'description': json['description'] == null ? undefined : json['description'],
         'displayNameSharedByUsers': json['display_name_shared_by_users'] == null ? undefined : json['display_name_shared_by_users'],
-        'displayNameForWorkflowParticipants': json['displayNameForWorkflowParticipants'] == null ? undefined : json['displayNameForWorkflowParticipants'],
+        'sharedReadStatusForUserParticipants': json['shared_read_status_for_user_participants'] == null ? undefined : json['shared_read_status_for_user_participants'],
+        'displayNameForWorkflowParticipants': json['display_name_for_workflow_participants'] == null ? undefined : json['display_name_for_workflow_participants'],
         'conversationDataSchema': json['conversation_data_schema'] == null ? undefined : json['conversation_data_schema'],
         'conversationDataListItemTemplate': json['conversation_data_list_item_template'],
         'clientAppHeaderTemplate': json['client_app_header_template'] == null ? undefined : json['client_app_header_template'],
@@ -120,11 +126,11 @@ export function ConversationTypePostRequestFromJSONTyped(json: any, ignoreDiscri
     };
 }
 
-export function ConversationTypePostRequestToJSON(json: any): ConversationTypePostRequest {
-    return ConversationTypePostRequestToJSONTyped(json, false);
+export function ConversationTypePatchRequestToJSON(json: any): ConversationTypePatchRequest {
+    return ConversationTypePatchRequestToJSONTyped(json, false);
 }
 
-export function ConversationTypePostRequestToJSONTyped(value?: ConversationTypePostRequest | null, ignoreDiscriminator: boolean = false): any {
+export function ConversationTypePatchRequestToJSONTyped(value?: ConversationTypePatchRequest | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
@@ -134,7 +140,8 @@ export function ConversationTypePostRequestToJSONTyped(value?: ConversationTypeP
         'id': value['id'],
         'description': value['description'],
         'display_name_shared_by_users': value['displayNameSharedByUsers'],
-        'displayNameForWorkflowParticipants': value['displayNameForWorkflowParticipants'],
+        'shared_read_status_for_user_participants': value['sharedReadStatusForUserParticipants'],
+        'display_name_for_workflow_participants': value['displayNameForWorkflowParticipants'],
         'conversation_data_schema': value['conversationDataSchema'],
         'conversation_data_list_item_template': value['conversationDataListItemTemplate'],
         'client_app_header_template': value['clientAppHeaderTemplate'],

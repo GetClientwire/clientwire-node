@@ -477,13 +477,8 @@ paths:
         content:
           application/json:
             schema:
-              description: "Allowed fields are: id, description, display_name_shared_by_users,\
-                \ display_name_for_workflow_participants ,conversation_data_schema,\
-                \ conversation_data_list_item_template, sms_template_name, email_template_name,\
-                \ sms_sender_id"
-              type: object
-              additionalProperties:
-                type: string
+              allOf:
+              - $ref: "#/components/schemas/ConversationTypePatchRequest"
               example:
                 description: new description
       responses:
@@ -824,10 +819,8 @@ paths:
         content:
           application/json:
             schema:
-              description: "The fields to update. Allowed fields are: id, archived,\
-                \ description and conversation_data."
-              type: object
-              additionalProperties: {}
+              allOf:
+              - $ref: "#/components/schemas/ConversationPatchRequest"
               example:
                 conversation_data: new-data
       responses:
@@ -4102,6 +4095,46 @@ components:
           type: integer
           example: "null"
           nullable: true
+    ConversationPatchRequest:
+      type: object
+      properties:
+        id:
+          description: Unique identifier for a conversation.
+          maxLength: 50
+          pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/OptionalStringInput"
+          example: Abc123
+          nullable: true
+        description:
+          description: A description field that can be used to store relevant information
+            for the conversation. The stored data will be used in the default list
+            item template.
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/OptionalStringInput"
+          example: This is a description!
+          nullable: true
+        conversation_data:
+          description: The data of a conversation corresponding to the conversation_data_schema
+            of the conversation type.
+          maxLength: 1073741824
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/OptionalStringInput"
+          example:
+            status: in_progress
+            details: Car breakdown on highway.
+          nullable: true
+        archived:
+          description: Indicates whether the conversation is archived. This can only
+            be set to false if the conversation already exists.
+          type: boolean
+          allOf:
+          - $ref: "#/components/schemas/OptionalBooleanInput"
+          example: true
+          nullable: true
     ConversationPostRequest:
       required:
       - id
@@ -4281,6 +4314,22 @@ components:
           type: string
           example: MyTemplate
           nullable: true
+        retention_policy_scope:
+          description: "The scope of data retention policy applied to this conversation\
+            \ type. Values: ARCHIVED (only archived conversations), ALL (all conversations)."
+          enum:
+          - ARCHIVED
+          - ALL
+          type: string
+          example: ARCHIVED
+          nullable: true
+        retention_policy_days:
+          format: int32
+          description: The number of days archived conversations will be retained
+            before automatic deletion.
+          type: integer
+          example: 90
+          nullable: true
     ConversationTypeListResponse:
       required:
       - conversation_types
@@ -4303,6 +4352,114 @@ components:
                 status:
                   type: string
             conversation_data_list_item_template: "{{status}} - {{created_at}}"
+    ConversationTypePatchRequest:
+      required:
+      - conversation_data_list_item_template
+      type: object
+      properties:
+        id:
+          description: Unique identifier for a conversation type.
+          maxLength: 50
+          pattern: "\"^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]?$\""
+          type: object
+          allOf:
+          - $ref: "#/components/schemas/OptionalStringInput"
+          example: breakdowncase
+          nullable: true
+        description:
+          description: A description of what this conversation type is used for.
+          type: object
+          allOf:
+          - $ref: "#/components/schemas/OptionalStringInput"
+          example: A conversation type for handling breakdown cases.
+          nullable: true
+        display_name_shared_by_users:
+          description: "If set, all user participants will appear as the same user\
+            \ in the conversation to client participants."
+          type: object
+          allOf:
+          - $ref: "#/components/schemas/OptionalStringInput"
+          example: true
+          nullable: true
+        shared_read_status_for_user_participants:
+          description: "If set, all user participants share the read status"
+          type: boolean
+          allOf:
+          - $ref: "#/components/schemas/OptionalBooleanInput"
+          example: true
+          nullable: true
+        display_name_for_workflow_participants:
+          description: "If set, all workflow participants will appear with this name\
+            \ in the conversation to client participants."
+          type: object
+          allOf:
+          - $ref: "#/components/schemas/OptionalStringInput"
+          example: Workflow
+          nullable: true
+        conversation_data_schema:
+          description: A JSON Schema describing the data expected in the conversation.
+          maxLength: 1073741824
+          type: object
+          allOf:
+          - $ref: "#/components/schemas/OptionalStringInput"
+          example:
+            type: object
+            properties:
+              status:
+                type: string
+          nullable: true
+        conversation_data_list_item_template:
+          description: "A handlebars template string used to render the conversation\
+            \ data in a list view. The template can contain placeholders for data\
+            \ in the conversation data schema, or one of the allowed values: conversation_id,\
+            \ conversation_description, conversation_unread_count."
+          maxLength: 1073741824
+          type: object
+          allOf:
+          - $ref: "#/components/schemas/OptionalStringInput"
+          example: "{{conversation_id}} - {{conversation_data.title}}"
+          nullable: true
+        client_app_header_template:
+          description: An HTML template to reader the header in the client app which
+            has dynamic values based on the conversation_data
+          maxLength: 1073741824
+          type: object
+          allOf:
+          - $ref: "#/components/schemas/OptionalStringInput"
+          example: "<div>{{client}}</div>"
+          nullable: true
+        sms_sender_id:
+          description: "If set, the SMS messages will have this value as sender"
+          pattern: "^(?=.*[a-zA-Z])[a-zA-Z0-9 ]{1,11}$"
+          type: object
+          allOf:
+          - $ref: "#/components/schemas/OptionalStringInput"
+          example: Customer Support
+          nullable: true
+        sms_template_name:
+          description: The name of the message template that should be used to render
+            the sms text used to notify the client participants.
+          type: object
+          allOf:
+          - $ref: "#/components/schemas/OptionalStringInput"
+          example: MyTemplate
+          nullable: true
+        email_template_name:
+          description: The name of the message template that should be used to render
+            the email body used to notify the client participants.
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/OptionalStringInput"
+          example: MyTemplate
+          nullable: true
+        retention_policy_days:
+          description: The number of days conversations of this type will be retained
+            before automatic deletion.
+          type: integer
+          allOf:
+          - $ref: "#/components/schemas/OptionalIntInput"
+          example: 90
+          nullable: true
     ConversationTypePostRequest:
       required:
       - id
@@ -4320,7 +4477,7 @@ components:
           type: string
           example: A conversation type for handling breakdown cases.
           nullable: true
-        displayNameSharedByUsers:
+        display_name_shared_by_users:
           description: "If set, all user participants will appear as the same user\
             \ in the conversation to client participants."
           type: string
@@ -4372,6 +4529,13 @@ components:
             the email body used to notify the client participants.
           type: string
           example: MyTemplate
+          nullable: true
+        retention_policy_days:
+          format: int32
+          description: The number of days conversations of this type will be retained
+            before automatic deletion.
+          type: integer
+          example: 90
           nullable: true
     ConversationTypePutRequest:
       required:
@@ -4446,6 +4610,13 @@ components:
             the email body used to notify the client participants.
           type: string
           example: MyTemplate
+          nullable: true
+        retention_policy_days:
+          format: int32
+          description: The number of days conversations of this type will be retained
+            before automatic deletion.
+          type: integer
+          example: 90
           nullable: true
     ConversationsByIdsRequest:
       required:
@@ -5118,10 +5289,13 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/OidcConfig"
-    OptionalInput:
-      type: string
+    OptionalBooleanInput:
+      type: boolean
       nullable: true
-    OptionalInputString:
+    OptionalIntInput:
+      type: integer
+      nullable: true
+    OptionalStringInput:
       type: string
       nullable: true
     ParameterKind:
@@ -5302,25 +5476,25 @@ components:
             be empty or null.
           maxLength: 50
           minLength: 1
-          type: object
+          type: string
           allOf:
-          - $ref: "#/components/schemas/OptionalInputString"
+          - $ref: "#/components/schemas/OptionalStringInput"
           example: John Doe
           nullable: true
         preferred_language:
           description: The preferred language of the participant. The preferred language
             can not be empty or null.
-          type: object
+          type: string
           allOf:
-          - $ref: "#/components/schemas/OptionalInputString"
+          - $ref: "#/components/schemas/OptionalStringInput"
           example: en
           nullable: true
         phone_number:
           description: The phone number of a participant if he is a CLIENT; otherwise
             always null.
-          type: object
+          type: string
           allOf:
-          - $ref: "#/components/schemas/OptionalInputString"
+          - $ref: "#/components/schemas/OptionalStringInput"
           example: "+4369912345678"
           nullable: true
         email:
@@ -5329,7 +5503,7 @@ components:
             null.
           type: string
           allOf:
-          - $ref: "#/components/schemas/OptionalInputString"
+          - $ref: "#/components/schemas/OptionalStringInput"
           example: user@example.com
           nullable: true
     ParticipantPostRequest:
